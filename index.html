@@ -14,39 +14,39 @@
         const table = document.createElement("table")
 
         for (var holeNumber = 1; holeNumber < scorecard_config.pars.length + 1; holeNumber++) {
-            generateHoleRow(table, holeNumber, scorecard_config.pars[holeNumber - 1], scorecard_config.players)
+            const row = generateHoleRow(holeNumber, scorecard_config.pars[holeNumber - 1], scorecard_config.players)
+            table.appendChild(row)
         }
 
-
-        document.getElementById("table").appendChild(table)
-
-        console.log("Generated table")
+        return table
     }
 
-    function generateHoleRow(table, holeNumber, par, numPlayers) {
+    function generateHoleRow(holeNumber, par, numPlayers) {
         console.log("Generating hole %s", holeNumber)
 
         const row = document.createElement("tr")
 
-        generateHoleHeader(row, holeNumber, par)
+        const headerCell = generateHoleHeader(holeNumber, par)
+        row.appendChild(headerCell)
 
         for (var playerNumber = 1; playerNumber < numPlayers + 1; playerNumber++) {
-            generateHoleForPlayer(row, holeNumber, playerNumber)
+            const holeCell = generateHoleForPlayer(holeNumber, playerNumber)
+            row.appendChild(holeCell)
         }
 
-        table.appendChild(row)
+        return row
     }
 
-    function generateHoleHeader(row, holeNumber, par) {
+    function generateHoleHeader(holeNumber, par) {
         console.log("Generating hole header %s", holeNumber)
 
         const cell = document.createElement("td")
         cell.textContent = "Hole " + holeNumber + ", (par " + par + ")"
 
-        row.appendChild(cell)
+        return cell
     }
 
-    function generateHoleForPlayer(row, holeNumber, playerNumber) {
+    function generateHoleForPlayer(holeNumber, playerNumber) {
         console.log("Generating hole %s, player %s", holeNumber, playerNumber)
 
         const cell = document.createElement("td")
@@ -58,10 +58,10 @@
 
         cell.appendChild(input)
 
-        row.appendChild(cell)
+        return cell
     }
 
-    generateTable()
+    document.getElementById("table").appendChild(generateTable())
 </script>
 
 </html>
