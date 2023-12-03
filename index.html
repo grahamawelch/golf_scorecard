@@ -16,6 +16,8 @@
 
         const numHoles = scorecard_config.pars.length
 
+        const nameRow = generateNameRow(scorecard_config.numPlayers)
+        table.appendChild(nameRow)
 
         for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
             const row = generateHoleRow(numHoles, holeIndex, scorecard_config.pars[holeIndex], scorecard_config.numPlayers)
@@ -26,6 +28,29 @@
         table.appendChild(scoreRow)
 
         return table
+    }
+
+    function generateNameRow(numPlayers) {
+        const row = document.createElement("tr")
+
+        const headerCell = document.createElement("td")
+        headerCell.textContent = "Name"
+        row.appendChild(headerCell)
+
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const playerCell = document.createElement("td")
+
+            const input = document.createElement("input")
+            input.type = "string"
+            input.id = idPlayerName(playerIndex)
+            input.placeholder = "Name"
+
+            playerCell.appendChild(input)
+
+            row.appendChild(playerCell)
+        }
+
+        return row
     }
 
     function generateHoleRow(numHoles, holeIndex, par, numPlayers) {
@@ -124,6 +149,8 @@
     function getPlayerScore(numHoles, playerIndex) {
         var out = []
 
+        out.push(document.getElementById(idPlayerName(playerIndex)).value)
+
         for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
             out.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)
         }
@@ -138,6 +165,10 @@
 
     function idScorePlayer(playerIndex) {
         return "score_" + playerIndex
+    }
+
+    function idPlayerName(playerIndex) {
+        return "name_" + playerIndex
     }
 </script>
 
