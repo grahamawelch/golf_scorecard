@@ -13,47 +13,47 @@
     function generateTable() {
         const table = document.createElement("table")
 
-        for (var holeNumber = 1; holeNumber < scorecard_config.pars.length + 1; holeNumber++) {
-            const row = generateHoleRow(holeNumber, scorecard_config.pars[holeNumber - 1], scorecard_config.players)
+        for (var holeIndex = 0; holeIndex < scorecard_config.pars.length; holeIndex++) {
+            const row = generateHoleRow(holeIndex, scorecard_config.pars[holeIndex], scorecard_config.players)
             table.appendChild(row)
         }
 
         return table
     }
 
-    function generateHoleRow(holeNumber, par, numPlayers) {
-        console.log("Generating hole %s", holeNumber)
+    function generateHoleRow(holeIndex, par, numPlayers) {
+        console.log("Generating hole %s", holeIndex)
 
         const row = document.createElement("tr")
 
-        const headerCell = generateHoleHeader(holeNumber, par)
+        const headerCell = generateHoleHeader(holeIndex, par)
         row.appendChild(headerCell)
 
-        for (var playerNumber = 1; playerNumber < numPlayers + 1; playerNumber++) {
-            const holeCell = generateHoleForPlayer(holeNumber, playerNumber)
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const holeCell = generateHoleForPlayer(holeIndex, playerIndex)
             row.appendChild(holeCell)
         }
 
         return row
     }
 
-    function generateHoleHeader(holeNumber, par) {
-        console.log("Generating hole header %s", holeNumber)
+    function generateHoleHeader(holeIndex, par) {
+        console.log("Generating hole header %s", holeIndex)
 
         const cell = document.createElement("td")
-        cell.textContent = "Hole " + holeNumber + ", (par " + par + ")"
+        cell.textContent = "Hole " + holeIndex + ", (par " + par + ")"
 
         return cell
     }
 
-    function generateHoleForPlayer(holeNumber, playerNumber) {
-        console.log("Generating hole %s, player %s", holeNumber, playerNumber)
+    function generateHoleForPlayer(holeIndex, playerIndex) {
+        console.log("Generating hole %s, player %s", holeIndex, playerIndex)
 
         const cell = document.createElement("td")
         
         const input = document.createElement("input")
         input.type = "number"
-        input.id = holeNumber + "_" + playerNumber
+        input.id = holeIndex + "_" + playerIndex
         input.placeholder = 0
 
         cell.appendChild(input)
