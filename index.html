@@ -7,6 +7,9 @@
     <h1>
         Springfield Senior League
     </h1>
+    <h2>
+        <div id="course"></div>
+    </h2>
 
     <div id="table"></div>
     <button onclick="submit()">Submit</button>
@@ -14,8 +17,15 @@
 <script>
     const scorecard_config = {
         pars: [2, 3, 4],
-        numPlayers: 4
+        numPlayers: 4,
+        courseName: "Green Hill Zone"
     };
+
+    function createScorecard(scorecard_config) {
+        document.getElementById("course").textContent = scorecard_config.courseName
+        document.getElementById("table").appendChild(generateTable(scorecard_config))
+
+    }
 
     function generateTable(scorecard_config) {
         const table = document.createElement("table")
@@ -140,8 +150,7 @@
         document.getElementById(idScorePlayer(playerIndex)).textContent = total
     }
 
-    document.getElementById("table").appendChild(generateTable(scorecard_config))
-
+    createScorecard(scorecard_config)
 
     function submit() {
         var playerScores = []
