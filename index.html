@@ -120,20 +120,14 @@
         row.appendChild(headerCell)
 
         for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const playerScore = generateScoreForPlayer(playerIndex)
-            row.appendChild(playerScore)
+            const scoreCell = document.createElement("td")
+
+            scoreCell.id = idScorePlayer(playerIndex)
+            scoreCell.textContent = 0
+            row.appendChild(scoreCell)
         }
 
         return row
-    }
-
-    function generateScoreForPlayer(playerIndex) {
-        const cell = document.createElement("td")
-
-        cell.id = idScorePlayer(playerIndex)
-        cell.textContent = 0
-
-        return cell
     }
 
     function updateScore(numHoles, playerIndex) {
