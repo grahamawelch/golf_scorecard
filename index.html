@@ -50,7 +50,13 @@
         console.log("Generating hole %s, player %s", holeNumber, playerNumber)
 
         const cell = document.createElement("td")
-        cell.textContent = "Player" + playerNumber
+        
+        const input = document.createElement("input")
+        input.type = "number"
+        input.id = holeNumber + "_" + playerNumber
+        input.placeholder = 0
+
+        cell.appendChild(input)
 
         row.appendChild(cell)
     }
