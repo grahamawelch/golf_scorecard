@@ -3,6 +3,7 @@
 
 <body>
     <div id="table"></div>
+    <button onclick="submit()">Submit</button>
 </body>
 <script>
     const scorecard_config = {
@@ -10,7 +11,7 @@
         players: 4
     };
 
-    function generateTable() {
+    function generateTable(scorecard_config) {
         const table = document.createElement("table")
 
         const numHoles = scorecard_config.pars.length
@@ -106,7 +107,30 @@
         document.getElementById("score_" + playerIndex).textContent = total
     }
 
-    document.getElementById("table").appendChild(generateTable())
+    document.getElementById("table").appendChild(generateTable(scorecard_config))
+
+
+    function submit() {
+        var playerScores = []
+
+        for (var i = 0; i < scorecard_config.players; i++) {
+            playerScores.push(getPlayerScore(scorecard_config.pars.length, i))
+        }
+
+        alert(JSON.stringify(playerScores))
+        // Replace with the call to the AppScript backend.
+    }
+
+    function getPlayerScore(numHoles, playerIndex) {
+        var out = []
+
+        for (var i = 0; i < numHoles; i++) {
+            out.push(document.getElementById(i + "_" + playerIndex).value)
+        }
+
+        console.log("Score for player %s, %s", playerIndex, out)
+        return out
+    }
 </script>
 
 </html>
