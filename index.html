@@ -7,7 +7,7 @@
 </body>
 <script>
     const scorecard_config = {
-        pars: [3, 4, 5],
+        pars: [2, 3, 4],
         numPlayers: 4
     };
 
@@ -62,7 +62,7 @@
         row.appendChild(headerCell)
 
         for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const holeCell = generateHoleForPlayer(numHoles, holeIndex, playerIndex)
+            const holeCell = generateHoleForPlayer(numHoles, holeIndex, par, playerIndex)
             row.appendChild(holeCell)
         }
 
@@ -78,7 +78,7 @@
         return cell
     }
 
-    function generateHoleForPlayer(numHoles, holeIndex, playerIndex) {
+    function generateHoleForPlayer(numHoles, holeIndex, par, playerIndex) {
         console.log("Generating hole %s, player %s", holeIndex, playerIndex)
 
         const cell = document.createElement("td")
@@ -86,7 +86,9 @@
         const input = document.createElement("input")
         input.type = "number"
         input.id = idHolePlayer(holeIndex, playerIndex)
-        input.placeholder = 0
+        input.placeholder = 0               // Don't set value so unset fields are treated as empty
+        input.min = Math.max(par - 2, 1)    // At best an Eagle (or hole in 1)
+        input.max = par + 2                 // At worst, a double-bogey
         input.onchange = function (event) { updateScore(numHoles, playerIndex) }
 
         cell.appendChild(input)
