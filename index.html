@@ -8,7 +8,7 @@
 <script>
     const scorecard_config = {
         pars: [3, 4, 5],
-        players: 4
+        numPlayers: 4
     };
 
     function generateTable(scorecard_config) {
@@ -18,11 +18,11 @@
 
 
         for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-            const row = generateHoleRow(numHoles, holeIndex, scorecard_config.pars[holeIndex], scorecard_config.players)
+            const row = generateHoleRow(numHoles, holeIndex, scorecard_config.pars[holeIndex], scorecard_config.numPlayers)
             table.appendChild(row)
         }
 
-        const scoreRow = generateScoreRow(scorecard_config.players)
+        const scoreRow = generateScoreRow(scorecard_config.numPlayers)
         table.appendChild(scoreRow)
 
         return table
@@ -60,7 +60,7 @@
 
         const input = document.createElement("input")
         input.type = "number"
-        input.id = holeIndex + "_" + playerIndex
+        input.id = idHolePlayer(holeIndex, playerIndex)
         input.placeholder = 0
         input.onchange = function (event) { updateScore(numHoles, playerIndex) }
 
@@ -76,8 +76,8 @@
         headerCell.textContent = "Score"
         row.appendChild(headerCell)
 
-        for (var i = 0; i < numPlayers; i++) {
-            const playerScore = generateScoreForPlayer(i)
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const playerScore = generateScoreForPlayer(playerIndex)
             row.appendChild(playerScore)
         }
 
@@ -87,7 +87,7 @@
     function generateScoreForPlayer(playerIndex) {
         const cell = document.createElement("td")
 
-        cell.id = "score_" + playerIndex
+        cell.id = idScorePlayer(playerIndex)
         cell.textContent = 0
 
         return cell
@@ -98,13 +98,13 @@
 
         var total = 0
         for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-            const score = parseInt(document.getElementById(holeIndex + "_" + playerIndex).value)
+            const score = parseInt(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)
             console.log(typeof score)
             if (!isNaN(score)) {
                 total += score
             }
         }
-        document.getElementById("score_" + playerIndex).textContent = total
+        document.getElementById(idScorePlayer(playerIndex)).textContent = total
     }
 
     document.getElementById("table").appendChild(generateTable(scorecard_config))
@@ -113,8 +113,8 @@
     function submit() {
         var playerScores = []
 
-        for (var i = 0; i < scorecard_config.players; i++) {
-            playerScores.push(getPlayerScore(scorecard_config.pars.length, i))
+        for (var playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
+            playerScores.push(getPlayerScore(scorecard_config.pars.length, playerIndex))
         }
 
         alert(JSON.stringify(playerScores))
@@ -124,12 +124,20 @@
     function getPlayerScore(numHoles, playerIndex) {
         var out = []
 
-        for (var i = 0; i < numHoles; i++) {
-            out.push(document.getElementById(i + "_" + playerIndex).value)
+        for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+            out.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)
         }
 
         console.log("Score for player %s, %s", playerIndex, out)
         return out
+    }
+
+    function idHolePlayer(holeIndex, playerIndex) {
+        return holeIndex + "_" + playerIndex
+    }
+
+    function idScorePlayer(playerIndex) {
+        return "score_" + playerIndex
     }
 </script>
 
