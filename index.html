@@ -13,15 +13,21 @@
     function generateTable() {
         const table = document.createElement("table")
 
-        for (var holeIndex = 0; holeIndex < scorecard_config.pars.length; holeIndex++) {
-            const row = generateHoleRow(holeIndex, scorecard_config.pars[holeIndex], scorecard_config.players)
+        const numHoles = scorecard_config.pars.length
+
+
+        for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+            const row = generateHoleRow(numHoles, holeIndex, scorecard_config.pars[holeIndex], scorecard_config.players)
             table.appendChild(row)
         }
+
+        const scoreRow = generateScoreRow(scorecard_config.players)
+        table.appendChild(scoreRow)
 
         return table
     }
 
-    function generateHoleRow(holeIndex, par, numPlayers) {
+    function generateHoleRow(numHoles, holeIndex, par, numPlayers) {
         console.log("Generating hole %s", holeIndex)
 
         const row = document.createElement("tr")
@@ -30,7 +36,7 @@
         row.appendChild(headerCell)
 
         for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const holeCell = generateHoleForPlayer(holeIndex, playerIndex)
+            const holeCell = generateHoleForPlayer(numHoles, holeIndex, playerIndex)
             row.appendChild(holeCell)
         }
 
@@ -46,19 +52,58 @@
         return cell
     }
 
-    function generateHoleForPlayer(holeIndex, playerIndex) {
+    function generateHoleForPlayer(numHoles, holeIndex, playerIndex) {
         console.log("Generating hole %s, player %s", holeIndex, playerIndex)
 
         const cell = document.createElement("td")
-        
+
         const input = document.createElement("input")
         input.type = "number"
         input.id = holeIndex + "_" + playerIndex
         input.placeholder = 0
+        input.onchange = function (event) { updateScore(numHoles, playerIndex) }
 
         cell.appendChild(input)
 
         return cell
+    }
+
+    function generateScoreRow(numPlayers) {
+        const row = document.createElement("tr")
+
+        const headerCell = document.createElement("td")
+        headerCell.textContent = "Score"
+        row.appendChild(headerCell)
+
+        for (var i = 0; i < numPlayers; i++) {
+            const playerScore = generateScoreForPlayer(i)
+            row.appendChild(playerScore)
+        }
+
+        return row
+    }
+
+    function generateScoreForPlayer(playerIndex) {
+        const cell = document.createElement("td")
+
+        cell.id = "score_" + playerIndex
+        cell.textContent = 0
+
+        return cell
+    }
+
+    function updateScore(numHoles, playerIndex) {
+        console.log("Updating score for %s for %s holes", playerIndex, numHoles)
+
+        var total = 0
+        for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+            const score = parseInt(document.getElementById(holeIndex + "_" + playerIndex).value)
+            console.log(typeof score)
+            if (!isNaN(score)) {
+                total += score
+            }
+        }
+        document.getElementById("score_" + playerIndex).textContent = total
     }
 
     document.getElementById("table").appendChild(generateTable())
