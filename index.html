@@ -21,6 +21,12 @@
     </div>
 
     <div id="table"></div>
+
+    <div>
+        <div style="display: inline-block">Team Points</div>
+        <div  style="display: inline-block" id="team_points">0</div>
+    </div>
+
     <button onclick="submit()">Submit</button>
 </body>
 <script>
@@ -107,7 +113,7 @@
             input.placeholder = "Target"
             input.min = 0
             input.onchange = function (event) {
-                updateResults(pars, currPlayerIndex)
+                updateResults(pars, numPlayers, currPlayerIndex)
                 updateTeamTarget(numPlayers)
             }
 
@@ -126,7 +132,7 @@
         row.appendChild(headerCell)
 
         for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const holeCell = generateHoleForPlayer(pars, holeIndex, playerIndex)
+            const holeCell = generateHoleForPlayer(pars, holeIndex, numPlayers, playerIndex)
             row.appendChild(holeCell)
         }
 
@@ -140,7 +146,7 @@
         return cell
     }
 
-    function generateHoleForPlayer(pars, holeIndex, playerIndex) {
+    function generateHoleForPlayer(pars, holeIndex, numPlayers, playerIndex) {
         const cell = document.createElement("td")
 
         const input = document.createElement("input")
@@ -149,7 +155,7 @@
         input.placeholder = 0               // Don't set value so unset fields are treated as empty
         input.min = Math.max(pars[holeIndex] - 2, 1)    // At best an Eagle (or hole in 1)
         input.max = pars[holeIndex] + 2                 // At worst, a double-bogey
-        input.onchange = function (event) { updateResults(pars, playerIndex) }
+        input.onchange = function (event) { updateResults(pars, numPlayers, playerIndex) }
 
         cell.appendChild(input)
 
@@ -203,14 +209,14 @@
             const pointsCell = document.createElement("td")
 
             pointsCell.id = idNet(playerIndex)
-            pointsCell.textContent = 0
+            pointsCell.textContent = ""
             row.appendChild(pointsCell)
         }
 
         return row
     }
 
-    function updateResults(pars, playerIndex) {
+    function updateResults(pars, numPlayers, playerIndex) {
         const score = computeScore(pars.length, playerIndex)
         document.getElementById(idScorePlayer(playerIndex)).textContent = score.overall_score
 
@@ -219,6 +225,18 @@
 
         const net = computeNet(pars, playerIndex)
         document.getElementById(idNet(playerIndex)).textContent = net
+
+        // We don't need to recompute all player's points, since only `playerIndex` has changed.                    
+        var teamPoints = 0;
+        for (var currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+            var playerPointsOrNaN = parseInt(document.getElementById(idPointsPlayer(currPlayerIndex)).textContent)
+            
+            if (isNaN(playerPointsOrNaN)) {
+                continue
+            }
+            teamPoints += playerPointsOrNaN
+        }
+        document.getElementById("team_points").textContent = teamPoints
     }
 
     function computeScore(numHoles, playerIndex) {
