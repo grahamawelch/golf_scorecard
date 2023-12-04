@@ -18,8 +18,10 @@
     const scorecard_config = {
         pars: [2, 3, 4],
         numPlayers: 4,
-        courseName: "Green Hill Zone"
+        courseName: "Carolina Lakes Course"
     };
+
+    createScorecard(scorecard_config)
 
     function createScorecard(scorecard_config) {
         document.getElementById("course").textContent = scorecard_config.courseName
@@ -92,7 +94,7 @@
         console.log("Generating hole header %s", holeIndex)
 
         const cell = document.createElement("td")
-        cell.textContent = holeIndex + "/" + par
+        cell.textContent = holeIndex + " (" + par + ")"
 
         return cell
     }
@@ -198,8 +200,6 @@
         return {"overall_points":total, "points": points}
     }
 
-    createScorecard(scorecard_config)
-
     function submit() {
         var playerResults = []
 
@@ -207,7 +207,12 @@
             playerResults.push(getPlayerResult(scorecard_config.pars, playerIndex))
         }
 
-        alert(JSON.stringify(playerResults))
+        var out = "";
+        for (var playerResult of playerResults) {
+            out += JSON.stringify(playerResult)
+            out += "\n"
+        }
+        alert(out)
         // Replace with the call to the AppScript backend.
     }
 
