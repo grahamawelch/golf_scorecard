@@ -24,7 +24,7 @@
 
     <div>
         <div style="display: inline-block">Team Points</div>
-        <div  style="display: inline-block" id="team_points">0</div>
+        <div style="display: inline-block" id="team_points">0</div>
     </div>
 
     <button onclick="submit()">Submit</button>
@@ -230,7 +230,7 @@
         var teamPoints = 0;
         for (var currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
             var playerPointsOrNaN = parseInt(document.getElementById(idPointsPlayer(currPlayerIndex)).textContent)
-            
+
             if (isNaN(playerPointsOrNaN)) {
                 continue
             }
@@ -291,7 +291,7 @@
     }
 
     function updateTeamTarget(numPlayers) {
-        var total = 0 
+        var total = 0
         for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             var possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value)
             if (isNaN(possibleTarget)) {
@@ -311,6 +311,14 @@
         }
 
         var out = "";
+
+        out += JSON.stringify({
+            "date": document.getElementById("date").value,
+            "team": document.getElementById("team").value,
+            "team_points": document.getElementById("team_points").textContent
+        })
+        out += "\n"
+
         for (var playerResult of playerResults) {
             out += JSON.stringify(playerResult)
             out += "\n"
