@@ -187,8 +187,10 @@
         const scoreRow = generateResultScoreRow(partialResult.name, scorecard_config.numPlayers)
         const pointsRow = generateResultPointsRow(partialResult.name, scorecard_config.numPlayers)
         const netRow = generateResultNetRow(partialResult.name, scorecard_config.numPlayers)
+        const pointsTeamRow = generateResultPointsTeamRow(partialResult.name)
+        const netTeamRow = generateResultNetTeamRow(partialResult.name)
 
-        return [row, scoreRow, pointsRow, netRow]
+        return [row, scoreRow, pointsRow, netRow, pointsTeamRow, netTeamRow]
     }
 
     function generateResultScoreRow(resultName, numPlayers) {
@@ -219,7 +221,7 @@
         for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             const pointsCell = document.createElement("td")
 
-            pointsCell.id = idResultsPointsPlayer(resultName, playerIndex)
+            pointsCell.id = idResultPointsPlayer(resultName, playerIndex)
             pointsCell.textContent = 0
             row.appendChild(pointsCell)
         }
@@ -237,10 +239,42 @@
         for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             const netCell = document.createElement("td")
 
-            netCell.id = idResultNet(resultName, playerIndex)
+            netCell.id = idResultNetPlayer(resultName, playerIndex)
             netCell.textContent = ""
             row.appendChild(netCell)
         }
+
+        return row
+    }
+
+    function generateResultPointsTeamRow(resultName) {
+        const row = document.createElement("tr")
+
+        const headerCell = document.createElement("td")
+        headerCell.textContent = "Team Points"
+        row.appendChild(headerCell)
+
+        const pointsCell = document.createElement("td")
+
+        pointsCell.id = idResultPointsTeam(resultName)
+        pointsCell.textContent = 0
+        row.appendChild(pointsCell)
+
+        return row
+    }
+
+    function generateResultNetTeamRow(resultName) {
+        const row = document.createElement("tr")
+
+        const headerCell = document.createElement("td")
+        headerCell.textContent = "Team Net"
+        row.appendChild(headerCell)
+
+        const netCell = document.createElement("td")
+
+        netCell.id = idResultNetTeam(resultName)
+        netCell.textContent = ""
+        row.appendChild(netCell)
 
         return row
     }
@@ -251,20 +285,28 @@
 
         for (var result of results) {
             updateResult(result, pars, playerIndex, score, points, pars)
-        }
 
-        // We don't need to recompute all player's points, since only `playerIndex` has changed.                    
-        var teamPoints = 0;
-        for (var currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-            // TODO: Make this not hardcoded.
-            var playerPointsOrNaN = parseInt(document.getElementById(idResultsPointsPlayer("TOTAL", currPlayerIndex)).textContent)
-
-            if (isNaN(playerPointsOrNaN)) {
-                continue
+            var pointsTeam = 0
+            for (var currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+                var playerPointsOrNaN = parseInt(document.getElementById(idResultPointsPlayer(result.name, currPlayerIndex)).textContent)
+                if (isNaN(playerPointsOrNaN)) {
+                    continue
+                }
+                pointsTeam += playerPointsOrNaN
             }
-            teamPoints += playerPointsOrNaN
+            document.getElementById(idResultPointsTeam(result.name)).textContent = pointsTeam
+
+            // Nets can be fractions
+            var netTeam = 0
+            for (var currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+                var playerNetOrNaN = parseFloat(document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent)
+                if (isNaN(playerNetOrNaN)) {
+                    continue
+                }
+                netTeam += playerNetOrNaN
+            }
+            document.getElementById(idResultNetTeam(result.name)).textContent = netTeam
         }
-        document.getElementById("team_points").textContent = teamPoints
     }
 
     function updateResult(result, pars, playerIndex, score, points) {
@@ -274,10 +316,10 @@
         document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent = resultScore
 
         var resultPoints = sumNumbersByIndex(points.points, holeIndices)
-        document.getElementById(idResultsPointsPlayer(result.name, playerIndex)).textContent = resultPoints
+        document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent = resultPoints
 
         var resultNet = computeNet(points, pars, holeIndices, playerIndex)
-        document.getElementById(idResultNet(result.name, playerIndex)).textContent = resultNet
+        document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent = resultNet
     }
 
     function computeScore(numHoles, playerIndex) {
@@ -401,20 +443,16 @@
         return holeIndex + "_" + playerIndex
     }
 
-    function idScorePlayer(playerIndex) {
-        return "score_" + playerIndex
-    }
-
     function idResultScorePlayer(resultName, playerIndex) {
         return "result_" + resultName + "_score_" + playerIndex
     }
 
-    function idPointsPlayer(playerIndex) {
-        return "points_" + playerIndex
+    function idResultPointsPlayer(resultName, playerIndex) {
+        return "result_" + resultName + "_points_" + playerIndex
     }
 
-    function idResultsPointsPlayer(resultName, playerIndex) {
-        return "result_" + resultName + "_points_" + playerIndex
+    function idResultPointsTeam(resultName) {
+        return "result_" + resultName + "_points_team"
     }
 
     function idPlayerName(playerIndex) {
@@ -425,12 +463,12 @@
         return "target_" + playerIndex
     }
 
-    function idNet(playerIndex) {
-        return "net_" + playerIndex
+    function idResultNetPlayer(resultName, playerIndex) {
+        return "result_" + resultName + "_net_" + playerIndex
     }
 
-    function idResultNet(resultName, playerIndex) {
-        return "result_" + resultName + "_net_" + playerIndex
+    function idResultNetTeam(resultName) {
+        return "result_" + resultName + "_net_team"
     }
 </script>
 
