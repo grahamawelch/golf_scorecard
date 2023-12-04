@@ -379,13 +379,13 @@
 
             if (isNaN(targetOrNaN)) {
                 targets.push[""]
+                continue
             }
 
             const resultTarget = targetOrNaN * (numResultHoles / numHoles)
             targets.push(resultTarget)
             totalTarget+= resultTarget
         }
-
         return {totalTarget: totalTarget, targets: targets}
     }
 
