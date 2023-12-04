@@ -12,6 +12,14 @@
         <div id="course"></div>
     </h2>
 
+    <input id="date" type="date">
+    <div>
+        <div style="display: inline-block">Team Name</div>
+        <input style="display: inline-block" id="team" type="string" placeholder="Team">
+        <div style="display: inline-block">Team Target</div>
+        <div style="display: inline-block" id="team_target"></div>
+    </div>
+
     <div id="table"></div>
     <button onclick="submit()">Submit</button>
 </body>
@@ -89,13 +97,19 @@
         row.appendChild(headerCell)
 
         for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const currPlayerIndex = playerIndex
+
             const playerCell = document.createElement("td")
 
             const input = document.createElement("input")
             input.type = "number"
             input.id = idTarget(playerIndex)
             input.placeholder = "Target"
-            input.onchange = function (event) { updateResults(pars, playerIndex) }
+            input.min = 0
+            input.onchange = function (event) {
+                updateResults(pars, currPlayerIndex)
+                updateTeamTarget(numPlayers)
+            }
 
             playerCell.appendChild(input)
 
@@ -254,7 +268,7 @@
 
     function computeNet(pars, playerIndex) {
         const points = computePoints(pars, playerIndex)
-        
+
         const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value)
 
         if (isNaN(possibleTarget)) {
@@ -262,6 +276,19 @@
         }
 
         return points.overall_points - possibleTarget
+    }
+
+    function updateTeamTarget(numPlayers) {
+        var total = 0 
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            var possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value)
+            if (isNaN(possibleTarget)) {
+                continue
+            }
+            total += possibleTarget
+        }
+
+        document.getElementById("team_target").textContent = total
     }
 
     function submit() {
