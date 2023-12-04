@@ -152,27 +152,30 @@
     }
 
     function updateScoreAndPoints(pars, playerIndex) {
-        const score = updateScore(pars.length, playerIndex)
-        const points = updatePoints(pars, playerIndex)
+        const score = computeScore(pars.length, playerIndex)
+        const points = computePoints(pars, playerIndex)
 
-        document.getElementById(idScorePlayer(playerIndex)).textContent = score
-        document.getElementById(idPointsPlayer(playerIndex)).textContent = points
+        document.getElementById(idScorePlayer(playerIndex)).textContent = score.overall_score
+        document.getElementById(idPointsPlayer(playerIndex)).textContent = points.overall_points
     }
 
-    function updateScore(numHoles, playerIndex) {
+    function computeScore(numHoles, playerIndex) {
+        var scores = []
         var total = 0
         for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-            const score = parseInt(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)
-            console.log(typeof score)
+            const rawScore = document.getElementById(idHolePlayer(holeIndex, playerIndex)).value
+            scores.push(rawScore)
+
+            const score = parseInt(rawScore)
             if (isNaN(score)) {
                 continue
             }
             total += score
         }
-        return total
+        return {"overall_score": total, "scores": scores}
     }
 
-    function updatePoints(pars, playerIndex) {
+    function computePoints(pars, playerIndex) {
         var scoresOrNaN = []
         for (var holeIndex = 0; holeIndex < pars.length; holeIndex++) {
             scoresOrNaN.push(parseInt(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value))
@@ -180,41 +183,40 @@
 
         // We need to compute points iff the user has entered a value for the corresponding hole.
 
+        var points = []
         var total = 0
         for (var holeIndex = 0; holeIndex < pars.length; holeIndex++) {
             if (isNaN(scoresOrNaN[holeIndex])) {
                 continue
+                points.push = ""
             }
 
-            total += 2 - (scoresOrNaN[holeIndex]- pars[holeIndex])
+            const point = 2 - (scoresOrNaN[holeIndex]- pars[holeIndex])
+            points.push(point)
+            total += point
         }
-        return total
+        return {"overall_points":total, "points": points}
     }
 
     createScorecard(scorecard_config)
 
     function submit() {
-        var playerScores = []
+        var playerResults = []
 
         for (var playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
-            playerScores.push(getPlayerScore(scorecard_config.pars.length, playerIndex))
+            playerResults.push(getPlayerResult(scorecard_config.pars, playerIndex))
         }
 
-        alert(JSON.stringify(playerScores))
+        alert(JSON.stringify(playerResults))
         // Replace with the call to the AppScript backend.
     }
 
-    function getPlayerScore(numHoles, playerIndex) {
-        var out = []
-
-        out.push(document.getElementById(idPlayerName(playerIndex)).value)
-
-        for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-            out.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)
+    function getPlayerResult(pars, playerIndex) { 
+        return {
+            "name": document.getElementById(idPlayerName(playerIndex)).value,
+            "score": computeScore(pars.length, playerIndex),
+            "points": computePoints(pars, playerIndex)
         }
-
-        console.log("Score for player %s, %s", playerIndex, out)
-        return out
     }
 
     function idHolePlayer(holeIndex, playerIndex) {
