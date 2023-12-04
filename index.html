@@ -21,12 +21,6 @@
     </div>
 
     <div id="table"></div>
-
-    <div>
-        <div style="display: inline-block">Team Points</div>
-        <div style="display: inline-block" id="team_points">0</div>
-    </div>
-
     <button onclick="submit()">Submit</button>
 </body>
 <script>
@@ -403,27 +397,41 @@
     }
 
     function submit() {
-        var playerResults = []
+        var flatResults = []
 
-        for (var playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
-            playerResults.push(getPlayerResult(scorecard_config.pars, playerIndex))
+        for (var result of scorecard_config.results) {
+            flatResults.push([
+                document.getElementById("date").value,
+                result.name,
+                document.getElementById("team").value,
+                "TEAM",
+                document.getElementById(idResultPointsTeam(result.name)).textContent,
+                document.getElementById(idResultNetTeam(result.name)).textContent
+            ])
+            for (var playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
+                var playerStats = [
+                    document.getElementById("date").value,
+                    result.name,
+                    document.getElementById("team").value,
+                    document.getElementById(idPlayerName(playerIndex)).value,
+                    document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent,
+                    document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent
+                ]
+                var playerScore = computeScore(scorecard_config.pars.length, playerIndex)
+
+                playerScore.scores.slice(result.startInclusive, result.endExclusive).forEach(s => playerStats.push(s))
+
+                var playerPoints = computePoints(scorecard_config.pars, playerIndex)
+                playerPoints.points.slice(result.startInclusive, result.endExclusive).forEach(p => playerStats.push(p))
+
+                flatResults.push(playerStats)
+            }
+            
         }
 
-        var out = "";
-
-        out += JSON.stringify({
-            "date": document.getElementById("date").value,
-            "team": document.getElementById("team").value,
-            "team_points": document.getElementById("team_points").textContent
-        })
-        out += "\n"
-
-        for (var playerResult of playerResults) {
-            out += JSON.stringify(playerResult)
-            out += "\n"
-        }
-        alert(out)
+        alert(JSON.stringify(flatResults))
         // Replace with the call to the AppScript backend.
+        // google.script.run.saveData(flatResults)
     }
 
     function getPlayerResult(pars, playerIndex) {
