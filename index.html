@@ -95,7 +95,7 @@
             input.type = "number"
             input.id = idTarget(playerIndex)
             input.placeholder = "Target"
-            input.onchange = function (event) { updateScoreAndPoints(pars, playerIndex) }
+            input.onchange = function (event) { updateResults(pars, playerIndex) }
 
             playerCell.appendChild(input)
 
@@ -141,7 +141,7 @@
         input.placeholder = 0               // Don't set value so unset fields are treated as empty
         input.min = Math.max(pars[holeIndex] - 2, 1)    // At best an Eagle (or hole in 1)
         input.max = pars[holeIndex] + 2                 // At worst, a double-bogey
-        input.onchange = function (event) { updateScoreAndPoints(pars, playerIndex) }
+        input.onchange = function (event) { updateResults(pars, playerIndex) }
 
         cell.appendChild(input)
 
@@ -202,7 +202,7 @@
         return row
     }
 
-    function updateScoreAndPoints(pars, playerIndex) {
+    function updateResults(pars, playerIndex) {
         const score = computeScore(pars.length, playerIndex)
         document.getElementById(idScorePlayer(playerIndex)).textContent = score.overall_score
 
@@ -283,6 +283,7 @@
     function getPlayerResult(pars, playerIndex) {
         return {
             "name": document.getElementById(idPlayerName(playerIndex)).value,
+            "target": document.getElementById(idTarget(playerIndex)).value,
             "score": computeScore(pars.length, playerIndex),
             "points": computePoints(pars, playerIndex)
         }
