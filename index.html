@@ -3,6 +3,7 @@
 <title>
     ⛳️🏌️‍♂️📝
 </title>
+
 <body>
     <h1>
         Springfield Senior League
@@ -16,9 +17,9 @@
 </body>
 <script>
     const scorecard_config = {
-        pars: [2, 3, 4],
+        pars: [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5],
         numPlayers: 4,
-        courseName: "Carolina Lakes Course"
+        courseName: "Springfield Course"
     };
 
     createScorecard(scorecard_config)
@@ -37,6 +38,9 @@
         const nameRow = generateNameRow(scorecard_config.numPlayers)
         table.appendChild(nameRow)
 
+        const targetRow = generateTargetRow(scorecard_config.pars, scorecard_config.numPlayers)
+        table.appendChild(targetRow)
+
         for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
             const row = generateHoleRow(scorecard_config.pars, holeIndex, scorecard_config.numPlayers)
             table.appendChild(row)
@@ -47,6 +51,9 @@
 
         const pointsRow = generatePointsRow(scorecard_config.numPlayers)
         table.appendChild(pointsRow)
+
+        const netRow = generateNetRow(scorecard_config.numPlayers)
+        table.appendChild(netRow)
 
         return table
     }
@@ -65,6 +72,30 @@
             input.type = "string"
             input.id = idPlayerName(playerIndex)
             input.placeholder = "Name"
+
+            playerCell.appendChild(input)
+
+            row.appendChild(playerCell)
+        }
+
+        return row
+    }
+
+    function generateTargetRow(pars, numPlayers) {
+        const row = document.createElement("tr")
+
+        const headerCell = document.createElement("td")
+        headerCell.textContent = "Target"
+        row.appendChild(headerCell)
+
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const playerCell = document.createElement("td")
+
+            const input = document.createElement("input")
+            input.type = "number"
+            input.id = idTarget(playerIndex)
+            input.placeholder = "Target"
+            input.onchange = function (event) { updateScoreAndPoints(pars, playerIndex) }
 
             playerCell.appendChild(input)
 
@@ -94,7 +125,7 @@
         console.log("Generating hole header %s", holeIndex)
 
         const cell = document.createElement("td")
-        cell.textContent = holeIndex + " (" + par + ")"
+        cell.textContent = (holeIndex + 1) + " (" + par + ")"
 
         return cell
     }
@@ -153,12 +184,33 @@
         return row
     }
 
+    function generateNetRow(numPlayers) {
+        const row = document.createElement("tr")
+
+        const headerCell = document.createElement("td")
+        headerCell.textContent = "Net"
+        row.appendChild(headerCell)
+
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const pointsCell = document.createElement("td")
+
+            pointsCell.id = idNet(playerIndex)
+            pointsCell.textContent = 0
+            row.appendChild(pointsCell)
+        }
+
+        return row
+    }
+
     function updateScoreAndPoints(pars, playerIndex) {
         const score = computeScore(pars.length, playerIndex)
-        const points = computePoints(pars, playerIndex)
-
         document.getElementById(idScorePlayer(playerIndex)).textContent = score.overall_score
+
+        const points = computePoints(pars, playerIndex)
         document.getElementById(idPointsPlayer(playerIndex)).textContent = points.overall_points
+
+        const net = computeNet(pars, playerIndex)
+        document.getElementById(idNet(playerIndex)).textContent = net
     }
 
     function computeScore(numHoles, playerIndex) {
@@ -174,7 +226,7 @@
             }
             total += score
         }
-        return {"overall_score": total, "scores": scores}
+        return { "overall_score": total, "scores": scores }
     }
 
     function computePoints(pars, playerIndex) {
@@ -193,11 +245,23 @@
                 continue
             }
 
-            const point = 2 - (scoresOrNaN[holeIndex]- pars[holeIndex])
+            const point = 2 - (scoresOrNaN[holeIndex] - pars[holeIndex])
             points.push(point)
             total += point
         }
-        return {"overall_points":total, "points": points}
+        return { "overall_points": total, "points": points }
+    }
+
+    function computeNet(pars, playerIndex) {
+        const points = computePoints(pars, playerIndex)
+        
+        const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value)
+
+        if (isNaN(possibleTarget)) {
+            return ""
+        }
+
+        return points.overall_points - possibleTarget
     }
 
     function submit() {
@@ -216,7 +280,7 @@
         // Replace with the call to the AppScript backend.
     }
 
-    function getPlayerResult(pars, playerIndex) { 
+    function getPlayerResult(pars, playerIndex) {
         return {
             "name": document.getElementById(idPlayerName(playerIndex)).value,
             "score": computeScore(pars.length, playerIndex),
@@ -238,6 +302,14 @@
 
     function idPlayerName(playerIndex) {
         return "name_" + playerIndex
+    }
+
+    function idTarget(playerIndex) {
+        return "target_" + playerIndex
+    }
+
+    function idNet(playerIndex) {
+        return "net_" + playerIndex
     }
 </script>
 
