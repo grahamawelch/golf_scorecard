@@ -33,6 +33,15 @@
     const scorecard_config = {
         pars: [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5],
         numPlayers: 4,
+        partialResults: [{
+            name: "OUT",
+            startInclusive: 0,
+            endExclusive: 9
+        }, {
+            name: "IN",
+            startInclusive: 9,
+            endExclusive: 18
+        }],
         courseName: "Springfield Course"
     };
 
@@ -42,6 +51,15 @@
         document.getElementById("course").textContent = scorecard_config.courseName
         document.getElementById("table").appendChild(generateTable(scorecard_config))
 
+        for (const partialResult of scorecard_config.partialResults) {
+            const refRow = document.getElementById(idHoleRow(partialResult.endExclusive - 1))
+            const refTable = refRow.parentElement
+
+            const partialRow = generatePartialResultRow(partialResult)
+
+            const placeholderRow = refTable.insertRow(refRow.rowIndex + 1)
+            placeholderRow.appendChild(partialRow)
+        }
     }
 
     function generateTable(scorecard_config) {
@@ -128,6 +146,8 @@
     function generateHoleRow(pars, holeIndex, numPlayers) {
         const row = document.createElement("tr")
 
+        row.id = idHoleRow(holeIndex)
+
         const headerCell = generateHoleHeader(holeIndex, pars[holeIndex])
         row.appendChild(headerCell)
 
@@ -160,6 +180,17 @@
         cell.appendChild(input)
 
         return cell
+    }
+
+    function generatePartialResultRow(partialResult) {
+        const row = document.createElement("tr")
+
+        const cell = document.createElement("td")
+        cell.textContent = partialResult.name
+
+        row.appendChild(cell)
+
+        return row
     }
 
     function generateScoreRow(numPlayers) {
@@ -334,6 +365,10 @@
             "score": computeScore(pars.length, playerIndex),
             "points": computePoints(pars, playerIndex)
         }
+    }
+
+    function idHoleRow(holeIndex) {
+        return "holeRow_" + holeIndex
     }
 
     function idHolePlayer(holeIndex, playerIndex) {
