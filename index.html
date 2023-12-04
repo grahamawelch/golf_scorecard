@@ -85,9 +85,6 @@
             table.appendChild(row)
         }
 
-        const netRow = generateNetRow(scorecard_config.numPlayers)
-        table.appendChild(netRow)
-
         return table
     }
 
@@ -230,7 +227,7 @@
         return row
     }
 
-    function generateNetRow(numPlayers) {
+    function generateResultNetRow(resultName, numPlayers) {
         const row = document.createElement("tr")
 
         const headerCell = document.createElement("td")
@@ -238,29 +235,11 @@
         row.appendChild(headerCell)
 
         for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const pointsCell = document.createElement("td")
+            const netCell = document.createElement("td")
 
-            pointsCell.id = idNet(playerIndex)
-            pointsCell.textContent = ""
-            row.appendChild(pointsCell)
-        }
-
-        return row
-    }
-
-    function generateResultNetRow(numPlayers) {
-        const row = document.createElement("tr")
-
-        const headerCell = document.createElement("td")
-        headerCell.textContent = "Net"
-        row.appendChild(headerCell)
-
-        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const pointsCell = document.createElement("td")
-
-            pointsCell.id = idResultNet(playerIndex)
-            pointsCell.textContent = ""
-            row.appendChild(pointsCell)
+            netCell.id = idResultNet(resultName, playerIndex)
+            netCell.textContent = ""
+            row.appendChild(netCell)
         }
 
         return row
@@ -271,11 +250,8 @@
         const points = computePoints(pars, playerIndex)
 
         for (var result of results) {
-            updateResult(result, playerIndex, score, points)
+            updateResult(result, pars, playerIndex, score, points, pars)
         }
-
-        const net = computeNet(pars, playerIndex)
-        document.getElementById(idNet(playerIndex)).textContent = net
 
         // We don't need to recompute all player's points, since only `playerIndex` has changed.                    
         var teamPoints = 0;
@@ -291,28 +267,17 @@
         document.getElementById("team_points").textContent = teamPoints
     }
 
-    function updateResult(result, playerIndex, score, points) {
+    function updateResult(result, pars, playerIndex, score, points) {
         const holeIndices = Array.from({ length: result.endExclusive - result.startInclusive }, (_, i) => result.startInclusive + i)
 
-        var resultScore = 0
-        for (var holeIndex of holeIndices) {
-            const holeScoreOrNaN = parseInt(score.scores[holeIndex])
-            if (isNaN(holeScoreOrNaN)) {
-                continue
-            }
-            resultScore += holeScoreOrNaN
-        }
+        var resultScore = sumNumbersByIndex(score.scores, holeIndices)
         document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent = resultScore
 
-        var resultPoints = 0
-        for (var holeIndex of holeIndices) {
-            const holePointsOrNaN = parseInt(points.points[holeIndex])
-            if (isNaN(holePointsOrNaN)) {
-                continue
-            }
-            resultPoints += holePointsOrNaN
-        }
+        var resultPoints = sumNumbersByIndex(points.points, holeIndices)
         document.getElementById(idResultsPointsPlayer(result.name, playerIndex)).textContent = resultPoints
+
+        var resultNet = computeNet(points, pars, holeIndices, playerIndex)
+        document.getElementById(idResultNet(result.name, playerIndex)).textContent = resultNet
     }
 
     function computeScore(numHoles, playerIndex) {
@@ -354,16 +319,32 @@
         return { "overall_points": total, "points": points }
     }
 
-    function computeNet(pars, playerIndex) {
-        const points = computePoints(pars, playerIndex)
-
+    function computeNet(points, pars, holeIndices, playerIndex) {
         const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value)
 
         if (isNaN(possibleTarget)) {
             return ""
         }
 
-        return points.overall_points - possibleTarget
+        // Weighted just by number of holes.
+        // Points are already independent of par.
+        const resultTarget = possibleTarget * (holeIndices.length / pars.length)
+
+        var resultPoints = sumNumbersByIndex(points.points, holeIndices)
+
+        return resultPoints - resultTarget
+    }
+
+    function sumNumbersByIndex(numbersOrNaN, indices) {
+        var out = 0
+        for (var index of indices) {
+            const numOrNaN = parseInt(numbersOrNaN[index])
+            if (isNaN(numOrNaN)) {
+                continue
+            }
+            out += numOrNaN
+        }
+        return out
     }
 
     function updateTeamTarget(numPlayers) {
