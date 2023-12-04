@@ -430,6 +430,12 @@
                 document.getElementById(idResultNetTeam(result.name)).textContent
             ])
             for (var playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
+                // Skip players that dont have a name.
+                const rawName = document.getElementById(idPlayerName(playerIndex)).value
+                if (rawName === "" || rawName === null) {
+                    continue
+                }
+
                 var playerStats = [
                     document.getElementById("date").value,
                     result.name,
