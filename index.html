@@ -120,8 +120,6 @@
     }
 
     function generateHoleRow(pars, holeIndex, numPlayers) {
-        console.log("Generating hole %s", holeIndex)
-
         const row = document.createElement("tr")
 
         const headerCell = generateHoleHeader(holeIndex, pars[holeIndex])
@@ -136,8 +134,6 @@
     }
 
     function generateHoleHeader(holeIndex, par) {
-        console.log("Generating hole header %s", holeIndex)
-
         const cell = document.createElement("td")
         cell.textContent = (holeIndex + 1) + " (" + par + ")"
 
@@ -145,8 +141,6 @@
     }
 
     function generateHoleForPlayer(pars, holeIndex, playerIndex) {
-        console.log("Generating hole %s, player %s", holeIndex, playerIndex)
-
         const cell = document.createElement("td")
 
         const input = document.createElement("input")
