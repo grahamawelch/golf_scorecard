@@ -33,7 +33,11 @@
     const scorecard_config = {
         pars: [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5],
         numPlayers: 4,
-        partialResults: [{
+        results: [{
+            name: "TOTAL",
+            startInclusive: 0,
+            endExclusive: 18,
+        }, {
             name: "OUT",
             startInclusive: 0,
             endExclusive: 9
@@ -51,14 +55,17 @@
         document.getElementById("course").textContent = scorecard_config.courseName
         document.getElementById("table").appendChild(generateTable(scorecard_config))
 
-        for (const partialResult of scorecard_config.partialResults) {
-            const refRow = document.getElementById(idHoleRow(partialResult.endExclusive - 1))
+        for (const result of scorecard_config.results) {
+            const refRow = document.getElementById(idHoleRow(result.endExclusive - 1))
             const refTable = refRow.parentElement
 
-            const partialRow = generatePartialResultRow(partialResult)
+            const newRows = generateResultTable(result, scorecard_config)
 
-            const placeholderRow = refTable.insertRow(refRow.rowIndex + 1)
-            placeholderRow.appendChild(partialRow)
+            // Loop over these rows in reverse, so they appear in order.
+            for (var rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
+                const placeholderRow = refTable.insertRow(refRow.rowIndex + 1)
+                refTable.replaceChild(newRows[rowIndex], placeholderRow)
+            }
         }
     }
 
@@ -182,15 +189,17 @@
         return cell
     }
 
-    function generatePartialResultRow(partialResult) {
+    function generateResultTable(partialResult, scorecard_config) {
+        const holeIndices = Array.from({ length: partialResult.endExclusive - partialResult.startInclusive }, (_, i) => partialResult.startInclusive + i)
+
         const row = document.createElement("tr")
+        row.textContent = partialResult.name
 
-        const cell = document.createElement("td")
-        cell.textContent = partialResult.name
+        const scoreRow = generateResultScoreRow(partialResult.name, scorecard_config.numPlayers)
+        const pointsRow = generateResultPointsRow(partialResult.name, scorecard_config.numPlayers)
+        const netRow = generateResultNetRow(partialResult.name, scorecard_config.numPlayers)
 
-        row.appendChild(cell)
-
-        return row
+        return [row, scoreRow, pointsRow, netRow]
     }
 
     function generateScoreRow(numPlayers) {
@@ -204,6 +213,24 @@
             const scoreCell = document.createElement("td")
 
             scoreCell.id = idScorePlayer(playerIndex)
+            scoreCell.textContent = 0
+            row.appendChild(scoreCell)
+        }
+
+        return row
+    }
+
+    function generateResultScoreRow(resultName, numPlayers) {
+        const row = document.createElement("tr")
+
+        const headerCell = document.createElement("td")
+        headerCell.textContent = "Score"
+        row.appendChild(headerCell)
+
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const scoreCell = document.createElement("td")
+
+            scoreCell.id = idResultScorePlayer(resultName, playerIndex)
             scoreCell.textContent = 0
             row.appendChild(scoreCell)
         }
@@ -229,6 +256,24 @@
         return row
     }
 
+    function generateResultPointsRow(resultName, numPlayers) {
+        const row = document.createElement("tr")
+
+        const headerCell = document.createElement("td")
+        headerCell.textContent = "Points"
+        row.appendChild(headerCell)
+
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const pointsCell = document.createElement("td")
+
+            pointsCell.id = idResultsPointsPlayer(resultName, playerIndex)
+            pointsCell.textContent = 0
+            row.appendChild(pointsCell)
+        }
+
+        return row
+    }
+
     function generateNetRow(numPlayers) {
         const row = document.createElement("tr")
 
@@ -240,6 +285,24 @@
             const pointsCell = document.createElement("td")
 
             pointsCell.id = idNet(playerIndex)
+            pointsCell.textContent = ""
+            row.appendChild(pointsCell)
+        }
+
+        return row
+    }
+
+    function generateResultNetRow(numPlayers) {
+        const row = document.createElement("tr")
+
+        const headerCell = document.createElement("td")
+        headerCell.textContent = "Net"
+        row.appendChild(headerCell)
+
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const pointsCell = document.createElement("td")
+
+            pointsCell.id = idResultNet(playerIndex)
             pointsCell.textContent = ""
             row.appendChild(pointsCell)
         }
@@ -379,8 +442,16 @@
         return "score_" + playerIndex
     }
 
+    function idResultScorePlayer(resultName, playerIndex) {
+        return "result_" + resultName + "_score_" + playerIndex
+    }
+
     function idPointsPlayer(playerIndex) {
         return "points_" + playerIndex
+    }
+
+    function idResultsPointsPlayer(resultName, playerIndex) {
+        return "result_"+ resultName + "_points_" + playerIndex
     }
 
     function idPlayerName(playerIndex) {
@@ -393,6 +464,10 @@
 
     function idNet(playerIndex) {
         return "net_" + playerIndex
+    }
+
+    function idResultNet(resultName, playerIndex) {
+        return "result_" + resultName + "_net_" + playerIndex
     }
 </script>
 
