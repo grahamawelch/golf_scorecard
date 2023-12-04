@@ -356,19 +356,37 @@
     }
 
     function computeNet(points, pars, holeIndices, playerIndex) {
-        const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value)
+        const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value)
 
-        if (isNaN(possibleTarget)) {
+        if (isNaN(targetOrNaN)) {
             return ""
         }
 
         // Weighted just by number of holes.
         // Points are already independent of par.
-        const resultTarget = possibleTarget * (holeIndices.length / pars.length)
+        const resultTarget = targetOrNaN * (holeIndices.length / pars.length)
 
         var resultPoints = sumNumbersByIndex(points.points, holeIndices)
 
         return resultPoints - resultTarget
+    }
+
+    function computeResultTargets(numHoles, numResultHoles, numPlayers) {
+        var totalTarget = 0
+        var targets = []
+        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            var targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value)
+
+            if (isNaN(targetOrNaN)) {
+                targets.push[""]
+            }
+
+            const resultTarget = targetOrNaN * (numResultHoles / numHoles)
+            targets.push(resultTarget)
+            totalTarget+= resultTarget
+        }
+
+        return {totalTarget: totalTarget, targets: targets}
     }
 
     function sumNumbersByIndex(numbersOrNaN, indices) {
@@ -400,11 +418,14 @@
         var flatResults = []
 
         for (var result of scorecard_config.results) {
+            var targets = computeResultTargets(scorecard_config.pars.length, result.endExclusive - result.startInclusive, scorecard_config.numPlayers)
+
             flatResults.push([
                 document.getElementById("date").value,
                 result.name,
                 document.getElementById("team").value,
                 "TEAM",
+                targets.totalTarget,
                 document.getElementById(idResultPointsTeam(result.name)).textContent,
                 document.getElementById(idResultNetTeam(result.name)).textContent
             ])
@@ -414,6 +435,7 @@
                     result.name,
                     document.getElementById("team").value,
                     document.getElementById(idPlayerName(playerIndex)).value,
+                    targets.targets[playerIndex],
                     document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent,
                     document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent
                 ]
