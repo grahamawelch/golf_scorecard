@@ -14,14 +14,89 @@
 function doGet() {
   // https://developers.google.com/apps-script/reference/html/html-service
   // This function is effectively the "server"; users navigating to your WebApp excute this function which produces the page they land on.
-  return HtmlService.createHtmlOutputFromFile('index');
+  const scorecard = HtmlService.createHtmlOutputFromFile('index');
+
+  const config = getConfigAsString();
+
+  scorecard.append("<script>const CONFIG =")
+  scorecard.append(config)
+  scorecard.append("</script>")
+
+  Logger.log(scorecard.getContent())
+  return scorecard;
+}
+
+function getConfigAsString() {
+  const rawConfig = extractRawConfig();
+  const structuredConfig = constructStructuredConfig(rawConfig);
+
+  const out = JSON.stringify(structuredConfig);
+  return out;
+}
+
+/**
+ * Returns an array of two elements
+ * - [Date, CourseName, par1, par2, ... par18]
+ * - [[TeamName, Player1, Target1, ...] ...]
+ */
+function extractRawConfig() {
+  // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
+  // https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
+  const spreadsheet = SpreadsheetApp.openById("1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ");
+  const sheet = spreadsheet.getSheetByName("Config");
+
+  const courseValues = sheet.getRange(1, 1, 1, 20).getValues()[0];
+
+  let allTeamValues = []
+  let currTeamRow = 2;
+  while (true) {
+    const teamValues = sheet.getRange(currTeamRow, 1, 1, 13).getValues()[0].filter(Boolean);
+    if (teamValues.length === 0) {
+      break;
+    }
+    allTeamValues.push(teamValues)
+    currTeamRow++;
+  }
+
+  const out = [courseValues, allTeamValues];
+  return out;
+}
+
+function constructStructuredConfig(rawConfig) {
+  const courseConfig = {
+    "date": rawConfig[0][0],
+    "courseName": rawConfig[0][1],
+    "pars": rawConfig[0].slice(2)
+  }
+
+  let allTeamConfigs = []
+  for (let currTeamConfig of rawConfig[1]) {
+    let allPlayerConfigs = []
+    for (let rowIndex = 1; rowIndex < currTeamConfig.length; rowIndex += 2) {
+      allPlayerConfigs.push({
+        "playerName": currTeamConfig[rowIndex],
+        "playerTarget": currTeamConfig[rowIndex + 1],
+      });
+    }
+
+    allTeamConfigs.push({
+      "teamName": currTeamConfig[0],
+      "players": allPlayerConfigs
+    });
+  }
+
+  const out = {
+    "courseConfig": courseConfig,
+    "allTeamConfigs": allTeamConfigs,
+  };
+  return out;
 }
 
 // App Script function to save data to sheet
 function saveData(flatResults) {
-  // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app#openbyurlurl
+  // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
   // https://docs.google.com/spreadsheets/d/1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM/edit#gid=0
-  var sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
+  const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
 
   flatResults.forEach(result => sheet.appendRow(result));
 }
