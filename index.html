@@ -420,8 +420,7 @@
             flatResults.push(playerStats);
         }
 
-        alert(JSON.stringify(flatResults));
-        
+        console.log("Submitting:\n" + JSON.stringify(flatResults));
         // This will fail when run not in AppScript
         // But its the Web! So it doesn't really matter.
         google.script.run.saveData(flatResults)
