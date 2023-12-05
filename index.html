@@ -398,8 +398,6 @@
 
     function submit() {
         let flatResults = [];
-
-   
             
         for (let playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
             // Skip players that dont have a name.
@@ -408,18 +406,16 @@
                 continue;
             }
 
-            let playerScores = []
-            for (let holeIndex = 0; holeIndex < scorecard_config.pars.length; holeIndex++) {
-                playerScores.push(document.getElementById(idHolePlayer(playerIndex)).value)
-            }
-
-            const playerStats = [
+            let playerStats = [
                 document.getElementById("date").value,
                 document.getElementById("team").value,
                 scorecard_config.courseName,
-                document.getElementById(idPlayerName(playerIndex)).value,
-                playerScores
+                document.getElementById(idPlayerName(playerIndex)).value
             ];
+
+            for (let holeIndex = 0; holeIndex < scorecard_config.pars.length; holeIndex++) {
+                playerStats.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)
+            }
             
             flatResults.push(playerStats);
         }
