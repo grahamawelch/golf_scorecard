@@ -56,7 +56,7 @@
             const newRows = generateResultTable(result, scorecard_config)
 
             // Loop over these rows in reverse, so they appear in order.
-            for (var rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
+            for (let rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
                 const placeholderRow = refTable.insertRow(refRow.rowIndex + 1)
                 refTable.replaceChild(newRows[rowIndex], placeholderRow)
             }
@@ -74,7 +74,7 @@
         const targetRow = generateTargetRow(scorecard_config.results, scorecard_config.pars, scorecard_config.numPlayers)
         table.appendChild(targetRow)
 
-        for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+        for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
             const row = generateHoleRow(scorecard_config.results, scorecard_config.pars, holeIndex, scorecard_config.numPlayers)
             table.appendChild(row)
         }
@@ -89,7 +89,7 @@
         headerCell.textContent = "Name"
         row.appendChild(headerCell)
 
-        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             const playerCell = document.createElement("td")
 
             const input = document.createElement("input")
@@ -112,7 +112,7 @@
         headerCell.textContent = "Target"
         row.appendChild(headerCell)
 
-        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             const currPlayerIndex = playerIndex
 
             const playerCell = document.createElement("td")
@@ -143,7 +143,7 @@
         const headerCell = generateHoleHeader(holeIndex, pars[holeIndex])
         row.appendChild(headerCell)
 
-        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             const holeCell = generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex)
             row.appendChild(holeCell)
         }
@@ -194,7 +194,7 @@
         headerCell.textContent = "Score"
         row.appendChild(headerCell)
 
-        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             const scoreCell = document.createElement("td")
 
             scoreCell.id = idResultScorePlayer(resultName, playerIndex)
@@ -212,7 +212,7 @@
         headerCell.textContent = "Points"
         row.appendChild(headerCell)
 
-        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             const pointsCell = document.createElement("td")
 
             pointsCell.id = idResultPointsPlayer(resultName, playerIndex)
@@ -230,7 +230,7 @@
         headerCell.textContent = "Net"
         row.appendChild(headerCell)
 
-        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             const netCell = document.createElement("td")
 
             netCell.id = idResultNetPlayer(resultName, playerIndex)
@@ -277,12 +277,12 @@
         const score = computeScore(pars.length, playerIndex)
         const points = computePoints(pars, playerIndex)
 
-        for (var result of results) {
+        for (let result of results) {
             updateResult(result, pars, playerIndex, score, points, pars)
 
-            var pointsTeam = 0
-            for (var currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-                var playerPointsOrNaN = parseInt(document.getElementById(idResultPointsPlayer(result.name, currPlayerIndex)).textContent)
+            let pointsTeam = 0
+            for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+                const playerPointsOrNaN = parseInt(document.getElementById(idResultPointsPlayer(result.name, currPlayerIndex)).textContent)
                 if (isNaN(playerPointsOrNaN)) {
                     continue
                 }
@@ -291,9 +291,9 @@
             document.getElementById(idResultPointsTeam(result.name)).textContent = pointsTeam
 
             // Nets can be fractions
-            var netTeam = 0
-            for (var currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-                var playerNetOrNaN = parseFloat(document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent)
+            let netTeam = 0
+            for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+                const playerNetOrNaN = parseFloat(document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent)
                 if (isNaN(playerNetOrNaN)) {
                     continue
                 }
@@ -306,20 +306,20 @@
     function updateResult(result, pars, playerIndex, score, points) {
         const holeIndices = Array.from({ length: result.endExclusive - result.startInclusive }, (_, i) => result.startInclusive + i)
 
-        var resultScore = sumNumbersByIndex(score.scores, holeIndices)
+        const resultScore = sumNumbersByIndex(score.scores, holeIndices)
         document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent = resultScore
 
-        var resultPoints = sumNumbersByIndex(points.points, holeIndices)
+        const resultPoints = sumNumbersByIndex(points.points, holeIndices)
         document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent = resultPoints
 
-        var resultNet = computeNet(points, pars, holeIndices, playerIndex)
+        const resultNet = computeNet(points, pars, holeIndices, playerIndex)
         document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent = resultNet
     }
 
     function computeScore(numHoles, playerIndex) {
-        var scores = []
-        var total = 0
-        for (var holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+        let scores = []
+        let total = 0
+        for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
             const rawScore = document.getElementById(idHolePlayer(holeIndex, playerIndex)).value
             scores.push(rawScore)
 
@@ -333,16 +333,16 @@
     }
 
     function computePoints(pars, playerIndex) {
-        var scoresOrNaN = []
-        for (var holeIndex = 0; holeIndex < pars.length; holeIndex++) {
+        let scoresOrNaN = []
+        for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
             scoresOrNaN.push(parseInt(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value))
         }
 
         // We need to compute points iff the user has entered a value for the corresponding hole.
 
-        var points = []
-        var total = 0
-        for (var holeIndex = 0; holeIndex < pars.length; holeIndex++) {
+        let points = []
+        let total = 0
+        for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
             if (isNaN(scoresOrNaN[holeIndex])) {
                 points.push("")
                 continue
@@ -366,16 +366,16 @@
         // Points are already independent of par.
         const resultTarget = targetOrNaN * (holeIndices.length / pars.length)
 
-        var resultPoints = sumNumbersByIndex(points.points, holeIndices)
+        const resultPoints = sumNumbersByIndex(points.points, holeIndices)
 
         return resultPoints - resultTarget
     }
 
     function computeResultTargets(numHoles, numResultHoles, numPlayers) {
-        var totalTarget = 0
-        var targets = []
-        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            var targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value)
+        let totalTarget = 0
+        let targets = []
+        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value)
 
             if (isNaN(targetOrNaN)) {
                 targets.push[""]
@@ -390,8 +390,8 @@
     }
 
     function sumNumbersByIndex(numbersOrNaN, indices) {
-        var out = 0
-        for (var index of indices) {
+        let out = 0
+        for (let index of indices) {
             const numOrNaN = parseInt(numbersOrNaN[index])
             if (isNaN(numOrNaN)) {
                 continue
@@ -402,9 +402,9 @@
     }
 
     function updateTeamTarget(numPlayers) {
-        var total = 0
-        for (var playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            var possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value)
+        let total = 0
+        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value)
             if (isNaN(possibleTarget)) {
                 continue
             }
@@ -415,10 +415,10 @@
     }
 
     function submit() {
-        var flatResults = []
+        let flatResults = []
 
-        for (var result of scorecard_config.results) {
-            var targets = computeResultTargets(scorecard_config.pars.length, result.endExclusive - result.startInclusive, scorecard_config.numPlayers)
+        for (let result of scorecard_config.results) {
+            const targets = computeResultTargets(scorecard_config.pars.length, result.endExclusive - result.startInclusive, scorecard_config.numPlayers)
 
             flatResults.push([
                 document.getElementById("date").value,
@@ -429,14 +429,14 @@
                 document.getElementById(idResultPointsTeam(result.name)).textContent,
                 document.getElementById(idResultNetTeam(result.name)).textContent
             ])
-            for (var playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
+            for (let playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
                 // Skip players that dont have a name.
                 const rawName = document.getElementById(idPlayerName(playerIndex)).value
                 if (rawName === "" || rawName === null) {
                     continue
                 }
 
-                var playerStats = [
+                const playerStats = [
                     document.getElementById("date").value,
                     result.name,
                     document.getElementById("team").value,
@@ -445,11 +445,11 @@
                     document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent,
                     document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent
                 ]
-                var playerScore = computeScore(scorecard_config.pars.length, playerIndex)
+                const playerScore = computeScore(scorecard_config.pars.length, playerIndex)
 
                 playerScore.scores.slice(result.startInclusive, result.endExclusive).forEach(s => playerStats.push(s))
 
-                var playerPoints = computePoints(scorecard_config.pars, playerIndex)
+                const playerPoints = computePoints(scorecard_config.pars, playerIndex)
                 playerPoints.points.slice(result.startInclusive, result.endExclusive).forEach(p => playerStats.push(p))
 
                 flatResults.push(playerStats)
