@@ -43,382 +43,382 @@
         courseName: "Springfield Course"
     };
 
-    createScorecard(scorecard_config)
+    createScorecard(scorecard_config);
 
     function createScorecard(scorecard_config) {
-        document.getElementById("course").textContent = scorecard_config.courseName
-        document.getElementById("table").appendChild(generateTable(scorecard_config))
+        document.getElementById("course").textContent = scorecard_config.courseName;
+        document.getElementById("table").appendChild(generateTable(scorecard_config));
 
         for (const result of scorecard_config.results) {
-            const refRow = document.getElementById(idHoleRow(result.endExclusive - 1))
-            const refTable = refRow.parentElement
+            const refRow = document.getElementById(idHoleRow(result.endExclusive - 1));
+            const refTable = refRow.parentElement;
 
-            const newRows = generateResultTable(result, scorecard_config)
+            const newRows = generateResultTable(result, scorecard_config);
 
             // Loop over these rows in reverse, so they appear in order.
             for (let rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
-                const placeholderRow = refTable.insertRow(refRow.rowIndex + 1)
-                refTable.replaceChild(newRows[rowIndex], placeholderRow)
+                const placeholderRow = refTable.insertRow(refRow.rowIndex + 1);
+                refTable.replaceChild(newRows[rowIndex], placeholderRow);
             }
         }
     }
 
     function generateTable(scorecard_config) {
-        const table = document.createElement("table")
+        const table = document.createElement("table");
 
-        const numHoles = scorecard_config.pars.length
+        const numHoles = scorecard_config.pars.length;
 
-        const nameRow = generateNameRow(scorecard_config.numPlayers)
-        table.appendChild(nameRow)
+        const nameRow = generateNameRow(scorecard_config.numPlayers);
+        table.appendChild(nameRow);
 
-        const targetRow = generateTargetRow(scorecard_config.results, scorecard_config.pars, scorecard_config.numPlayers)
-        table.appendChild(targetRow)
+        const targetRow = generateTargetRow(scorecard_config.results, scorecard_config.pars, scorecard_config.numPlayers);
+        table.appendChild(targetRow);
 
         for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-            const row = generateHoleRow(scorecard_config.results, scorecard_config.pars, holeIndex, scorecard_config.numPlayers)
-            table.appendChild(row)
+            const row = generateHoleRow(scorecard_config.results, scorecard_config.pars, holeIndex, scorecard_config.numPlayers);
+            table.appendChild(row);
         }
 
-        return table
+        return table;
     }
 
     function generateNameRow(numPlayers) {
-        const row = document.createElement("tr")
+        const row = document.createElement("tr");
 
-        const headerCell = document.createElement("td")
-        headerCell.textContent = "Name"
-        row.appendChild(headerCell)
+        const headerCell = document.createElement("td");
+        headerCell.textContent = "Name";
+        row.appendChild(headerCell);
 
         for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const playerCell = document.createElement("td")
+            const playerCell = document.createElement("td");
 
-            const input = document.createElement("input")
-            input.type = "string"
-            input.id = idPlayerName(playerIndex)
-            input.placeholder = "Name"
+            const input = document.createElement("input");
+            input.type = "string";
+            input.id = idPlayerName(playerIndex);
+            input.placeholder = "Name";
 
-            playerCell.appendChild(input)
+            playerCell.appendChild(input);
 
-            row.appendChild(playerCell)
+            row.appendChild(playerCell);
         }
 
-        return row
+        return row;
     }
 
     function generateTargetRow(results, pars, numPlayers) {
-        const row = document.createElement("tr")
+        const row = document.createElement("tr");
 
-        const headerCell = document.createElement("td")
-        headerCell.textContent = "Target"
-        row.appendChild(headerCell)
+        const headerCell = document.createElement("td");
+        headerCell.textContent = "Target";
+        row.appendChild(headerCell);
 
         for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const currPlayerIndex = playerIndex
+            const currPlayerIndex = playerIndex;
 
-            const playerCell = document.createElement("td")
+            const playerCell = document.createElement("td");
 
-            const input = document.createElement("input")
-            input.type = "number"
-            input.id = idTarget(playerIndex)
-            input.placeholder = "Target"
-            input.min = 0
+            const input = document.createElement("input");
+            input.type = "number";
+            input.id = idTarget(playerIndex);
+            input.placeholder = "Target";
+            input.min = 0;
             input.onchange = function (event) {
-                updateStats(results, pars, numPlayers, currPlayerIndex)
-                updateTeamTarget(numPlayers)
-            }
+                updateStats(results, pars, numPlayers, currPlayerIndex);
+                updateTeamTarget(numPlayers);
+            };
 
-            playerCell.appendChild(input)
+            playerCell.appendChild(input);
 
-            row.appendChild(playerCell)
+            row.appendChild(playerCell);
         }
 
-        return row
+        return row;
     }
 
     function generateHoleRow(results, pars, holeIndex, numPlayers) {
-        const row = document.createElement("tr")
+        const row = document.createElement("tr");
 
-        row.id = idHoleRow(holeIndex)
+        row.id = idHoleRow(holeIndex);
 
-        const headerCell = generateHoleHeader(holeIndex, pars[holeIndex])
-        row.appendChild(headerCell)
+        const headerCell = generateHoleHeader(holeIndex, pars[holeIndex]);
+        row.appendChild(headerCell);
 
         for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const holeCell = generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex)
-            row.appendChild(holeCell)
+            const holeCell = generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex);
+            row.appendChild(holeCell);
         }
 
-        return row
+        return row;
     }
 
     function generateHoleHeader(holeIndex, par) {
-        const cell = document.createElement("td")
-        cell.textContent = (holeIndex + 1) + " (" + par + ")"
+        const cell = document.createElement("td");
+        cell.textContent = (holeIndex + 1) + " (" + par + ")";
 
-        return cell
+        return cell;
     }
 
     function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex) {
-        const cell = document.createElement("td")
+        const cell = document.createElement("td");
 
-        const input = document.createElement("input")
-        input.type = "number"
-        input.id = idHolePlayer(holeIndex, playerIndex)
-        input.placeholder = 0               // Don't set value so unset fields are treated as empty
-        input.min = Math.max(pars[holeIndex] - 2, 1)    // At best an Eagle (or hole in 1)
-        input.max = pars[holeIndex] + 2                 // At worst, a double-bogey
-        input.onchange = function (event) { updateStats(results, pars, numPlayers, playerIndex) }
+        const input = document.createElement("input");
+        input.type = "number";
+        input.id = idHolePlayer(holeIndex, playerIndex);
+        input.placeholder = 0;               // Don't set value so unset fields are treated as empty
+        input.min = Math.max(pars[holeIndex] - 2, 1);    // At best an Eagle (or hole in 1)
+        input.max = pars[holeIndex] + 2;                 // At worst, a double-bogey
+        input.onchange = function (event) { updateStats(results, pars, numPlayers, playerIndex); };
 
-        cell.appendChild(input)
+        cell.appendChild(input);
 
-        return cell
+        return cell;
     }
 
     function generateResultTable(partialResult, scorecard_config) {
-        const row = document.createElement("tr")
-        row.textContent = partialResult.name
+        const row = document.createElement("tr");
+        row.textContent = partialResult.name;
 
-        const scoreRow = generateResultScoreRow(partialResult.name, scorecard_config.numPlayers)
-        const pointsRow = generateResultPointsRow(partialResult.name, scorecard_config.numPlayers)
-        const netRow = generateResultNetRow(partialResult.name, scorecard_config.numPlayers)
-        const pointsTeamRow = generateResultPointsTeamRow(partialResult.name)
-        const netTeamRow = generateResultNetTeamRow(partialResult.name)
+        const scoreRow = generateResultScoreRow(partialResult.name, scorecard_config.numPlayers);
+        const pointsRow = generateResultPointsRow(partialResult.name, scorecard_config.numPlayers);
+        const netRow = generateResultNetRow(partialResult.name, scorecard_config.numPlayers);
+        const pointsTeamRow = generateResultPointsTeamRow(partialResult.name);
+        const netTeamRow = generateResultNetTeamRow(partialResult.name);
 
-        return [row, scoreRow, pointsRow, netRow, pointsTeamRow, netTeamRow]
+        return [row, scoreRow, pointsRow, netRow, pointsTeamRow, netTeamRow];
     }
 
     function generateResultScoreRow(resultName, numPlayers) {
-        const row = document.createElement("tr")
+        const row = document.createElement("tr");
 
-        const headerCell = document.createElement("td")
-        headerCell.textContent = "Score"
-        row.appendChild(headerCell)
+        const headerCell = document.createElement("td");
+        headerCell.textContent = "Score";
+        row.appendChild(headerCell);
 
         for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const scoreCell = document.createElement("td")
+            const scoreCell = document.createElement("td");
 
-            scoreCell.id = idResultScorePlayer(resultName, playerIndex)
-            scoreCell.textContent = 0
-            row.appendChild(scoreCell)
+            scoreCell.id = idResultScorePlayer(resultName, playerIndex);
+            scoreCell.textContent = 0;
+            row.appendChild(scoreCell);
         }
 
-        return row
+        return row;
     }
 
     function generateResultPointsRow(resultName, numPlayers) {
-        const row = document.createElement("tr")
+        const row = document.createElement("tr");
 
-        const headerCell = document.createElement("td")
-        headerCell.textContent = "Points"
-        row.appendChild(headerCell)
+        const headerCell = document.createElement("td");
+        headerCell.textContent = "Points";
+        row.appendChild(headerCell);
 
         for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const pointsCell = document.createElement("td")
+            const pointsCell = document.createElement("td");
 
-            pointsCell.id = idResultPointsPlayer(resultName, playerIndex)
-            pointsCell.textContent = 0
-            row.appendChild(pointsCell)
+            pointsCell.id = idResultPointsPlayer(resultName, playerIndex);
+            pointsCell.textContent = 0;
+            row.appendChild(pointsCell);
         }
 
-        return row
+        return row;
     }
 
     function generateResultNetRow(resultName, numPlayers) {
-        const row = document.createElement("tr")
+        const row = document.createElement("tr");
 
-        const headerCell = document.createElement("td")
-        headerCell.textContent = "Net"
-        row.appendChild(headerCell)
+        const headerCell = document.createElement("td");
+        headerCell.textContent = "Net";
+        row.appendChild(headerCell);
 
         for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const netCell = document.createElement("td")
+            const netCell = document.createElement("td");
 
-            netCell.id = idResultNetPlayer(resultName, playerIndex)
-            netCell.textContent = ""
-            row.appendChild(netCell)
+            netCell.id = idResultNetPlayer(resultName, playerIndex);
+            netCell.textContent = "";
+            row.appendChild(netCell);
         }
 
-        return row
+        return row;
     }
 
     function generateResultPointsTeamRow(resultName) {
-        const row = document.createElement("tr")
+        const row = document.createElement("tr");
 
-        const headerCell = document.createElement("td")
-        headerCell.textContent = "Team Points"
-        row.appendChild(headerCell)
+        const headerCell = document.createElement("td");
+        headerCell.textContent = "Team Points";
+        row.appendChild(headerCell);
 
-        const pointsCell = document.createElement("td")
+        const pointsCell = document.createElement("td");
 
-        pointsCell.id = idResultPointsTeam(resultName)
-        pointsCell.textContent = 0
-        row.appendChild(pointsCell)
+        pointsCell.id = idResultPointsTeam(resultName);
+        pointsCell.textContent = 0;
+        row.appendChild(pointsCell);
 
-        return row
+        return row;
     }
 
     function generateResultNetTeamRow(resultName) {
-        const row = document.createElement("tr")
+        const row = document.createElement("tr");
 
-        const headerCell = document.createElement("td")
-        headerCell.textContent = "Team Net"
-        row.appendChild(headerCell)
+        const headerCell = document.createElement("td");
+        headerCell.textContent = "Team Net";
+        row.appendChild(headerCell);
 
-        const netCell = document.createElement("td")
+        const netCell = document.createElement("td");
 
-        netCell.id = idResultNetTeam(resultName)
-        netCell.textContent = ""
-        row.appendChild(netCell)
+        netCell.id = idResultNetTeam(resultName);
+        netCell.textContent = "";
+        row.appendChild(netCell);
 
-        return row
+        return row;
     }
 
     function updateStats(results, pars, numPlayers, playerIndex) {
-        const score = computeScore(pars.length, playerIndex)
-        const points = computePoints(pars, playerIndex)
+        const score = computeScore(pars.length, playerIndex);
+        const points = computePoints(pars, playerIndex);
 
         for (let result of results) {
-            updateResult(result, pars, playerIndex, score, points, pars)
+            updateResult(result, pars, playerIndex, score, points, pars);
 
-            let pointsTeam = 0
+            let pointsTeam = 0;
             for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-                const playerPointsOrNaN = parseInt(document.getElementById(idResultPointsPlayer(result.name, currPlayerIndex)).textContent)
+                const playerPointsOrNaN = parseInt(document.getElementById(idResultPointsPlayer(result.name, currPlayerIndex)).textContent);
                 if (isNaN(playerPointsOrNaN)) {
-                    continue
+                    continue;
                 }
-                pointsTeam += playerPointsOrNaN
+                pointsTeam += playerPointsOrNaN;
             }
-            document.getElementById(idResultPointsTeam(result.name)).textContent = pointsTeam
+            document.getElementById(idResultPointsTeam(result.name)).textContent = pointsTeam;
 
             // Nets can be fractions
-            let netTeam = 0
+            let netTeam = 0;
             for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-                const playerNetOrNaN = parseFloat(document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent)
+                const playerNetOrNaN = parseFloat(document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent);
                 if (isNaN(playerNetOrNaN)) {
-                    continue
+                    continue;
                 }
-                netTeam += playerNetOrNaN
+                netTeam += playerNetOrNaN;
             }
-            document.getElementById(idResultNetTeam(result.name)).textContent = netTeam
+            document.getElementById(idResultNetTeam(result.name)).textContent = netTeam;
         }
     }
 
     function updateResult(result, pars, playerIndex, score, points) {
-        const holeIndices = Array.from({ length: result.endExclusive - result.startInclusive }, (_, i) => result.startInclusive + i)
+        const holeIndices = Array.from({ length: result.endExclusive - result.startInclusive }, (_, i) => result.startInclusive + i);
 
-        const resultScore = sumNumbersByIndex(score.scores, holeIndices)
-        document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent = resultScore
+        const resultScore = sumNumbersByIndex(score.scores, holeIndices);
+        document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent = resultScore;
 
-        const resultPoints = sumNumbersByIndex(points.points, holeIndices)
-        document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent = resultPoints
+        const resultPoints = sumNumbersByIndex(points.points, holeIndices);
+        document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent = resultPoints;
 
-        const resultNet = computeNet(points, pars, holeIndices, playerIndex)
-        document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent = resultNet
+        const resultNet = computeNet(points, pars, holeIndices, playerIndex);
+        document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent = resultNet;
     }
 
     function computeScore(numHoles, playerIndex) {
-        let scores = []
-        let total = 0
+        let scores = [];
+        let total = 0;
         for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-            const rawScore = document.getElementById(idHolePlayer(holeIndex, playerIndex)).value
-            scores.push(rawScore)
+            const rawScore = document.getElementById(idHolePlayer(holeIndex, playerIndex)).value;
+            scores.push(rawScore);
 
-            const score = parseInt(rawScore)
+            const score = parseInt(rawScore);
             if (isNaN(score)) {
-                continue
+                continue;
             }
-            total += score
+            total += score;
         }
-        return { "overall_score": total, "scores": scores }
+        return { "overall_score": total, "scores": scores };
     }
 
     function computePoints(pars, playerIndex) {
-        let scoresOrNaN = []
+        let scoresOrNaN = [];
         for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
-            scoresOrNaN.push(parseInt(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value))
+            scoresOrNaN.push(parseInt(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value));
         }
 
         // We need to compute points iff the user has entered a value for the corresponding hole.
 
-        let points = []
-        let total = 0
+        let points = [];
+        let total = 0;
         for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
             if (isNaN(scoresOrNaN[holeIndex])) {
-                points.push("")
-                continue
+                points.push("");
+                continue;
             }
 
-            const point = 2 - (scoresOrNaN[holeIndex] - pars[holeIndex])
-            points.push(point)
-            total += point
+            const point = 2 - (scoresOrNaN[holeIndex] - pars[holeIndex]);
+            points.push(point);
+            total += point;
         }
-        return { "overall_points": total, "points": points }
+        return { "overall_points": total, "points": points };
     }
 
     function computeNet(points, pars, holeIndices, playerIndex) {
-        const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value)
+        const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value);
 
         if (isNaN(targetOrNaN)) {
-            return ""
+            return "";
         }
 
         // Weighted just by number of holes.
         // Points are already independent of par.
-        const resultTarget = targetOrNaN * (holeIndices.length / pars.length)
+        const resultTarget = targetOrNaN * (holeIndices.length / pars.length);
 
-        const resultPoints = sumNumbersByIndex(points.points, holeIndices)
+        const resultPoints = sumNumbersByIndex(points.points, holeIndices);
 
-        return resultPoints - resultTarget
+        return resultPoints - resultTarget;
     }
 
     function computeResultTargets(numHoles, numResultHoles, numPlayers) {
-        let totalTarget = 0
-        let targets = []
+        let totalTarget = 0;
+        let targets = [];
         for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value)
+            const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value);
 
             if (isNaN(targetOrNaN)) {
-                targets.push[""]
-                continue
+                targets.push[""];
+                continue;
             }
 
-            const resultTarget = targetOrNaN * (numResultHoles / numHoles)
-            targets.push(resultTarget)
-            totalTarget+= resultTarget
+            const resultTarget = targetOrNaN * (numResultHoles / numHoles);
+            targets.push(resultTarget);
+            totalTarget += resultTarget;
         }
-        return {totalTarget: totalTarget, targets: targets}
+        return { totalTarget: totalTarget, targets: targets };
     }
 
     function sumNumbersByIndex(numbersOrNaN, indices) {
-        let out = 0
+        let out = 0;
         for (let index of indices) {
-            const numOrNaN = parseInt(numbersOrNaN[index])
+            const numOrNaN = parseInt(numbersOrNaN[index]);
             if (isNaN(numOrNaN)) {
-                continue
+                continue;
             }
-            out += numOrNaN
+            out += numOrNaN;
         }
-        return out
+        return out;
     }
 
     function updateTeamTarget(numPlayers) {
-        let total = 0
+        let total = 0;
         for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value)
+            const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value);
             if (isNaN(possibleTarget)) {
-                continue
+                continue;
             }
-            total += possibleTarget
+            total += possibleTarget;
         }
 
-        document.getElementById("team_target").textContent = total
+        document.getElementById("team_target").textContent = total;
     }
 
     function submit() {
-        let flatResults = []
+        let flatResults = [];
 
         for (let result of scorecard_config.results) {
-            const targets = computeResultTargets(scorecard_config.pars.length, result.endExclusive - result.startInclusive, scorecard_config.numPlayers)
+            const targets = computeResultTargets(scorecard_config.pars.length, result.endExclusive - result.startInclusive, scorecard_config.numPlayers);
 
             flatResults.push([
                 document.getElementById("date").value,
@@ -428,12 +428,12 @@
                 targets.totalTarget,
                 document.getElementById(idResultPointsTeam(result.name)).textContent,
                 document.getElementById(idResultNetTeam(result.name)).textContent
-            ])
+            ]);
             for (let playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
                 // Skip players that dont have a name.
-                const rawName = document.getElementById(idPlayerName(playerIndex)).value
+                const rawName = document.getElementById(idPlayerName(playerIndex)).value;
                 if (rawName === "" || rawName === null) {
-                    continue
+                    continue;
                 }
 
                 const playerStats = [
@@ -444,20 +444,20 @@
                     targets.targets[playerIndex],
                     document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent,
                     document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent
-                ]
-                const playerScore = computeScore(scorecard_config.pars.length, playerIndex)
+                ];
+                const playerScore = computeScore(scorecard_config.pars.length, playerIndex);
 
-                playerScore.scores.slice(result.startInclusive, result.endExclusive).forEach(s => playerStats.push(s))
+                playerScore.scores.slice(result.startInclusive, result.endExclusive).forEach(s => playerStats.push(s));
 
-                const playerPoints = computePoints(scorecard_config.pars, playerIndex)
-                playerPoints.points.slice(result.startInclusive, result.endExclusive).forEach(p => playerStats.push(p))
+                const playerPoints = computePoints(scorecard_config.pars, playerIndex);
+                playerPoints.points.slice(result.startInclusive, result.endExclusive).forEach(p => playerStats.push(p));
 
-                flatResults.push(playerStats)
+                flatResults.push(playerStats);
             }
-            
+
         }
 
-        alert(JSON.stringify(flatResults))
+        alert(JSON.stringify(flatResults));
         // Replace with the call to the AppScript backend.
         // google.script.run.saveData(flatResults)
     }
@@ -468,43 +468,43 @@
             "target": document.getElementById(idTarget(playerIndex)).value,
             "score": computeScore(pars.length, playerIndex),
             "points": computePoints(pars, playerIndex)
-        }
+        };
     }
 
     function idHoleRow(holeIndex) {
-        return "holeRow_" + holeIndex
+        return "holeRow_" + holeIndex;
     }
 
     function idHolePlayer(holeIndex, playerIndex) {
-        return holeIndex + "_" + playerIndex
+        return holeIndex + "_" + playerIndex;
     }
 
     function idResultScorePlayer(resultName, playerIndex) {
-        return "result_" + resultName + "_score_" + playerIndex
+        return "result_" + resultName + "_score_" + playerIndex;
     }
 
     function idResultPointsPlayer(resultName, playerIndex) {
-        return "result_" + resultName + "_points_" + playerIndex
+        return "result_" + resultName + "_points_" + playerIndex;
     }
 
     function idResultPointsTeam(resultName) {
-        return "result_" + resultName + "_points_team"
+        return "result_" + resultName + "_points_team";
     }
 
     function idPlayerName(playerIndex) {
-        return "name_" + playerIndex
+        return "name_" + playerIndex;
     }
 
     function idTarget(playerIndex) {
-        return "target_" + playerIndex
+        return "target_" + playerIndex;
     }
 
     function idResultNetPlayer(resultName, playerIndex) {
-        return "result_" + resultName + "_net_" + playerIndex
+        return "result_" + resultName + "_net_" + playerIndex;
     }
 
     function idResultNetTeam(resultName) {
-        return "result_" + resultName + "_net_team"
+        return "result_" + resultName + "_net_team";
     }
 </script>
 
