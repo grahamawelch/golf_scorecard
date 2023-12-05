@@ -421,8 +421,10 @@
         }
 
         alert(JSON.stringify(flatResults));
-        // Replace with the call to the AppScript backend.
-        // google.script.run.saveData(flatResults)
+        
+        // This will fail when run not in AppScript
+        // But its the Web! So it doesn't really matter.
+        google.script.run.saveData(flatResults)
     }
 
     function idHoleRow(holeIndex) {
