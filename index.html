@@ -371,24 +371,6 @@
         return resultPoints - resultTarget;
     }
 
-    function computeResultTargets(numHoles, numResultHoles, numPlayers) {
-        let totalTarget = 0;
-        let targets = [];
-        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value);
-
-            if (isNaN(targetOrNaN)) {
-                targets.push[""];
-                continue;
-            }
-
-            const resultTarget = targetOrNaN * (numResultHoles / numHoles);
-            targets.push(resultTarget);
-            totalTarget += resultTarget;
-        }
-        return { totalTarget: totalTarget, targets: targets };
-    }
-
     function sumNumbersByIndex(numbersOrNaN, indices) {
         let out = 0;
         for (let index of indices) {
@@ -417,58 +399,34 @@
     function submit() {
         let flatResults = [];
 
-        for (let result of scorecard_config.results) {
-            const targets = computeResultTargets(scorecard_config.pars.length, result.endExclusive - result.startInclusive, scorecard_config.numPlayers);
-
-            flatResults.push([
-                document.getElementById("date").value,
-                result.name,
-                document.getElementById("team").value,
-                "TEAM",
-                targets.totalTarget,
-                document.getElementById(idResultPointsTeam(result.name)).textContent,
-                document.getElementById(idResultNetTeam(result.name)).textContent
-            ]);
-            for (let playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
-                // Skip players that dont have a name.
-                const rawName = document.getElementById(idPlayerName(playerIndex)).value;
-                if (rawName === "" || rawName === null) {
-                    continue;
-                }
-
-                const playerStats = [
-                    document.getElementById("date").value,
-                    result.name,
-                    document.getElementById("team").value,
-                    document.getElementById(idPlayerName(playerIndex)).value,
-                    targets.targets[playerIndex],
-                    document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent,
-                    document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent
-                ];
-                const playerScore = computeScore(scorecard_config.pars.length, playerIndex);
-
-                playerScore.scores.slice(result.startInclusive, result.endExclusive).forEach(s => playerStats.push(s));
-
-                const playerPoints = computePoints(scorecard_config.pars, playerIndex);
-                playerPoints.points.slice(result.startInclusive, result.endExclusive).forEach(p => playerStats.push(p));
-
-                flatResults.push(playerStats);
+   
+            
+        for (let playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
+            // Skip players that dont have a name.
+            const rawName = document.getElementById(idPlayerName(playerIndex)).value;
+            if (rawName === "" || rawName === null) {
+                continue;
             }
 
+            let playerScores = []
+            for (let holeIndex = 0; holeIndex < scorecard_config.pars.length; holeIndex++) {
+                playerScores.push(document.getElementById(idHolePlayer(playerIndex)).value)
+            }
+
+            const playerStats = [
+                document.getElementById("date").value,
+                document.getElementById("team").value,
+                scorecard_config.courseName,
+                document.getElementById(idPlayerName(playerIndex)).value,
+                playerScores
+            ];
+            
+            flatResults.push(playerStats);
         }
 
         alert(JSON.stringify(flatResults));
         // Replace with the call to the AppScript backend.
         // google.script.run.saveData(flatResults)
-    }
-
-    function getPlayerResult(pars, playerIndex) {
-        return {
-            "name": document.getElementById(idPlayerName(playerIndex)).value,
-            "target": document.getElementById(idTarget(playerIndex)).value,
-            "score": computeScore(pars.length, playerIndex),
-            "points": computePoints(pars, playerIndex)
-        };
     }
 
     function idHoleRow(holeIndex) {
