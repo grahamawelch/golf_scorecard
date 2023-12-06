@@ -99,6 +99,9 @@
                 refTable.replaceChild(newRows[rowIndex], placeholderRow);
             }
         }
+
+        // We could have loaded some cached scores.
+        updateAllStats(scorecard_config.results, scorecard_config.pars, scorecard_config.numPlayers);
     }
 
     function generateTable(scorecard_config) {
@@ -321,6 +324,12 @@
         return row;
     }
 
+    function updateAllStats(results, pars, numPlayers) {
+        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            updateStats(results, pars, numPlayers, playerIndex);
+        }
+    }
+
     function updateStats(results, pars, numPlayers, playerIndex) {
         const score = computeScore(pars.length, playerIndex);
         const points = computePoints(pars, playerIndex);
@@ -489,6 +498,9 @@
         }
 
         localStorage.clear();
+
+        // Basically just resets everything to 0.
+        updateAllStats(scorecard_config.results, scorecard_config.pars, scorecard_config.numPlayers);
     }
 
     function idHoleRow(holeIndex) {
