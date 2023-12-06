@@ -14,16 +14,22 @@
 function doGet() {
   // https://developers.google.com/apps-script/reference/html/html-service
   // This function is effectively the "server"; users navigating to your WebApp excute this function which produces the page they land on.
+  const rootPage = HtmlService.createHtmlOutput();
   const scorecard = HtmlService.createHtmlOutputFromFile('index');
 
   const config = getConfigAsString();
 
-  scorecard.append("<script>const CONFIG =")
-  scorecard.append(config)
-  scorecard.append("</script>")
+  rootPage.append("<script>const CONFIG =")
+  rootPage.append(config)
+  rootPage.append("</script>")
 
-  Logger.log(scorecard.getContent())
-  return scorecard;
+  // In order for the CONFIG variable to be available to the function creating the form
+  // it needs to be declared *before* that function.
+  // So we start with an empty page, add the CONFIG, *then* add the rest of the form.
+
+  rootPage.append(scorecard.getContent())
+
+  return rootPage;
 }
 
 function getConfigAsString() {

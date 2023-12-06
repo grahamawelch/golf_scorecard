@@ -43,10 +43,47 @@
         courseName: "Springfield Course"
     };
 
-    createScorecard(scorecard_config);
+    const TEST_CONFIG = { 
+        "courseConfig": { 
+            "date": "2000-01-01", 
+            "courseName": "Test Course", 
+            "pars": [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5] 
+        }, 
+        "allTeamConfigs": [
+            { 
+                "teamName": "9:20", 
+                "players": [
+                    { "playerName": "AAAA AAAAAAA", "playerTarget": 24 }, 
+                    { "playerName": "BBBBB BBBBBB", "playerTarget": 21 }, 
+                    { "playerName": "CCC CCCCCC", "playerTarget": 15 }
+                ]
+            },
+            { 
+                "teamName": "9:30", 
+                "players": [
+                    { "playerName": "DDDDD DDDD", "playerTarget": 29 },
+                    { "playerName": "EEEE EEEEEEEEE", "playerTarget": 25 }, 
+                    { "playerName": "FFFFF FFFFFF", "playerTarget": 21 }, 
+                    { "playerName": "GGG GGGGG", "playerTarget": 15 }] 
+                }
+        ]
+    }
 
-    function createScorecard(scorecard_config) {
-        document.getElementById("course").textContent = scorecard_config.courseName;
+    function spreadsheetConfig() {
+        // This function exists to making testing iteration more straightforward.
+        // AppScript will inject the variable CONFIG *before* the HTML content.
+        if (typeof CONFIG === "undefined") {
+            console.log("Falling back to TEST_CONFIG.");
+            return TEST_CONFIG;
+        }
+        console.log("Loaded config:\n" + JSON.stringify(CONFIG));
+        return CONFIG;
+    }
+
+    createScorecard(scorecard_config, spreadsheetConfig());
+
+    function createScorecard(scorecard_config, spreadsheetConfig) {
+        document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
         document.getElementById("table").appendChild(generateTable(scorecard_config));
 
         for (const result of scorecard_config.results) {
@@ -398,7 +435,7 @@
 
     function submit() {
         let flatResults = [];
-            
+
         for (let playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
             // Skip players that dont have a name.
             const rawName = document.getElementById(idPlayerName(playerIndex)).value;
@@ -416,7 +453,7 @@
             for (let holeIndex = 0; holeIndex < scorecard_config.pars.length; holeIndex++) {
                 playerStats.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)
             }
-            
+
             flatResults.push(playerStats);
         }
 
