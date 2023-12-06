@@ -19,15 +19,15 @@ function doGet() {
 
   const config = getConfigAsString();
 
-  rootPage.append("<script>const CONFIG =")
-  rootPage.append(config)
-  rootPage.append("</script>")
+  rootPage.append("<script>const CONFIG =");
+  rootPage.append(config);
+  rootPage.append("</script>");
 
   // In order for the CONFIG variable to be available to the function creating the form
   // it needs to be declared *before* that function.
   // So we start with an empty page, add the CONFIG, *then* add the rest of the form.
 
-  rootPage.append(scorecard.getContent())
+  rootPage.append(scorecard.getContent());
 
   return rootPage;
 }
@@ -53,14 +53,14 @@ function extractRawConfig() {
 
   const courseValues = sheet.getRange(1, 1, 1, 20).getValues()[0];
 
-  let allTeamValues = []
+  let allTeamValues = [];
   let currTeamRow = 2;
   while (true) {
     const teamValues = sheet.getRange(currTeamRow, 1, 1, 13).getValues()[0].filter(Boolean);
     if (teamValues.length === 0) {
       break;
     }
-    allTeamValues.push(teamValues)
+    allTeamValues.push(teamValues);
     currTeamRow++;
   }
 
@@ -77,7 +77,7 @@ function constructStructuredConfig(rawConfig) {
 
   let allTeamConfigs = []
   for (let currTeamConfig of rawConfig[1]) {
-    let allPlayerConfigs = []
+    let allPlayerConfigs = [];
     for (let rowIndex = 1; rowIndex < currTeamConfig.length; rowIndex += 2) {
       allPlayerConfigs.push({
         "playerName": currTeamConfig[rowIndex],
