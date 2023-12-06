@@ -22,6 +22,7 @@
 
     <div id="table"></div>
     <button onclick="submit()">Submit</button>
+    <button onclick="clearScoresAndCache()">Clear</button>
 </body>
 <script>
     const scorecard_config = {
@@ -200,11 +201,21 @@
 
         const input = document.createElement("input");
         input.type = "number";
-        input.id = idHolePlayer(holeIndex, playerIndex);
-        input.placeholder = 0;               // Don't set value so unset fields are treated as empty
+        const id = idHolePlayer(holeIndex, playerIndex);
+        input.id = id;
+        
+        const possibleSavedScore = localStorage.getItem(id);
+        if (possibleSavedScore != null) {
+            input.value = possibleSavedScore;
+        } else {
+            input.placeholder = 0;               // Don't set value so unset fields are treated as empty
+        }
+
         input.min = Math.max(pars[holeIndex] - 2, 1);    // At best an Eagle (or hole in 1)
         input.max = pars[holeIndex] + 2;                 // At worst, a double-bogey
-        input.onchange = function (event) { updateStats(results, pars, numPlayers, playerIndex); };
+        input.onchange = function (event) { 
+            localStorage.setItem(id, event.target.value)
+            updateStats(results, pars, numPlayers, playerIndex); };
 
         cell.appendChild(input);
 
@@ -460,7 +471,24 @@
         console.log("Submitting:\n" + JSON.stringify(flatResults));
         // This will fail when run not in AppScript
         // But its the Web! So it doesn't really matter.
-        google.script.run.saveData(flatResults)
+        google.script.run.saveData(flatResults);
+    }
+
+    function clearScoresAndCache() {        
+        const numHoles = spreadsheetConfig().courseConfig.pars.length;
+        // For now we hardcode that at most 6 players per team.
+        for (let playerIndex = 0; playerIndex < 6; playerIndex++) {
+            for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+                const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
+                if (possibleInput == null) {
+                    break;
+                }
+                possibleInput.value = null;
+                possibleInput.placeholder = 0;
+            }
+        }
+
+        localStorage.clear();
     }
 
     function idHoleRow(holeIndex) {
