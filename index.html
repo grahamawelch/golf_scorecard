@@ -15,7 +15,7 @@
     <input id="date" type="date">
     <div>
         <div style="display: inline-block">Team Name</div>
-        <input style="display: inline-block" id="team" type="string" placeholder="Team">
+        <input style="display: inline-block; width: 60px;" id="team" type="string" maxlength=6 placeholder="Team">
         <div style="display: inline-block">Team Target</div>
         <div style="display: inline-block" id="team_target"></div>
     </div>
@@ -134,7 +134,7 @@
             const playerCell = document.createElement("td");
 
             const input = document.createElement("input");
-            input.type = "string";
+            input.type = "string"; width: 70px;
             input.id = idPlayerName(playerIndex);
             input.placeholder = "Name";
 
@@ -159,7 +159,7 @@
             const playerCell = document.createElement("td");
 
             const input = document.createElement("input");
-            input.type = "number";
+            input.type = "number";width: 30px;
             input.id = idTarget(playerIndex);
             input.placeholder = "Target";
             input.min = 0;
