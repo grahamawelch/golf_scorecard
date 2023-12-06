@@ -477,6 +477,8 @@
             flatResults.push(playerStats);
         }
 
+        clearScoresAndCache();
+
         console.log("Submitting:\n" + JSON.stringify(flatResults));
         // This will fail when run not in AppScript
         // But its the Web! So it doesn't really matter.
