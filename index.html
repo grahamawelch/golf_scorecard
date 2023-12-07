@@ -27,8 +27,8 @@
     </div>
 
     <div id="table"></div>
-    <button onclick="submit()">Submit</button>
-    <button onclick="clearScoresAndCache()">Clear</button>
+    <button id="submit_button" onclick="submit()" disabled="true">Submit</button>
+    <button id="clear_button" onclick="clearScoresAndCache()" disabled="true">Clear</button>
 </body>
 <script>
     const RESULTS = [{
@@ -113,6 +113,9 @@
 
         document.getElementById("table").innerHTML = "";
         createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
+
+        document.getElementById("submit_button").disabled = false;
+        document.getElementById("clear_button").disabled = false;
     }
 
     function getSelectedTeamConfig(allTeamConfigs) {
