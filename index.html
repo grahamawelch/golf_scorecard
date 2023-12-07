@@ -95,11 +95,9 @@
         document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
 
         document.getElementById("team").onchange = function(event) {
-            teamOnchange(spreadsheetConfig);
+            teamOnchange(scorecard_config, spreadsheetConfig);
         }
         document.getElementById("teamOptions").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
-
-        createScorecardTable(scorecard_config, spreadsheetConfig);
     }
 
     function createTeamOptions(allTeamConfigs) {
@@ -114,7 +112,7 @@
         return teamDatalist;
     }
 
-    function teamOnchange(spreadsheetConfig) {
+    function teamOnchange(scorecard_config, spreadsheetConfig) {
         const teamName = document.getElementById("team").value;
 
         let selectedTeamConfig = {
@@ -134,16 +132,20 @@
         }
 
         console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
+
+        document.getElementById("table").innerHTML = "";
+        createScorecardTable(scorecard_config, spreadsheetConfig.courseConfig, selectedTeamConfig);
     }
 
-    function createScorecardTable(scorecard_config, spreadsheetConfig) {
-        document.getElementById("table").appendChild(generateTable(scorecard_config));
+    function createScorecardTable(scorecard_config, courseConfig, teamConfig) {
+        document.getElementById("table").appendChild(
+            generateTable(scorecard_config.results, courseConfig, teamConfig));
 
         for (const result of scorecard_config.results) {
             const refRow = document.getElementById(idHoleRow(result.endExclusive - 1));
             const refTable = refRow.parentElement;
 
-            const newRows = generateResultTable(result, scorecard_config);
+            const newRows = generateResultTable(result, teamConfig.players.length);
 
             // Loop over these rows in reverse, so they appear in order.
             for (let rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
@@ -153,22 +155,22 @@
         }
 
         // We could have loaded some cached scores.
-        updateAllStats(scorecard_config.results, scorecard_config.pars, scorecard_config.numPlayers);
+        updateAllStats(scorecard_config.results, courseConfig.pars, teamConfig.players.length);
     }
 
-    function generateTable(scorecard_config) {
+    function generateTable(results, courseConfig, teamConfig) {
         const table = document.createElement("table");
 
-        const numHoles = scorecard_config.pars.length;
+        const numHoles = courseConfig.pars.length;
 
-        const nameRow = generateNameRow(scorecard_config.numPlayers);
+        const nameRow = generateNameRow(teamConfig.numPlayers);
         table.appendChild(nameRow);
 
-        const targetRow = generateTargetRow(scorecard_config.results, scorecard_config.pars, scorecard_config.numPlayers);
+        const targetRow = generateTargetRow(results, courseConfig.pars, teamConfig.players.length);
         table.appendChild(targetRow);
 
         for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-            const row = generateHoleRow(scorecard_config.results, scorecard_config.pars, holeIndex, scorecard_config.numPlayers);
+            const row = generateHoleRow(results, courseConfig.pars, holeIndex, teamConfig.players.length);
             table.appendChild(row);
         }
 
@@ -306,13 +308,13 @@
         return "";
     }
 
-    function generateResultTable(partialResult, scorecard_config) {
+    function generateResultTable(partialResult, numPlayers) {
         const row = document.createElement("tr");
         row.textContent = partialResult.name;
 
-        const scoreRow = generateResultScoreRow(partialResult.name, scorecard_config.numPlayers);
-        const pointsRow = generateResultPointsRow(partialResult.name, scorecard_config.numPlayers);
-        const netRow = generateResultNetRow(partialResult.name, scorecard_config.numPlayers);
+        const scoreRow = generateResultScoreRow(partialResult.name, numPlayers);
+        const pointsRow = generateResultPointsRow(partialResult.name, numPlayers);
+        const netRow = generateResultNetRow(partialResult.name, numPlayers);
         const pointsTeamRow = generateResultPointsTeamRow(partialResult.name);
         const netTeamRow = generateResultNetTeamRow(partialResult.name);
 
