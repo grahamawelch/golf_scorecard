@@ -224,6 +224,14 @@
             userScore = Math.max(userScore, input.min);
             input.value = userScore;
 
+            if (userScore == input.min) {
+                input.style.backgroundColor = "#FFA500";
+            } else if (userScore == (parseInt(input.min) + 1)) {
+                input.style.backgroundColor = "#90EE90";
+            } else {
+                input.style.backgroundColor = "";
+            }
+
             localStorage.setItem(id, userScore);
             updateStats(results, pars, numPlayers, playerIndex);
         };
