@@ -20,7 +20,7 @@
 
         <div>
             <div style="display: inline-block">Team Name</div>
-            <input style="display: inline-block" id="team" type="text" list="teamDatalist" placeholder="Team">
+            <input style="display: inline-block; width: 8ch" id="team" type="text" list="teamDatalist" placeholder="Team">
             <div id="team_options"></div>
             <div style="display: inline-block">Team Target</div>
             <div style="display: inline-block" id="team_target"></div>
@@ -194,6 +194,8 @@
             const input = document.createElement("input");
             input.type = "string";
             input.id = idPlayerName(playerIndex);
+            input.style = "width: 16ch";
+
             input.value = teamConfig.players[playerIndex].playerName
 
             playerCell.appendChild(input);
@@ -221,6 +223,7 @@
             const input = document.createElement("input");
             input.type = "number";
             input.id = idTarget(playerIndex);
+            input.style = "width: 8ch";
 
             input.value = teamConfig.players[playerIndex].playerTarget;
 
@@ -276,6 +279,7 @@
         input.type = "number";
         const id = idHolePlayer(holeIndex, playerIndex);
         input.id = id;
+        input.style = "width: 8ch";
 
         const possibleSavedScore = localStorage.getItem(id);
         input.value = getUserScore(possibleSavedScore, pars[holeIndex]);
