@@ -12,23 +12,24 @@
         <div id="course"></div>
     </h2>
 
-    <div>
-        <div style="display: inline-block">Date</div>
-        <div style="display: inline-block" id="date"></div>
+    <div id="all_input">
+        <div>
+            <div style="display: inline-block">Date</div>
+            <div style="display: inline-block" id="date"></div>
+        </div>
+
+        <div>
+            <div style="display: inline-block">Team Name</div>
+            <input style="display: inline-block" id="team" type="text" list="teamDatalist" placeholder="Team">
+            <div id="team_options"></div>
+            <div style="display: inline-block">Team Target</div>
+            <div style="display: inline-block" id="team_target"></div>
+        </div>
+
+        <div id="table"></div>
+        <button id="submit_button" onclick="submit()" disabled="true">Submit</button>
+        <button id="clear_button" onclick="clearScoresAndCache()" disabled="true">Clear</button>
     </div>
-
-
-    <div>
-        <div style="display: inline-block">Team Name</div>
-        <input style="display: inline-block" id="team" type="text" list="teamDatalist" placeholder="Team">
-        <div id="team_options"></div>
-        <div style="display: inline-block">Team Target</div>
-        <div style="display: inline-block" id="team_target"></div>
-    </div>
-
-    <div id="table"></div>
-    <button id="submit_button" onclick="submit()" disabled="true">Submit</button>
-    <button id="clear_button" onclick="clearScoresAndCache()" disabled="true">Clear</button>
 </body>
 <script>
     const RESULTS = [{
@@ -586,6 +587,10 @@
         // This will fail when run not in AppScript
         // But its the Web! So it doesn't really matter.
         google.script.run.saveData(flatResults);
+
+        const allInput = document.getElementById("all_input");
+        allInput.innerHTML = "";
+        allInput.textContent = "Thanks for submitting your scores!";
     }
 
     function clearScoresAndCache() {
