@@ -44,29 +44,29 @@
         courseName: "Springfield Course"
     };
 
-    const TEST_CONFIG = { 
-        "courseConfig": { 
-            "date": "2000-01-01", 
-            "courseName": "Test Course", 
-            "pars": [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5] 
-        }, 
+    const TEST_CONFIG = {
+        "courseConfig": {
+            "date": "2000-01-01",
+            "courseName": "Test Course",
+            "pars": [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5]
+        },
         "allTeamConfigs": [
-            { 
-                "teamName": "9:20", 
+            {
+                "teamName": "9:20",
                 "players": [
-                    { "playerName": "AAAA AAAAAAA", "playerTarget": 24 }, 
-                    { "playerName": "BBBBB BBBBBB", "playerTarget": 21 }, 
+                    { "playerName": "AAAA AAAAAAA", "playerTarget": 24 },
+                    { "playerName": "BBBBB BBBBBB", "playerTarget": 21 },
                     { "playerName": "CCC CCCCCC", "playerTarget": 15 }
                 ]
             },
-            { 
-                "teamName": "9:30", 
+            {
+                "teamName": "9:30",
                 "players": [
                     { "playerName": "DDDDD DDDD", "playerTarget": 29 },
-                    { "playerName": "EEEE EEEEEEEEE", "playerTarget": 25 }, 
-                    { "playerName": "FFFFF FFFFFF", "playerTarget": 21 }, 
-                    { "playerName": "GGG GGGGG", "playerTarget": 15 }] 
-                }
+                    { "playerName": "EEEE EEEEEEEEE", "playerTarget": 25 },
+                    { "playerName": "FFFFF FFFFFF", "playerTarget": 21 },
+                    { "playerName": "GGG GGGGG", "playerTarget": 15 }]
+            }
         ]
     }
 
@@ -206,7 +206,7 @@
         input.type = "number";
         const id = idHolePlayer(holeIndex, playerIndex);
         input.id = id;
-        
+
         const possibleSavedScore = localStorage.getItem(id);
         input.value = getUserScore(possibleSavedScore, pars[holeIndex]);
 
@@ -215,7 +215,7 @@
 
         input.style.backgroundColor = getHoleForPlayerColor(input.value, pars[holeIndex]);
 
-        input.onchange = function (event) { 
+        input.onchange = function (event) {
             const userScore = getUserScore(event.target.value, pars[holeIndex]);
 
             input.value = userScore;
@@ -238,7 +238,7 @@
         }
         // Watch out, "66" < "7", so we use Math functions explicitly.
         userScore = Math.min(userScore, par + 2);
-        userScore = Math.max(userScore, Math.max(par -2, 1));
+        userScore = Math.max(userScore, Math.max(par - 2, 1));
 
         return userScore;
     }
@@ -246,7 +246,7 @@
     function getHoleForPlayerColor(userScore, par) {
         // Check -1 first incase the hole is par 2 for some reason.
         if (parseInt(userScore) === (par - 1)) {
-            return  "#90EE90"; // Green
+            return "#90EE90"; // Green
         }
         if (parseInt(userScore) === (par - 2)) {
             return "#FFA500"; // Orange
@@ -514,7 +514,7 @@
         google.script.run.saveData(flatResults);
     }
 
-    function clearScoresAndCache() {        
+    function clearScoresAndCache() {
         const numHoles = spreadsheetConfig().courseConfig.pars.length;
         // For now we hardcode that at most 6 players per team.
         for (let playerIndex = 0; playerIndex < 6; playerIndex++) {
