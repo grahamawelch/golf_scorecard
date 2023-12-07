@@ -208,21 +208,17 @@
         input.id = id;
         
         const possibleSavedScore = localStorage.getItem(id);
-        if (possibleSavedScore != null) {
-            input.value = possibleSavedScore;
-        }
+        input.value = getUserScore(possibleSavedScore, pars[holeIndex]);
 
         input.min = Math.max(pars[holeIndex] - 2, 1);    // At best an Eagle (or hole in 1)
         input.max = pars[holeIndex] + 2;                 // At worst, a double-bogey
-        input.onchange = function (event) { 
-            let userScore = event.target.value;
 
-            if (userScore != "") {
-                // Watch out, "66" < "7", so we use Math functions explicitly.
-                userScore = Math.min(userScore, input.max);
-                userScore = Math.max(userScore, input.min);
-                input.value = userScore;
-            }
+        input.style.backgroundColor = getHoleForPlayerColor(input.value, pars[holeIndex]);
+
+        input.onchange = function (event) { 
+            const userScore = getUserScore(event.target.value, pars[holeIndex]);
+
+            input.value = userScore;
 
             input.style.backgroundColor = getHoleForPlayerColor(userScore, pars[holeIndex]);
 
@@ -235,12 +231,25 @@
         return cell;
     }
 
-    function getHoleForPlayerColor(userScore, par) {
-        if (userScore === (par - 2)) {
-            return "#FFA500";
+    function getUserScore(value, par) {
+        let userScore = value;
+        if (userScore === null || userScore === "") {
+            return "";
         }
-        if (userScore === (par -1)) {
-            return  "#90EE90";
+        // Watch out, "66" < "7", so we use Math functions explicitly.
+        userScore = Math.min(userScore, par + 2);
+        userScore = Math.max(userScore, Math.max(par -2, 1));
+
+        return userScore;
+    }
+
+    function getHoleForPlayerColor(userScore, par) {
+        // Check -1 first incase the hole is par 2 for some reason.
+        if (parseInt(userScore) === (par - 1)) {
+            return  "#90EE90"; // Green
+        }
+        if (parseInt(userScore) === (par - 2)) {
+            return "#FFA500"; // Orange
         }
         return "";
     }
