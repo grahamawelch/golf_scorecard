@@ -593,6 +593,23 @@
             flatResults.push(playerStats);
         }
 
+        let allScoresEntered = true;
+        for (let currentPlayerStats of flatResults) {
+            for (let resultIndex = 5; currentPlayerStats.length; resultIndex++) {
+                if (currentPlayerStats[resultIndex] === "") {
+                    allScoresEntered = false;
+                    break;
+                }
+            }
+        }
+        let confirmationMessage = "Are you ready to submit these scores?";
+        if (!allScoresEntered) {
+            confirmationMessage += " Not all holes have scores!";
+        }
+        if (!confirm(confirmationMessage)) {
+            return;
+        }
+
         clearScoresAndCache(spreadsheetConfig);
 
         console.log("Submitting:\n" + JSON.stringify(flatResults));
