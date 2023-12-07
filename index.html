@@ -224,13 +224,7 @@
                 input.value = userScore;
             }
 
-            if (userScore == input.min) {
-                input.style.backgroundColor = "#FFA500";
-            } else if (userScore == (parseInt(input.min) + 1)) {
-                input.style.backgroundColor = "#90EE90";
-            } else {
-                input.style.backgroundColor = "";
-            }
+            input.style.backgroundColor = getHoleForPlayerColor(userScore, pars[holeIndex]);
 
             localStorage.setItem(id, userScore);
             updateStats(results, pars, numPlayers, playerIndex);
@@ -239,6 +233,16 @@
         cell.appendChild(input);
 
         return cell;
+    }
+
+    function getHoleForPlayerColor(userScore, par) {
+        if (userScore === (par - 2)) {
+            return "#FFA500";
+        }
+        if (userScore === (par -1)) {
+            return  "#90EE90";
+        }
+        return "";
     }
 
     function generateResultTable(partialResult, scorecard_config) {
