@@ -219,7 +219,7 @@
         input.onchange = function (event) { 
             let userScore = event.target.value;
 
-            // Watch out, "666" > "7" returns false.
+            // Watch out, "66" < "7", so we use Math functions explicitly.
             userScore = Math.min(userScore, input.max);
             userScore = Math.max(userScore, input.min);
             input.value = userScore;
