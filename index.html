@@ -210,8 +210,6 @@
         const possibleSavedScore = localStorage.getItem(id);
         if (possibleSavedScore != null) {
             input.value = possibleSavedScore;
-        } else {
-            input.placeholder = 0;               // Don't set value so unset fields are treated as empty
         }
 
         input.min = Math.max(pars[holeIndex] - 2, 1);    // At best an Eagle (or hole in 1)
@@ -219,10 +217,12 @@
         input.onchange = function (event) { 
             let userScore = event.target.value;
 
-            // Watch out, "66" < "7", so we use Math functions explicitly.
-            userScore = Math.min(userScore, input.max);
-            userScore = Math.max(userScore, input.min);
-            input.value = userScore;
+            if (userScore != "") {
+                // Watch out, "66" < "7", so we use Math functions explicitly.
+                userScore = Math.min(userScore, input.max);
+                userScore = Math.max(userScore, input.min);
+                input.value = userScore;
+            }
 
             if (userScore == input.min) {
                 input.style.backgroundColor = "#FFA500";
