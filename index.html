@@ -12,17 +12,16 @@
         <div id="course"></div>
     </h2>
 
-    <div id="date"></div>
-    
+    <div>
+        <div style="display: inline-block">Date</div>
+        <div style="display: inline-block" id="date"></div>
+    </div>
+
+
     <div>
         <div style="display: inline-block">Team Name</div>
-        <input 
-            style="display: inline-block" 
-            id="team" 
-            type="text" 
-            list="teamDatalist" 
-            placeholder="Team">
-        <div id="teamOptions"></div>
+        <input style="display: inline-block" id="team" type="text" list="teamDatalist" placeholder="Team">
+        <div id="team_options"></div>
         <div style="display: inline-block">Team Target</div>
         <div style="display: inline-block" id="team_target"></div>
     </div>
@@ -32,24 +31,19 @@
     <button onclick="clearScoresAndCache()">Clear</button>
 </body>
 <script>
-    const scorecard_config = {
-        pars: [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5],
-        numPlayers: 4,
-        results: [{
-            name: "TOTAL",
-            startInclusive: 0,
-            endExclusive: 18,
-        }, {
-            name: "OUT",
-            startInclusive: 0,
-            endExclusive: 9
-        }, {
-            name: "IN",
-            startInclusive: 9,
-            endExclusive: 18
-        }],
-        courseName: "Springfield Course"
-    };
+    const RESULTS = [{
+        name: "TOTAL",
+        startInclusive: 0,
+        endExclusive: 18,
+    }, {
+        name: "OUT",
+        startInclusive: 0,
+        endExclusive: 9
+    }, {
+        name: "IN",
+        startInclusive: 9,
+        endExclusive: 18
+    }];
 
     const TEST_CONFIG = {
         "courseConfig": {
@@ -88,16 +82,16 @@
         return CONFIG;
     }
 
-    createScorecard(scorecard_config, spreadsheetConfig());
+    createScorecard(RESULTS, spreadsheetConfig());
 
-    function createScorecard(scorecard_config, spreadsheetConfig) {
+    function createScorecard(RESULTS, spreadsheetConfig) {
         document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
         document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
 
-        document.getElementById("team").onchange = function(event) {
-            teamOnchange(scorecard_config, spreadsheetConfig);
+        document.getElementById("team").onchange = function (event) {
+            teamOnchange(RESULTS, spreadsheetConfig);
         }
-        document.getElementById("teamOptions").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
+        document.getElementById("team_options").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
     }
 
     function createTeamOptions(allTeamConfigs) {
@@ -112,7 +106,16 @@
         return teamDatalist;
     }
 
-    function teamOnchange(scorecard_config, spreadsheetConfig) {
+    function teamOnchange(RESULTS, spreadsheetConfig) {
+        const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
+
+        console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
+
+        document.getElementById("table").innerHTML = "";
+        createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
+    }
+
+    function getSelectedTeamConfig(allTeamConfigs) {
         const teamName = document.getElementById("team").value;
 
         let selectedTeamConfig = {
@@ -125,23 +128,20 @@
             ]
         };
 
-        for (let teamConfig of spreadsheetConfig.allTeamConfigs) {
+        for (let teamConfig of allTeamConfigs) {
             if (teamName === teamConfig.teamName) {
-                selectedTeamConfig = teamConfig; 
+                selectedTeamConfig = teamConfig;
             }
         }
 
-        console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
-
-        document.getElementById("table").innerHTML = "";
-        createScorecardTable(scorecard_config, spreadsheetConfig.courseConfig, selectedTeamConfig);
+        return selectedTeamConfig;
     }
 
-    function createScorecardTable(scorecard_config, courseConfig, teamConfig) {
+    function createScorecardTable(RESULTS, courseConfig, teamConfig) {
         document.getElementById("table").appendChild(
-            generateTable(scorecard_config.results, courseConfig, teamConfig));
+            generateTable(RESULTS, courseConfig, teamConfig));
 
-        for (const result of scorecard_config.results) {
+        for (const result of RESULTS) {
             const refRow = document.getElementById(idHoleRow(result.endExclusive - 1));
             const refTable = refRow.parentElement;
 
@@ -155,7 +155,7 @@
         }
 
         // We could have loaded some cached scores.
-        updateAllStats(scorecard_config.results, courseConfig.pars, teamConfig.players.length);
+        updateAllStats(RESULTS, courseConfig.pars, teamConfig.players.length);
     }
 
     function generateTable(results, courseConfig, teamConfig) {
@@ -163,10 +163,10 @@
 
         const numHoles = courseConfig.pars.length;
 
-        const nameRow = generateNameRow(teamConfig.numPlayers);
+        const nameRow = generateNameRow(teamConfig);
         table.appendChild(nameRow);
 
-        const targetRow = generateTargetRow(results, courseConfig.pars, teamConfig.players.length);
+        const targetRow = generateTargetRow(results, courseConfig.pars, teamConfig);
         table.appendChild(targetRow);
 
         for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
@@ -177,20 +177,20 @@
         return table;
     }
 
-    function generateNameRow(numPlayers) {
+    function generateNameRow(teamConfig) {
         const row = document.createElement("tr");
 
         const headerCell = document.createElement("td");
         headerCell.textContent = "Name";
         row.appendChild(headerCell);
 
-        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+        for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
             const playerCell = document.createElement("td");
 
             const input = document.createElement("input");
             input.type = "string";
             input.id = idPlayerName(playerIndex);
-            input.placeholder = "Name";
+            input.value = teamConfig.players[playerIndex].playerName
 
             playerCell.appendChild(input);
 
@@ -200,14 +200,16 @@
         return row;
     }
 
-    function generateTargetRow(results, pars, numPlayers) {
+    function generateTargetRow(results, pars, teamConfig) {
         const row = document.createElement("tr");
 
         const headerCell = document.createElement("td");
         headerCell.textContent = "Target";
         row.appendChild(headerCell);
 
-        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+        let teamTarget = 0;
+
+        for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
             const currPlayerIndex = playerIndex;
 
             const playerCell = document.createElement("td");
@@ -215,17 +217,27 @@
             const input = document.createElement("input");
             input.type = "number";
             input.id = idTarget(playerIndex);
-            input.placeholder = "Target";
+
+            input.value = teamConfig.players[playerIndex].playerTarget;
+
+            const playerTargetOrNan = parseInt(teamConfig.players[playerIndex].playerTarget);
+            if (playerTargetOrNan != NaN) {
+                teamTarget += playerTargetOrNan;
+            }
+
             input.min = 0;
             input.onchange = function (event) {
-                updateStats(results, pars, numPlayers, currPlayerIndex);
-                updateTeamTarget(numPlayers);
+                updateStats(results, pars, teamConfig.players.length, currPlayerIndex);
+                updateTeamTarget(teamConfig.players.length);
             };
 
             playerCell.appendChild(input);
 
             row.appendChild(playerCell);
         }
+
+
+        document.getElementById("team_target").textContent = teamTarget;
 
         return row;
     }
@@ -422,7 +434,9 @@
 
             let pointsTeam = 0;
             for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-                const playerPointsOrNaN = parseInt(document.getElementById(idResultPointsPlayer(result.name, currPlayerIndex)).textContent);
+                const playerPointsOrNaN = parseInt(document.getElementById(
+                    idResultPointsPlayer(result.name, currPlayerIndex))
+                    .textContent);
                 if (isNaN(playerPointsOrNaN)) {
                     continue;
                 }
@@ -537,9 +551,12 @@
     }
 
     function submit() {
+        const localSpreadsheetConfig = spreadsheetConfig();
+        const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+
         let flatResults = [];
 
-        for (let playerIndex = 0; playerIndex < scorecard_config.numPlayers; playerIndex++) {
+        for (let playerIndex = 0; playerIndex < selectedTeamConfig.players.length; playerIndex++) {
             // Skip players that dont have a name.
             const rawName = document.getElementById(idPlayerName(playerIndex)).value;
             if (rawName === "" || rawName === null) {
@@ -547,20 +564,20 @@
             }
 
             let playerStats = [
-                document.getElementById("date").value,
+                document.getElementById("date").textContent,
                 document.getElementById("team").value,
-                scorecard_config.courseName,
+                localSpreadsheetConfig.courseConfig.courseName,
                 document.getElementById(idPlayerName(playerIndex)).value
             ];
 
-            for (let holeIndex = 0; holeIndex < scorecard_config.pars.length; holeIndex++) {
+            for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
                 playerStats.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)
             }
 
             flatResults.push(playerStats);
         }
 
-        clearScoresAndCache();
+        clearScoresAndCache(spreadsheetConfig);
 
         console.log("Submitting:\n" + JSON.stringify(flatResults));
         // This will fail when run not in AppScript
@@ -569,10 +586,14 @@
     }
 
     function clearScoresAndCache() {
-        const numHoles = spreadsheetConfig().courseConfig.pars.length;
+        const localSpreadsheetConfig = spreadsheetConfig();
+        const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+
         // For now we hardcode that at most 6 players per team.
         for (let playerIndex = 0; playerIndex < 6; playerIndex++) {
-            for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+            for (let holeIndex = 0;
+                holeIndex < localSpreadsheetConfig.courseConfig.pars.length;
+                holeIndex++) {
                 const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
                 if (possibleInput == null) {
                     break;
@@ -585,7 +606,10 @@
         localStorage.clear();
 
         // Basically just resets everything to 0.
-        updateAllStats(scorecard_config.results, scorecard_config.pars, scorecard_config.numPlayers);
+        updateAllStats(
+            RESULTS,
+            localSpreadsheetConfig.courseConfig.pars,
+            selectedTeamConfig.players.length);
     }
 
     function idHoleRow(holeIndex) {
