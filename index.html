@@ -12,10 +12,17 @@
         <div id="course"></div>
     </h2>
 
-    <input id="date" type="date">
+    <div id="date"></div>
+    
     <div>
         <div style="display: inline-block">Team Name</div>
-        <input style="display: inline-block" id="team" type="string" placeholder="Team">
+        <input 
+            style="display: inline-block" 
+            id="team" 
+            type="text" 
+            list="teamDatalist" 
+            placeholder="Team">
+        <div id="teamOptions"></div>
         <div style="display: inline-block">Team Target</div>
         <div style="display: inline-block" id="team_target"></div>
     </div>
@@ -85,6 +92,51 @@
 
     function createScorecard(scorecard_config, spreadsheetConfig) {
         document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
+        document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
+
+        document.getElementById("team").onchange = function(event) {
+            teamOnchange(spreadsheetConfig);
+        }
+        document.getElementById("teamOptions").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
+
+        createScorecardTable(scorecard_config, spreadsheetConfig);
+    }
+
+    function createTeamOptions(allTeamConfigs) {
+        const teamDatalist = document.createElement("datalist");
+        teamDatalist.id = "teamDatalist";
+
+        for (let teamIndex = 0; teamIndex < allTeamConfigs.length; teamIndex++) {
+            const teamOption = document.createElement("option");
+            teamOption.value = allTeamConfigs[teamIndex].teamName;
+            teamDatalist.appendChild(teamOption);
+        }
+        return teamDatalist;
+    }
+
+    function teamOnchange(spreadsheetConfig) {
+        const teamName = document.getElementById("team").value;
+
+        let selectedTeamConfig = {
+            "teamName": "",
+            "players": [
+                { "playerName": "", "playerTarget": null },
+                { "playerName": "", "playerTarget": null },
+                { "playerName": "", "playerTarget": null },
+                { "playerName": "", "playerTarget": null },
+            ]
+        };
+
+        for (let teamConfig of spreadsheetConfig.allTeamConfigs) {
+            if (teamName === teamConfig.teamName) {
+                selectedTeamConfig = teamConfig; 
+            }
+        }
+
+        console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
+    }
+
+    function createScorecardTable(scorecard_config, spreadsheetConfig) {
         document.getElementById("table").appendChild(generateTable(scorecard_config));
 
         for (const result of scorecard_config.results) {
