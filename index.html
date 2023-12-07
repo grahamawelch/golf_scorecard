@@ -409,6 +409,7 @@
 
         const pointsCell = document.createElement("td");
         pointsCell.style = "font-weight: bold";
+        pointsCell.align = "center";
         pointsCell.id = idResultPointsTeam(resultName);
         pointsCell.textContent = 0;
         row.appendChild(pointsCell);
@@ -426,6 +427,7 @@
 
         const netCell = document.createElement("td");
         netCell.style = "font-weight: bold";
+        netCell.align = "center";
         netCell.id = idResultNetTeam(resultName);
         netCell.textContent = "";
         row.appendChild(netCell);
