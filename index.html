@@ -596,7 +596,7 @@
 
         let allScoresEntered = true;
         for (let currentPlayerStats of flatResults) {
-            for (let resultIndex = 5; currentPlayerStats.length; resultIndex++) {
+            for (let resultIndex = 5; resultIndex < currentPlayerStats.length; resultIndex++) {
                 if (currentPlayerStats[resultIndex] === "") {
                     allScoresEntered = false;
                     break;
