@@ -596,7 +596,8 @@
 
         let allScoresEntered = true;
         for (let currentPlayerStats of flatResults) {
-            for (let resultIndex = 5; resultIndex < currentPlayerStats.length; resultIndex++) {
+            // Skip date, team, courseName, playerName.
+            for (let resultIndex = 4; resultIndex < currentPlayerStats.length; resultIndex++) {
                 if (currentPlayerStats[resultIndex] === "") {
                     allScoresEntered = false;
                     break;
