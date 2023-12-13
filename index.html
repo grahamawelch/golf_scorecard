@@ -29,7 +29,7 @@
 
         <div id="table"></div>
         <button id="submit_button" onclick="submit()" disabled="true">Submit</button>
-        <button id="clear_button" onclick="clearScoresAndCache()" disabled="true">Clear</button>
+        <button id="clear_button" onclick="clearWithConfirmation()" disabled="true">Clear</button>
     </div>
 </body>
 <script>
@@ -622,6 +622,12 @@
         const allInput = document.getElementById("all_input");
         allInput.innerHTML = "";
         allInput.textContent = "Thanks for submitting your scores!";
+    }
+
+    function clearWithConfirmation() {
+        if (confirm("Are you sure you want to clear hole scores?")) {
+            clearScoresAndCache();
+        }
     }
 
     function clearScoresAndCache() {
