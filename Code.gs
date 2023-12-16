@@ -106,3 +106,13 @@ function saveData(flatResults) {
 
   flatResults.forEach(result => sheet.appendRow(result));
 }
+
+// You can directly execute this method in the AppsScript UI.
+function testSaveData() {
+  const flatResults = [
+    ["date", "team", "course", "player0", 1, 2, 3],
+    ["date", "team", "course", "player1", 4, 5, 6]
+  ];
+
+  saveData(flatResults);
+}
