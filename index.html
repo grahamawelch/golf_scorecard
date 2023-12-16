@@ -604,7 +604,7 @@
                 }
             }
         }
-        let confirmationMessage = "Submitting scores 1) sends the scores to ONLY Alan- not Ken,   2) and clears the scores on your web page.   3) Are you ready to submit these scores?     ";
+        let confirmationMessage = "Submitting scores sends the scores to ONLY Alan- not Ken. Are you ready to submit these scores?     ";
         if (!allScoresEntered) {
             confirmationMessage += " Not all holes have scores!";
         }
@@ -612,7 +612,7 @@
             return;
         }
 
-        clearScoresAndCache(spreadsheetConfig);
+        lockInputs();
 
         console.log("Submitting:\n" + JSON.stringify(flatResults));
         // This will fail when run not in AppScript
@@ -622,6 +622,37 @@
         const allInput = document.getElementById("all_input");
         allInput.innerHTML = "";
         allInput.textContent = "Thanks for submitting your scores to Alan!";
+    }
+
+    function lockInputs() {
+        const localSpreadsheetConfig = spreadsheetConfig();
+
+        const submitButton = document.getElementById("submit_button");
+        submitButton.disabled = true;
+
+        const teamInput = document.getElementById("team");
+        teamInput.disabled = true;
+
+        // For now we hardcode that at most 6 players per team.
+        for (let playerIndex = 0; playerIndex < 6; playerIndex++) {
+
+            const possiblePlayerName = document.getElementById(idPlayerName(playerIndex));
+
+            if (possiblePlayerName == null) {
+                break;
+            }
+            possiblePlayerName.disabled = true;
+
+            for (let holeIndex = 0;
+                holeIndex < localSpreadsheetConfig.courseConfig.pars.length;
+                holeIndex++) {
+                const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
+                if (possibleInput == null) {
+                    break;
+                }
+                possibleInput.disabled = true;
+            }
+        }
     }
 
     function clearWithConfirmation() {
