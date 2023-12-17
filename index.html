@@ -19,7 +19,9 @@
         </div>
 
         <div>
-            <div style="display: inline-block"><font color="Blue"><b>Team</b></font></div>
+            <div style="display: inline-block">
+                <font color="Blue"><b>Team</b></font>
+            </div>
             <input style="display: inline-block; width: 10ch" id="team" type="text" list="teamDatalist"
                 placeholder="Tee Time">
             <div id="team_options"></div>
@@ -28,8 +30,15 @@
         </div>
 
         <div id="table"></div>
-        <button id="submit_button" onclick="submit()" disabled="true">Submit</button>
-        <button id="clear_button" onclick="clearWithConfirmation()" disabled="true">Clear</button>
+        <div id="buttons">
+            <table>
+                <tr>
+                    <td><button id="submit_button" onclick="submit()" disabled="true">Submit</button></td>
+                    <td><button id="clear_button" onclick="clearWithConfirmation()" disabled="true">Clear</button></td>
+                    <td><div id="submit_confirmation"></div></td>
+                </tr>
+            </table>
+        </div>
     </div>
 </body>
 <script>
@@ -616,8 +625,13 @@
 
         console.log("Submitting:\n" + JSON.stringify(flatResults));
         // This will fail when run not in AppScript
-        // So make sure this is the last call in this file so testing locally still works.
+        // So make sure this no important logic happens after this line so testing locally still works.
         google.script.run.saveData(flatResults);
+
+        // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
+        // This code will NOT execute when testing locally.
+        const submitConfirmation = document.getElementById("submit_confirmation");
+        submitConfirmation.textContent = "Thank you for submitting!";
     }
 
     function lockInputs() {
