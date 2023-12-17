@@ -616,12 +616,8 @@
 
         console.log("Submitting:\n" + JSON.stringify(flatResults));
         // This will fail when run not in AppScript
-        // But its the Web! So it doesn't really matter.
+        // So make sure this is the last call in this file so testing locally still works.
         google.script.run.saveData(flatResults);
-
-        const allInput = document.getElementById("all_input");
-        allInput.innerHTML = "";
-        allInput.textContent = "Thanks for submitting your scores to Alan!";
     }
 
     function lockInputs() {
