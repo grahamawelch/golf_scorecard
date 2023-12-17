@@ -35,7 +35,9 @@
                 <tr>
                     <td><button id="submit_button" onclick="submit()" disabled="true">Submit</button></td>
                     <td><button id="clear_button" onclick="clearWithConfirmation()" disabled="true">Clear</button></td>
-                    <td><div id="submit_confirmation"></div></td>
+                    <td>
+                        <div id="submit_confirmation"></div>
+                    </td>
                 </tr>
             </table>
         </div>
@@ -576,6 +578,10 @@
         document.getElementById("team_target").textContent = total;
     }
 
+    // For each player:
+    //  <date, team, course, player, hole1, ... hole18, target, tScore, tPoints, tNet, fScore, fPoints, fNet, bScore, bPoints, bNet>
+    // The totals for the team:
+    //  <data, team, course, team  , ""   , ... ""    , target, 0     , tPoints, tNet, 0     , fPoints, fNet, 0     , bPoints, bNet>
     function submit() {
         const localSpreadsheetConfig = spreadsheetConfig();
         const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
@@ -590,14 +596,22 @@
             }
 
             let playerStats = [
-                document.getElementById("date").textContent,
-                document.getElementById("team").value,
-                localSpreadsheetConfig.courseConfig.courseName,
-                document.getElementById(idPlayerName(playerIndex)).value
+                document.getElementById("date").textContent,                // Date
+                document.getElementById("team").value,                      // Team
+                localSpreadsheetConfig.courseConfig.courseName,             // Course Name
+                document.getElementById(idPlayerName(playerIndex)).value    // Player Name
             ];
 
             for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                playerStats.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)
+                playerStats.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)   // Holes
+            }
+
+            playerStats.push(document.getElementById(idTarget(playerIndex)).value); // Target
+
+            for (const result of RESULTS) {
+                playerStats.push(document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent);   // Score
+                playerStats.push(document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent);  // Points
+                playerStats.push(document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent);     // Net
             }
 
             flatResults.push(playerStats);
@@ -605,14 +619,35 @@
 
         let allScoresEntered = true;
         for (let currentPlayerStats of flatResults) {
-            // Skip date, team, courseName, playerName.
-            for (let resultIndex = 4; resultIndex < currentPlayerStats.length; resultIndex++) {
-                if (currentPlayerStats[resultIndex] === "") {
+            for (let resultIndex = 0; resultIndex < localSpreadsheetConfig.courseConfig.pars.length; resultIndex++) {
+                // Skip date, team, courseName, playerName.
+                if (currentPlayerStats[resultIndex + 4] === "") {
                     allScoresEntered = false;
                     break;
                 }
             }
         }
+
+        // Add team level results.
+        let teamStats = [
+            document.getElementById("date").textContent,                // Date
+            document.getElementById("team").value,                      // Team
+            localSpreadsheetConfig.courseConfig.courseName,             // Course Name
+            document.getElementById("team").value,                      // Player Name (but just the team this time)
+        ];
+        for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+            teamStats.push("");   // No hole scores at the team level. 
+        }
+        teamStats.push(document.getElementById("team_target").textContent); // Target
+
+        for (const result of RESULTS) {
+            teamStats.push("");   // Score
+            teamStats.push(document.getElementById(idResultPointsTeam(result.name)).textContent);  // Points
+            teamStats.push(document.getElementById(idResultNetTeam(result.name)).textContent);     // Net
+        }
+
+        flatResults.push(teamStats);
+
         let confirmationMessage = "Submitting scores sends the scores to ONLY Alan- not Ken. Are you ready to submit these scores?     ";
         if (!allScoresEntered) {
             confirmationMessage += " Not all holes have scores!";
