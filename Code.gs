@@ -105,6 +105,7 @@ function saveData(flatResults) {
   const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
 
   flatResults.forEach(result => sheet.appendRow(result));
+  sheet.appendRow(["***"]);
 }
 
 // You can directly execute this method in the AppsScript UI.
