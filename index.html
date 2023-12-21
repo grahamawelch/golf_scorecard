@@ -33,7 +33,7 @@
             <div style="display: inline-block">
             <font color="Blue"><b>Team</b></font>
             </div>
-            <input style="display: inline-block; width: 10ch" id="team" type="text" list="teamDatalist"
+            <input style="display: inline-block; font-size: 15px; padding: 7px 7px; width: 10ch" id="team" type="text" list="teamDatalist"
                 placeholder="Tee Time">
             <div id="team_options"></div>
             <div style="display: inline-block"><b>Team Target Points</b></div>
@@ -226,7 +226,7 @@
             const input = document.createElement("input");
             input.type = "string";
             input.id = idPlayerName(playerIndex);
-            input.style = "width: 10ch";
+            input.style = "font-size: 15px; padding: 5px 5px; width: 16ch";
 
             input.value = teamConfig.players[playerIndex].playerName
 
