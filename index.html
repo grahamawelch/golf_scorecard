@@ -669,9 +669,9 @@
 
         flatResults.push(teamStats);
 
-        let confirmationMessage = "1. If you have not emailed the screenshot, please cancel this SUBMIT and take the screenshot and email it in.     2. If you have done that, great!  Realize this SUBMIT will only be used to support the development of the next Phase.   3. Are you ready to SUBMIT these scores?    ";
+        let confirmationMessage = "Be sure all scores are correct! When so, click 'OK' to SUBMIT these scores. Thanks!     ";
         if (!allScoresEntered) {
-            confirmationMessage += " Not all holes have scores!";
+            confirmationMessage += " Wait-- I see some holes without scores-- please 'Cancel' and fully fill in scores!";
         }
         if (!confirm(confirmationMessage)) {
             return;
