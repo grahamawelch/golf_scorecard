@@ -100,7 +100,10 @@
                     { "playerName": "DDDDD DDDD", "playerTarget": 29 },
                     { "playerName": "EEEE EEEEEEEEE", "playerTarget": 25 },
                     { "playerName": "FFFFF FFFFFF", "playerTarget": 21 },
-                    { "playerName": "GGG GGGGG", "playerTarget": 15 }]
+                    { "playerName": "GGG GGGGG", "playerTarget": 15 }
+                    // { "playerName": "HHHHHHHHH", "playerTarget": 21 },
+                    // { "playerName": "IIIIIIIII", "playerTarget": 15 }
+                ]
             }
         ]
     }
@@ -734,8 +737,8 @@
         const localSpreadsheetConfig = spreadsheetConfig();
         const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
 
-        // For now we hardcode that at most 6 players per team.
-        for (let playerIndex = 0; playerIndex < 6; playerIndex++) {
+        // For now we hardcode that at most 4 players per team.
+        for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
             for (let holeIndex = 0;
                 holeIndex < localSpreadsheetConfig.courseConfig.pars.length;
                 holeIndex++) {
