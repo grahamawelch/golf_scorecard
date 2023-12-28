@@ -7,9 +7,9 @@
 <head>
     
     <style>  
-        body{
-        zoom:100%
-        }
+        //body{
+        //zoom:100%
+        //}
         body {padding: 0px 0px 0px 20px;}
     </style>     
 
@@ -702,7 +702,7 @@
         const teamInput = document.getElementById("team");
         teamInput.disabled = true;
 
-        // For now we hardcode that at most 6 players per team.
+        // For now we hardcode that at most 4 players per team.
         for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
 
             const possiblePlayerName = document.getElementById(idPlayerName(playerIndex));
@@ -725,7 +725,7 @@
     }
 
     function clearWithConfirmation() {
-        if (confirm("Are you sure you want to clear hole scores?")) {
+        if (confirm("Be VERY sure you want to clear the hole scores!")) {
             clearScoresAndCache();
         }
     }
