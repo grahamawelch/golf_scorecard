@@ -320,7 +320,7 @@
         const possibleSavedScore = localStorage.getItem(id);
         input.value = getUserScore(possibleSavedScore, pars[holeIndex]);
 
-        input.min = Math.max(pars[holeIndex] - 3, 1);    // At best an Eagle (or hole in 1)
+        input.min = Math.max(pars[holeIndex] - 3, 1);    // At best an Albatross (or hole in 1)
         input.max = pars[holeIndex] + 2;                 // At worst, a double-bogey
 
         input.style.backgroundColor = getHoleForPlayerColor(input.value, pars[holeIndex]);
