@@ -320,7 +320,7 @@
         const possibleSavedScore = localStorage.getItem(id);
         input.value = getUserScore(possibleSavedScore, pars[holeIndex]);
 
-        input.min = Math.max(pars[holeIndex] - 2, 1);    // At best an Eagle (or hole in 1)
+        input.min = Math.max(pars[holeIndex] - 3, 1);    // At best an Eagle (or hole in 1)
         input.max = pars[holeIndex] + 2;                 // At worst, a double-bogey
 
         input.style.backgroundColor = getHoleForPlayerColor(input.value, pars[holeIndex]);
@@ -348,7 +348,7 @@
         }
         // Watch out, "66" < "7", so we use Math functions explicitly.
         userScore = Math.min(userScore, par + 2);
-        userScore = Math.max(userScore, Math.max(par - 2, 1));
+        userScore = Math.max(userScore, Math.max(par - 3, 1));
 
         return userScore;
     }
@@ -360,6 +360,9 @@
         }
         if (parseInt(userScore) === (par - 2)) {
             return "#FFA500"; // Orange
+        }
+        if (parseInt(userScore) === (par - 3)) {
+            return "#00FFFF"; // Cyan
         }
         return "";
     }
