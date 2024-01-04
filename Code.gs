@@ -56,7 +56,7 @@ function extractRawConfig() {
   let allTeamValues = [];
   let currTeamRow = 2;
   while (true) {
-    const teamValues = sheet.getRange(currTeamRow, 1, 1, 13).getValues()[0].filter(Boolean);
+    const teamValues = sheet.getRange(currTeamRow, 1, 1, 9).getValues()[0].filter(Boolean);
     if (teamValues.length === 0) {
       break;
     }
