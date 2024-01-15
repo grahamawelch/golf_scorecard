@@ -274,7 +274,7 @@
             }
 
             input.min = 0;
-            input.onchange = function (event) {
+            input.oninput = function (event) {
                 updateStats(results, pars, teamConfig.players.length, currPlayerIndex);
                 updateTeamTarget(teamConfig.players.length);
             };
@@ -331,7 +331,7 @@
 
         input.style.backgroundColor = getHoleForPlayerColor(input.value, pars[holeIndex]);
 
-        input.onchange = function (event) {
+        input.oninput = function (event) {
             const userScore = getUserScore(event.target.value, pars[holeIndex]);
 
             input.value = userScore;
