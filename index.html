@@ -696,7 +696,7 @@
         // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
         // This code will NOT execute when testing locally.
         const submitConfirmation = document.getElementById("submit_confirmation");
-        submitConfirmation.textContent = <p style="font-size: 30px; color: #FF0000;"><strong>"THANK YOU FOR SUCCESSFULLY SUBMITTING YOUR TEAM SCORES!"</strong></p>;
+        submitConfirmation.textContent = "Thank you for submitting!";
     }
 
     function lockInputs() {
