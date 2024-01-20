@@ -61,6 +61,15 @@
                     <td><button id="clear_button" onclick="clearWithConfirmation()" disabled="true" style="font-size: 30px; padding: 10px 10px">Clear</button></td>
                     <td>
                         <div id="submit_confirmation"></div>
+                          <script>
+                            const submitConfirmation = document.getElementById("submit_confirmation");
+                            submitConfirmation.textContent = "Successful Submisson-- Thanks!";
+                            
+                            // Apply styles
+                            submitConfirmation.style.fontSize = "20px"; // Change the font size
+                            submitConfirmation.style.fontWeight = "bold"; // Make the text bold
+                            submitConfirmation.style.color = "green"; // Change the text color
+                         </script>
                     </td>
                 </tr>
             </table>
@@ -696,7 +705,7 @@
         // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
         // This code will NOT execute when testing locally.
         const submitConfirmation = document.getElementById("submit_confirmation");
-        submitConfirmation.textContent = "Thank you for submitting!";
+        submitConfirmation.textContent = "Successful Submission-- Thanks!";
     }
 
     function lockInputs() {
