@@ -694,20 +694,10 @@
         // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
         // This code will NOT execute when testing locally.
         const submitConfirmation = document.getElementById("submit_confirmation");
+        submitConfirmation.textContent = "SUBMISSION Success - Thanks!"; submitConfirmation.style.cssText = "font-size: 40px; font-weight: bold; color: green;";
 
-        submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
-
-        // Apply styles
-        submitConfirmation.style.fontSize = "40px"; // Change the font size
-        submitConfirmation.style.fontWeight = "bold"; // Make the text bold
-        submitConfirmation.style.color = "green"; // Change the text color
-
-                        //   submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
+            // submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
         
-                        // Display a popup message
-                        // alert(submitConfirmation.textContent);              
-
-        // submitConfirmation.textContent = "Successful Submission-- Thanks!";
     }
 
     function lockInputs() {
