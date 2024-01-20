@@ -60,6 +60,7 @@
                     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                     <td><button id="clear_button" onclick="clearWithConfirmation()" disabled="true" style="font-size: 30px; padding: 10px 10px">Clear</button></td>
                     <td>
+                        <div id="submit_confirmation"></div>
                 </tr>
             </table>
         </div>
@@ -691,13 +692,13 @@
         // So make sure this no important logic happens after this line so testing locally still works.
         google.script.run.saveData(flatResults);
 
-        // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
+         // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
         // This code will NOT execute when testing locally.
         const submitConfirmation = document.getElementById("submit_confirmation");
-        submitConfirmation.textContent = "SUBMISSION Success - Thanks!"; 
+        submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
     }
 
-    
+
     function lockInputs() {
         const localSpreadsheetConfig = spreadsheetConfig();
 
