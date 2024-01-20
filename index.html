@@ -62,21 +62,19 @@
                     <td>
                         <div id="submit_confirmation"></div>
                           <script>
-                            document.getElementById("submit_button").addEventListener("click", function() {
-                            const submitConfirmationText ="Submission Success--Thank you!";
+                            const submitConfirmation = document.getElementById("submit_confirmation");
+                            submitConfirmation.textContent ="Submission Success--Thank you!";
 
-                            // Display a popup message
-                            alert(submitConfirmationText);
+                            // Apply Style
+                            submitConfirmation.style.fontSize = "40px"; // Change the font size
+                            submitConfirmation.style.fontWeight = "bold"; // Make the text bold
+                            submitConfirmation.style.color = "green"; // Change the text color
 
-                            // Optionally, you can also apply styles to the confirmation text
-                            const confirmationStyle = `
-                            font-size: 30px;
-                            font-weight: bold;
-                            color: green;
-                            `;
-
-// Apply the styles to the confirmation text
-alert("%c" + submitConfirmationText, confirmationStyle);
+                             // Move the confirmation text above the SUBMIT button
+                            const submitButton = document.getElementById("submit_button");
+                            submitButton.insertAdjacentHTML('beforebegin', submitConfirmation.outerHTML);
+                            submitConfirmation.remove(); // Remove the original placement of the confirmation text
+                            
                          </script>
                     </td>
                 </tr>
