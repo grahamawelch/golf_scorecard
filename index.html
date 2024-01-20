@@ -62,13 +62,20 @@
                     <td>
                         <div id="submit_confirmation"></div>
                           <script>
-                            const submitConfirmation = document.getElementById("submit_confirmation");
-                            submitConfirmation.textContent = "Successful Submisson-- Thanks!";
-                            
-                            // Apply styles
-                            submitConfirmation.style.fontSize = "20px"; // Change the font size
-                            submitConfirmation.style.fontWeight = "bold"; // Make the text bold
-                            submitConfirmation.style.color = "green"; // Change the text color
+                            const submitConfirmationText = "Submission Success--Thank you!";
+
+                            // Display a popup message
+                            alert(submitConfirmationText);
+
+                            // Optionally, you can also apply styles to the confirmation text
+                            const confirmationStyle = `
+                            font-size: 30px;
+                            font-weight: bold;
+                            color: green;
+                            `;
+
+// Apply the styles to the confirmation text
+alert("%c" + submitConfirmationText, confirmationStyle);
                          </script>
                     </td>
                 </tr>
