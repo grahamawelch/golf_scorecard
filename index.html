@@ -56,7 +56,7 @@
             <table>
                 <tr>
                     <td><button id="submit_button" onclick="submit()" disabled="true" style="font-size: 30px; padding: 10px 10px">SUBMIT</button></td>
-                    <td>&nbsp;&nbsp;&nbsp;&nbsp;<div id="submit_confirmation"></div></td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div id="submit_confirmation"></div></td>
                     <div>
                 </tr> 
                 <tr></tr>
@@ -706,7 +706,8 @@
          // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
         // This code will NOT execute when testing locally.
         const submitConfirmation = document.getElementById("submit_confirmation");
-        submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
+         //submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
+        submitConfirmation.textContent = "SUBMISSION Success - Thanks!"; submitConfirmation.style.cssText = "font-size: 40px; font-weight: bold; color: green;";
     }
 
 
