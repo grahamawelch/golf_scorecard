@@ -702,11 +702,6 @@
         submitConfirmation.style.fontWeight = "bold"; // Make the text bold
         submitConfirmation.style.color = "green"; // Change the text color
 
-        // Move the confirmation text above the SUBMIT button
-        const submitButton = document.getElementById("submit_button");
-        submitButton.insertAdjacentHTML('beforebegin', submitConfirmation.outerHTML);
-        submitConfirmation.remove(); // Remove the original placement of the confirmation text
-
                         //   submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
         
                         // Display a popup message
