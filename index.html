@@ -694,11 +694,23 @@
         // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
         // This code will NOT execute when testing locally.
         const submitConfirmation = document.getElementById("submit_confirmation");
-         
+
         submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
+
+        // Apply styles
+        submitConfirmation.style.fontSize = "40px"; // Change the font size
+        submitConfirmation.style.fontWeight = "bold"; // Make the text bold
+        submitConfirmation.style.color = "green"; // Change the text color
+
+        // Move the confirmation text above the SUBMIT button
+        const submitButton = document.getElementById("submit_button");
+        submitButton.insertAdjacentHTML('beforebegin', submitConfirmation.outerHTML);
+        submitConfirmation.remove(); // Remove the original placement of the confirmation text
+
+                        //   submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
         
-           // Display a popup message
-        alert(submitConfirmation.textContent);              
+                        // Display a popup message
+                        // alert(submitConfirmation.textContent);              
 
         // submitConfirmation.textContent = "Successful Submission-- Thanks!";
     }
