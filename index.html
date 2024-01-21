@@ -5,815 +5,825 @@
 </title>
 
 <head>
-    
-    <style>  
-        // body{
-        // zoom:100%
-        // }
-        body {padding: 0px 0px 0px 20px;}
-    </style>     
 
-    
+    <style>
+        body {
+            padding: 0px 0px 0px 20px;
+        }
+    </style>
+
+
 </head>
 
 <body>
+
     <body style="background-color:#ADD8E6;">
-    <h1>
-        <font color="Blue"><b>The Beard-Turner Senior Golf Group</b></font>
-    </h1>
-    <h2>
-        <div id="course"></div>
-    </h2>
+        <h1>
+            <font color="Blue"><b>The Beard-Turner Senior Golf Group</b></font>
+        </h1>
+        <h2>
+            <div id="course"></div>
+        </h2>
 
-    <div id="all_input">
-        <div>
-            <div style="display: inline-block"><b>Date</b></div>
-            <div style="display: inline-block" id="date"></div>
-        </div>
-
-        <div>
-            <div style="display: inline-block">
-            <font color="Blue"><b>Team</b></font>
+        <div id="all_input">
+            <div>
+                <div style="display: inline-block"><b>Date</b></div>
+                <div style="display: inline-block" id="date"></div>
             </div>
-            <input style="display: inline-block; font-size: 25px; padding: 7px 7px; width: 10ch" id="team" type="text" list="teamDatalist"
-                placeholder="Tee Time">
-            <div id="team_options"></div>
-            <div style="display: inline-block"><b>Team Target Points</b></div>
-            <div style="display: inline-block" id="team_target"></div>
-        </div>
 
-        <div id="table">
-        </div>
-        <div id="buttons">
-            <p> <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Instructions</u></b><br>
-                Choose your scheduled Tee Time, input all scores, <br>
-                confirm correctness, then "Submit" to send scores to Ken.<br>
-                <b>Then you are done— Thanks!</b><br>
-                <br>
-                <span style= "background-color: cyan"><b>Albatrosses</b></span>, &nbsp<span style= "background-color: orange"><b>Eagles</b></span>,&nbsp & &nbsp<span style= "background-color: green"><b> Birdies</b></span> &nbsp;&nbsp; <b><i> are highlighted </b></i>
-                
-                
-            <table>
-                <tr>
-                    <td><button id="submit_button" onclick="submit()" disabled="true" style="font-size: 30px; padding: 10px 10px">SUBMIT</button></td>
-                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div id="submit_confirmation"></div></td>
-                    <div>
-                </tr> 
-                <tr></tr>
-                <tr></tr>
-                <tr></tr>
-                <tr></tr>
-                <tr></tr>
-                <tr></tr>
-                <tr></tr>
-                <tr></tr>
-                <tr></tr>
-                <tr>
-                    <td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button" onclick="clearWithConfirmation()" disabled="true" style="font-size: 30px; padding: 10px 10px">Clear</button></td>
-                    <td>
-                </tr>
-            </table>
-        </div>
-    </div>
-</body>
-<script>
-    const RESULTS = [{
-        name: "Total 18",
-        startInclusive: 0,
-        endExclusive: 18,
-    }, {
-        name: "Front 9",
-        startInclusive: 0,
-        endExclusive: 9
-    }, {
-        name: "Back 9",
-        startInclusive: 9,
-        endExclusive: 18
-    }];
+            <div>
+                <div style="display: inline-block">
+                    <font color="Blue"><b>Team</b></font>
+                </div>
+                <input style="display: inline-block; font-size: 25px; padding: 7px 7px; width: 10ch" id="team"
+                    type="text" list="teamDatalist" placeholder="Tee Time">
+                <div id="team_options"></div>
+                <div style="display: inline-block"><b>Team Target Points</b></div>
+                <div style="display: inline-block" id="team_target"></div>
+            </div>
 
-    const TEST_CONFIG = {
-        "courseConfig": {
-            "date": "2000-01-01",
-            "courseName": "Test Course",
-            "pars": [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5]
-        },
-        "allTeamConfigs": [
-            {
-                "teamName": "9:20",
-                "players": [
-                    { "playerName": "AAAA AAAAAAA", "playerTarget": 24 },
-                    { "playerName": "BBBBB BBBBBB", "playerTarget": 21 },
-                    { "playerName": "CCC CCCCCC", "playerTarget": 15 }
-                ]
+            <div id="table">
+            </div>
+            <div id="buttons">
+                <p> <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Instructions</u></b><br>
+                    Choose your scheduled Tee Time, input all scores, <br>
+                    confirm correctness, then "Submit" to send scores to Ken.<br>
+                    <b>Then you are done— Thanks!</b><br>
+                    <br>
+                    <span style="background-color: cyan"><b>Albatrosses</b></span>, &nbsp<span
+                        style="background-color: orange"><b>Eagles</b></span>,&nbsp & &nbsp<span
+                        style="background-color: green"><b> Birdies</b></span> &nbsp;&nbsp; <b><i> are highlighted
+                    </b></i>
+
+
+                <table>
+                    <tr>
+                        <td><button id="submit_button" onclick="submit()" disabled="true"
+                                style="font-size: 30px; padding: 10px 10px">SUBMIT</button></td>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div
+                                id="submit_confirmation"></div>
+                        </td>
+                        <div>
+                    </tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr>
+                        <td>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </td>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button"
+                                onclick="clearWithConfirmation()" disabled="true"
+                                style="font-size: 30px; padding: 10px 10px">Clear</button></td>
+                        <td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </body>
+    <script>
+        const RESULTS = [{
+            name: "Total 18",
+            startInclusive: 0,
+            endExclusive: 18,
+        }, {
+            name: "Front 9",
+            startInclusive: 0,
+            endExclusive: 9
+        }, {
+            name: "Back 9",
+            startInclusive: 9,
+            endExclusive: 18
+        }];
+
+        const TEST_CONFIG = {
+            "courseConfig": {
+                "date": "2000-01-01",
+                "courseName": "Test Course",
+                "pars": [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5]
             },
-            {
-                "teamName": "9:30",
-                "players": [
-                    { "playerName": "DDDDD DDDD", "playerTarget": 29 },
-                    { "playerName": "EEEE EEEEEEEEE", "playerTarget": 25 },
-                    { "playerName": "FFFFF FFFFFF", "playerTarget": 21 },
-                    { "playerName": "GGG GGGGG", "playerTarget": 15 }
-                    // { "playerName": "HHHHHHHHH", "playerTarget": 21 },
-                    // { "playerName": "IIIIIIIII", "playerTarget": 15 }
-                ]
-            }
-        ]
-    }
-
-    function spreadsheetConfig() {
-        // This function exists to making testing iteration more straightforward.
-        // AppScript will inject the variable CONFIG *before* the HTML content.
-        if (typeof CONFIG === "undefined") {
-            console.log("Falling back to TEST_CONFIG.");
-            return TEST_CONFIG;
-        }
-        console.log("Loaded config:\n" + JSON.stringify(CONFIG));
-        return CONFIG;
-    }
-
-    createScorecard(RESULTS, spreadsheetConfig());
-
-    function createScorecard(RESULTS, spreadsheetConfig) {
-        document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
-        document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
-
-        document.getElementById("team").onchange = function (event) {
-            teamOnchange(RESULTS, spreadsheetConfig);
-        }
-        document.getElementById("team_options").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
-    }
-
-    function createTeamOptions(allTeamConfigs) {
-        const teamDatalist = document.createElement("datalist");
-        teamDatalist.id = "teamDatalist";
-
-        for (let teamIndex = 0; teamIndex < allTeamConfigs.length; teamIndex++) {
-            const teamOption = document.createElement("option");
-            teamOption.value = allTeamConfigs[teamIndex].teamName;
-            teamDatalist.appendChild(teamOption);
-        }
-        return teamDatalist;
-    }
-
-    function teamOnchange(RESULTS, spreadsheetConfig) {
-        const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
-
-        console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
-
-        document.getElementById("table").innerHTML = "";
-        createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
-
-        document.getElementById("submit_button").disabled = false;
-        document.getElementById("clear_button").disabled = false;
-    }
-
-    function getSelectedTeamConfig(allTeamConfigs) {
-        const teamName = document.getElementById("team").value;
-
-        let selectedTeamConfig = {
-            "teamName": "",
-            "players": [
-                { "playerName": "", "playerTarget": null },
-                { "playerName": "", "playerTarget": null },
-                { "playerName": "", "playerTarget": null },
-                { "playerName": "", "playerTarget": null },
+            "allTeamConfigs": [
+                {
+                    "teamName": "9:20",
+                    "players": [
+                        { "playerName": "AAAA AAAAAAA", "playerTarget": 24 },
+                        { "playerName": "BBBBB BBBBBB", "playerTarget": 21 },
+                        { "playerName": "CCC CCCCCC", "playerTarget": 15 }
+                    ]
+                },
+                {
+                    "teamName": "9:30",
+                    "players": [
+                        { "playerName": "DDDDD DDDD", "playerTarget": 29 },
+                        { "playerName": "EEEE EEEEEEEEE", "playerTarget": 25 },
+                        { "playerName": "FFFFF FFFFFF", "playerTarget": 21 },
+                        { "playerName": "GGG GGGGG", "playerTarget": 15 }
+                        // { "playerName": "HHHHHHHHH", "playerTarget": 21 },
+                        // { "playerName": "IIIIIIIII", "playerTarget": 15 }
+                    ]
+                }
             ]
-        };
+        }
 
-        for (let teamConfig of allTeamConfigs) {
-            if (teamName === teamConfig.teamName) {
-                selectedTeamConfig = teamConfig;
+        function spreadsheetConfig() {
+            // This function exists to making testing iteration more straightforward.
+            // AppScript will inject the variable CONFIG *before* the HTML content.
+            if (typeof CONFIG === "undefined") {
+                console.log("Falling back to TEST_CONFIG.");
+                return TEST_CONFIG;
             }
+            console.log("Loaded config:\n" + JSON.stringify(CONFIG));
+            return CONFIG;
         }
 
-        return selectedTeamConfig;
-    }
+        createScorecard(RESULTS, spreadsheetConfig());
 
-    function createScorecardTable(RESULTS, courseConfig, teamConfig) {
-        document.getElementById("table").appendChild(
-            generateTable(RESULTS, courseConfig, teamConfig));
+        function createScorecard(RESULTS, spreadsheetConfig) {
+            document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
+            document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
 
-        for (const result of RESULTS) {
-            const refRow = document.getElementById(idHoleRow(result.endExclusive - 1));
-            const refTable = refRow.parentElement;
-
-            const newRows = generateResultTable(result, teamConfig.players.length);
-
-            // Loop over these rows in reverse, so they appear in order.
-            for (let rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
-                const placeholderRow = refTable.insertRow(refRow.rowIndex + 1);
-                refTable.replaceChild(newRows[rowIndex], placeholderRow);
+            document.getElementById("team").onchange = function (event) {
+                teamOnchange(RESULTS, spreadsheetConfig);
             }
+            document.getElementById("team_options").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
         }
 
-        // We could have loaded some cached scores.
-        updateAllStats(RESULTS, courseConfig.pars, teamConfig.players.length);
-    }
+        function createTeamOptions(allTeamConfigs) {
+            const teamDatalist = document.createElement("datalist");
+            teamDatalist.id = "teamDatalist";
 
-    function generateTable(results, courseConfig, teamConfig) {
-        const table = document.createElement("table");
-
-        const numHoles = courseConfig.pars.length;
-
-        const nameRow = generateNameRow(teamConfig);
-        table.appendChild(nameRow);
-
-        const targetRow = generateTargetRow(results, courseConfig.pars, teamConfig);
-        table.appendChild(targetRow);
-
-        for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-            const row = generateHoleRow(results, courseConfig.pars, holeIndex, teamConfig.players.length);
-            table.appendChild(row);
+            for (let teamIndex = 0; teamIndex < allTeamConfigs.length; teamIndex++) {
+                const teamOption = document.createElement("option");
+                teamOption.value = allTeamConfigs[teamIndex].teamName;
+                teamDatalist.appendChild(teamOption);
+            }
+            return teamDatalist;
         }
 
-        return table;
-    }
+        function teamOnchange(RESULTS, spreadsheetConfig) {
+            const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
 
-    function generateNameRow(teamConfig) {
-        const row = document.createElement("tr");
+            console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
 
-        const headerCell = document.createElement("td");
-        headerCell.textContent = "Name";
-        row.appendChild(headerCell);
+            document.getElementById("table").innerHTML = "";
+            createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
 
-        for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
-            const playerCell = document.createElement("td");
-
-            const input = document.createElement("input");
-            input.type = "string";
-            input.id = idPlayerName(playerIndex);
-            input.style = "font-size: 15px; padding: 5px 5px; width: 10ch";
-
-            input.value = teamConfig.players[playerIndex].playerName
-
-            playerCell.appendChild(input);
-
-            row.appendChild(playerCell);
+            document.getElementById("submit_button").disabled = false;
+            document.getElementById("clear_button").disabled = false;
         }
 
-        return row;
-    }
+        function getSelectedTeamConfig(allTeamConfigs) {
+            const teamName = document.getElementById("team").value;
 
-    function generateTargetRow(results, pars, teamConfig) {
-        const row = document.createElement("tr");
+            let selectedTeamConfig = {
+                "teamName": "",
+                "players": [
+                    { "playerName": "", "playerTarget": null },
+                    { "playerName": "", "playerTarget": null },
+                    { "playerName": "", "playerTarget": null },
+                    { "playerName": "", "playerTarget": null },
+                ]
+            };
 
-        const headerCell = document.createElement("td");
-        headerCell.textContent = "Target";
-        row.appendChild(headerCell);
+            for (let teamConfig of allTeamConfigs) {
+                if (teamName === teamConfig.teamName) {
+                    selectedTeamConfig = teamConfig;
+                }
+            }
 
-        let teamTarget = 0;
+            return selectedTeamConfig;
+        }
 
-        for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
-            const currPlayerIndex = playerIndex;
+        function createScorecardTable(RESULTS, courseConfig, teamConfig) {
+            document.getElementById("table").appendChild(
+                generateTable(RESULTS, courseConfig, teamConfig));
 
-            const playerCell = document.createElement("td");
-            playerCell.align = "center";
+            for (const result of RESULTS) {
+                const refRow = document.getElementById(idHoleRow(result.endExclusive - 1));
+                const refTable = refRow.parentElement;
+
+                const newRows = generateResultTable(result, teamConfig.players.length);
+
+                // Loop over these rows in reverse, so they appear in order.
+                for (let rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
+                    const placeholderRow = refTable.insertRow(refRow.rowIndex + 1);
+                    refTable.replaceChild(newRows[rowIndex], placeholderRow);
+                }
+            }
+
+            // We could have loaded some cached scores.
+            updateAllStats(RESULTS, courseConfig.pars, teamConfig.players.length);
+        }
+
+        function generateTable(results, courseConfig, teamConfig) {
+            const table = document.createElement("table");
+
+            const numHoles = courseConfig.pars.length;
+
+            const nameRow = generateNameRow(teamConfig);
+            table.appendChild(nameRow);
+
+            const targetRow = generateTargetRow(results, courseConfig.pars, teamConfig);
+            table.appendChild(targetRow);
+
+            for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+                const row = generateHoleRow(results, courseConfig.pars, holeIndex, teamConfig.players.length);
+                table.appendChild(row);
+            }
+
+            return table;
+        }
+
+        function generateNameRow(teamConfig) {
+            const row = document.createElement("tr");
+
+            const headerCell = document.createElement("td");
+            headerCell.textContent = "Name";
+            row.appendChild(headerCell);
+
+            for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
+                const playerCell = document.createElement("td");
+
+                const input = document.createElement("input");
+                input.type = "string";
+                input.id = idPlayerName(playerIndex);
+                input.style = "font-size: 15px; padding: 5px 5px; width: 10ch";
+
+                input.value = teamConfig.players[playerIndex].playerName
+
+                playerCell.appendChild(input);
+
+                row.appendChild(playerCell);
+            }
+
+            return row;
+        }
+
+        function generateTargetRow(results, pars, teamConfig) {
+            const row = document.createElement("tr");
+
+            const headerCell = document.createElement("td");
+            headerCell.textContent = "Target";
+            row.appendChild(headerCell);
+
+            let teamTarget = 0;
+
+            for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
+                const currPlayerIndex = playerIndex;
+
+                const playerCell = document.createElement("td");
+                playerCell.align = "center";
+
+                const input = document.createElement("input");
+                input.type = "number";
+                input.id = idTarget(playerIndex);
+                input.style = "width: 4ch";
+                input.disabled = false;
+
+                input.value = teamConfig.players[playerIndex].playerTarget;
+
+                const playerTargetOrNan = parseInt(teamConfig.players[playerIndex].playerTarget);
+                if (playerTargetOrNan != NaN) {
+                    teamTarget += playerTargetOrNan;
+                }
+
+                input.min = 0;
+                input.oninput = function (event) {
+                    updateStats(results, pars, teamConfig.players.length, currPlayerIndex);
+                    updateTeamTarget(teamConfig.players.length);
+                };
+
+                playerCell.appendChild(input);
+
+                row.appendChild(playerCell);
+            }
+
+
+            document.getElementById("team_target").textContent = teamTarget;
+
+            return row;
+        }
+
+        function generateHoleRow(results, pars, holeIndex, numPlayers) {
+            const row = document.createElement("tr");
+
+            row.id = idHoleRow(holeIndex);
+
+            const headerCell = generateHoleHeader(holeIndex, pars[holeIndex]);
+            row.appendChild(headerCell);
+
+            for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+                const holeCell = generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex);
+                row.appendChild(holeCell);
+            }
+
+            return row;
+        }
+
+        function generateHoleHeader(holeIndex, par) {
+            const cell = document.createElement("td");
+            cell.textContent = (holeIndex + 1) + " (" + par + ")";
+
+            return cell;
+        }
+
+        function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex) {
+            const cell = document.createElement("td");
+            cell.align = "center";
 
             const input = document.createElement("input");
             input.type = "number";
-            input.id = idTarget(playerIndex);
+            const id = idHolePlayer(holeIndex, playerIndex);
+            input.id = id;
             input.style = "width: 4ch";
-            input.disabled = false;
 
-            input.value = teamConfig.players[playerIndex].playerTarget;
+            const possibleSavedScore = localStorage.getItem(id);
+            input.value = getUserScore(possibleSavedScore, pars[holeIndex]);
 
-            const playerTargetOrNan = parseInt(teamConfig.players[playerIndex].playerTarget);
-            if (playerTargetOrNan != NaN) {
-                teamTarget += playerTargetOrNan;
-            }
+            input.min = Math.max(pars[holeIndex] - 3, 1);    // At best an Albatross (or hole in 1)
+            input.max = pars[holeIndex] + 2;                 // At worst, a double-bogey
 
-            input.min = 0;
+            input.style.backgroundColor = getHoleForPlayerColor(input.value, pars[holeIndex]);
+
             input.oninput = function (event) {
-                updateStats(results, pars, teamConfig.players.length, currPlayerIndex);
-                updateTeamTarget(teamConfig.players.length);
+                const userScore = getUserScore(event.target.value, pars[holeIndex]);
+
+                input.value = userScore;
+
+                input.style.backgroundColor = getHoleForPlayerColor(userScore, pars[holeIndex]);
+
+                localStorage.setItem(id, userScore);
+                updateStats(results, pars, numPlayers, playerIndex);
             };
 
-            playerCell.appendChild(input);
+            cell.appendChild(input);
 
-            row.appendChild(playerCell);
+            return cell;
         }
 
+        function getUserScore(value, par) {
+            let userScore = value;
+            if (userScore === null || userScore === "") {
+                return "";
+            }
+            // Watch out, "66" < "7", so we use Math functions explicitly.
+            userScore = Math.min(userScore, par + 2);
+            userScore = Math.max(userScore, Math.max(par - 3, 1));
 
-        document.getElementById("team_target").textContent = teamTarget;
-
-        return row;
-    }
-
-    function generateHoleRow(results, pars, holeIndex, numPlayers) {
-        const row = document.createElement("tr");
-
-        row.id = idHoleRow(holeIndex);
-
-        const headerCell = generateHoleHeader(holeIndex, pars[holeIndex]);
-        row.appendChild(headerCell);
-
-        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const holeCell = generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex);
-            row.appendChild(holeCell);
+            return userScore;
         }
 
-        return row;
-    }
-
-    function generateHoleHeader(holeIndex, par) {
-        const cell = document.createElement("td");
-        cell.textContent = (holeIndex + 1) + " (" + par + ")";
-
-        return cell;
-    }
-
-    function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex) {
-        const cell = document.createElement("td");
-        cell.align = "center";
-
-        const input = document.createElement("input");
-        input.type = "number";
-        const id = idHolePlayer(holeIndex, playerIndex);
-        input.id = id;
-        input.style = "width: 4ch";
-
-        const possibleSavedScore = localStorage.getItem(id);
-        input.value = getUserScore(possibleSavedScore, pars[holeIndex]);
-
-        input.min = Math.max(pars[holeIndex] - 3, 1);    // At best an Albatross (or hole in 1)
-        input.max = pars[holeIndex] + 2;                 // At worst, a double-bogey
-
-        input.style.backgroundColor = getHoleForPlayerColor(input.value, pars[holeIndex]);
-
-        input.oninput = function (event) {
-            const userScore = getUserScore(event.target.value, pars[holeIndex]);
-
-            input.value = userScore;
-
-            input.style.backgroundColor = getHoleForPlayerColor(userScore, pars[holeIndex]);
-
-            localStorage.setItem(id, userScore);
-            updateStats(results, pars, numPlayers, playerIndex);
-        };
-
-        cell.appendChild(input);
-
-        return cell;
-    }
-
-    function getUserScore(value, par) {
-        let userScore = value;
-        if (userScore === null || userScore === "") {
+        function getHoleForPlayerColor(userScore, par) {
+            // Check -1 first incase the hole is par 2 for some reason.
+            if (parseInt(userScore) === (par - 1)) {
+                return "#90EE90"; // Green
+            }
+            if (parseInt(userScore) === (par - 2)) {
+                return "#FFA500"; // Orange
+            }
+            if (parseInt(userScore) === (par - 3)) {
+                return "#00FFFF"; // Cyan
+            }
             return "";
         }
-        // Watch out, "66" < "7", so we use Math functions explicitly.
-        userScore = Math.min(userScore, par + 2);
-        userScore = Math.max(userScore, Math.max(par - 3, 1));
 
-        return userScore;
-    }
+        function generateResultTable(partialResult, numPlayers) {
+            const headerRow = document.createElement("tr");
+            headerRow.textContent = partialResult.name;
+            headerRow.style = "font-weight: bold; text-decoration: underline";
 
-    function getHoleForPlayerColor(userScore, par) {
-        // Check -1 first incase the hole is par 2 for some reason.
-        if (parseInt(userScore) === (par - 1)) {
-            return "#90EE90"; // Green
-        }
-        if (parseInt(userScore) === (par - 2)) {
-            return "#FFA500"; // Orange
-        }
-        if (parseInt(userScore) === (par - 3)) {
-            return "#00FFFF"; // Cyan
-        }
-        return "";
-    }
+            const scoreRow = generateResultScoreRow(partialResult.name, numPlayers);
+            const pointsRow = generateResultPointsRow(partialResult.name, numPlayers);
+            const netRow = generateResultNetRow(partialResult.name, numPlayers);
+            const pointsTeamRow = generateResultPointsTeamRow(partialResult.name);
+            const netTeamRow = generateResultNetTeamRow(partialResult.name);
 
-    function generateResultTable(partialResult, numPlayers) {
-        const headerRow = document.createElement("tr");
-        headerRow.textContent = partialResult.name;
-        headerRow.style = "font-weight: bold; text-decoration: underline";
-
-        const scoreRow = generateResultScoreRow(partialResult.name, numPlayers);
-        const pointsRow = generateResultPointsRow(partialResult.name, numPlayers);
-        const netRow = generateResultNetRow(partialResult.name, numPlayers);
-        const pointsTeamRow = generateResultPointsTeamRow(partialResult.name);
-        const netTeamRow = generateResultNetTeamRow(partialResult.name);
-
-        return [headerRow, scoreRow, pointsRow, netRow, pointsTeamRow, netTeamRow];
-    }
-
-    function generateResultScoreRow(resultName, numPlayers) {
-        const row = document.createElement("tr");
-
-        const headerCell = document.createElement("td");
-        headerCell.textContent = "Score";
-        row.appendChild(headerCell);
-
-        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const scoreCell = document.createElement("td");
-            scoreCell.align = "center";
-            scoreCell.id = idResultScorePlayer(resultName, playerIndex);
-            scoreCell.textContent = 0;
-            row.appendChild(scoreCell);
+            return [headerRow, scoreRow, pointsRow, netRow, pointsTeamRow, netTeamRow];
         }
 
-        return row;
-    }
+        function generateResultScoreRow(resultName, numPlayers) {
+            const row = document.createElement("tr");
 
-    function generateResultPointsRow(resultName, numPlayers) {
-        const row = document.createElement("tr");
+            const headerCell = document.createElement("td");
+            headerCell.textContent = "Score";
+            row.appendChild(headerCell);
 
-        const headerCell = document.createElement("td");
-        headerCell.textContent = "Points";
-        row.appendChild(headerCell);
+            for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+                const scoreCell = document.createElement("td");
+                scoreCell.align = "center";
+                scoreCell.id = idResultScorePlayer(resultName, playerIndex);
+                scoreCell.textContent = 0;
+                row.appendChild(scoreCell);
+            }
 
-        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+            return row;
+        }
+
+        function generateResultPointsRow(resultName, numPlayers) {
+            const row = document.createElement("tr");
+
+            const headerCell = document.createElement("td");
+            headerCell.textContent = "Points";
+            row.appendChild(headerCell);
+
+            for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+                const pointsCell = document.createElement("td");
+                pointsCell.align = "center";
+                pointsCell.id = idResultPointsPlayer(resultName, playerIndex);
+                pointsCell.textContent = 0;
+                row.appendChild(pointsCell);
+            }
+
+            return row;
+        }
+
+        function generateResultNetRow(resultName, numPlayers) {
+            const row = document.createElement("tr");
+
+            const headerCell = document.createElement("td");
+            headerCell.textContent = "Net";
+            row.appendChild(headerCell);
+
+            for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+                const netCell = document.createElement("td");
+                netCell.align = "center";
+                netCell.id = idResultNetPlayer(resultName, playerIndex);
+                netCell.textContent = "";
+                row.appendChild(netCell);
+            }
+
+            return row;
+        }
+
+        function generateResultPointsTeamRow(resultName) {
+            const row = document.createElement("tr");
+
+            const headerCell = document.createElement("td");
+            headerCell.textContent = "Team Points";
+            headerCell.style = "font-weight: bold";
+            row.appendChild(headerCell);
+
             const pointsCell = document.createElement("td");
+            pointsCell.style = "font-weight: bold";
             pointsCell.align = "center";
-            pointsCell.id = idResultPointsPlayer(resultName, playerIndex);
+            pointsCell.id = idResultPointsTeam(resultName);
             pointsCell.textContent = 0;
             row.appendChild(pointsCell);
+
+            return row;
         }
 
-        return row;
-    }
+        function generateResultNetTeamRow(resultName) {
+            const row = document.createElement("tr");
 
-    function generateResultNetRow(resultName, numPlayers) {
-        const row = document.createElement("tr");
+            const headerCell = document.createElement("td");
+            headerCell.textContent = "Team Net";
+            headerCell.style = "font-weight: bold";
+            row.appendChild(headerCell);
 
-        const headerCell = document.createElement("td");
-        headerCell.textContent = "Net";
-        row.appendChild(headerCell);
-
-        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
             const netCell = document.createElement("td");
+            netCell.style = "font-weight: bold";
             netCell.align = "center";
-            netCell.id = idResultNetPlayer(resultName, playerIndex);
+            netCell.id = idResultNetTeam(resultName);
             netCell.textContent = "";
             row.appendChild(netCell);
+
+            return row;
         }
 
-        return row;
-    }
-
-    function generateResultPointsTeamRow(resultName) {
-        const row = document.createElement("tr");
-
-        const headerCell = document.createElement("td");
-        headerCell.textContent = "Team Points";
-        headerCell.style = "font-weight: bold";
-        row.appendChild(headerCell);
-
-        const pointsCell = document.createElement("td");
-        pointsCell.style = "font-weight: bold";
-        pointsCell.align = "center";
-        pointsCell.id = idResultPointsTeam(resultName);
-        pointsCell.textContent = 0;
-        row.appendChild(pointsCell);
-
-        return row;
-    }
-
-    function generateResultNetTeamRow(resultName) {
-        const row = document.createElement("tr");
-
-        const headerCell = document.createElement("td");
-        headerCell.textContent = "Team Net";
-        headerCell.style = "font-weight: bold";
-        row.appendChild(headerCell);
-
-        const netCell = document.createElement("td");
-        netCell.style = "font-weight: bold";
-        netCell.align = "center";
-        netCell.id = idResultNetTeam(resultName);
-        netCell.textContent = "";
-        row.appendChild(netCell);
-
-        return row;
-    }
-
-    function updateAllStats(results, pars, numPlayers) {
-        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            updateStats(results, pars, numPlayers, playerIndex);
+        function updateAllStats(results, pars, numPlayers) {
+            for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+                updateStats(results, pars, numPlayers, playerIndex);
+            }
         }
-    }
 
-    function updateStats(results, pars, numPlayers, playerIndex) {
-        const score = computeScore(pars.length, playerIndex);
-        const points = computePoints(pars, playerIndex);
+        function updateStats(results, pars, numPlayers, playerIndex) {
+            const score = computeScore(pars.length, playerIndex);
+            const points = computePoints(pars, playerIndex);
 
-        for (let result of results) {
-            updateResult(result, pars, playerIndex, score, points, pars);
+            for (let result of results) {
+                updateResult(result, pars, playerIndex, score, points, pars);
 
-            let pointsTeam = 0;
-            for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-                const playerPointsOrNaN = parseInt(document.getElementById(
-                    idResultPointsPlayer(result.name, currPlayerIndex))
-                    .textContent);
-                if (isNaN(playerPointsOrNaN)) {
+                let pointsTeam = 0;
+                for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+                    const playerPointsOrNaN = parseInt(document.getElementById(
+                        idResultPointsPlayer(result.name, currPlayerIndex))
+                        .textContent);
+                    if (isNaN(playerPointsOrNaN)) {
+                        continue;
+                    }
+                    pointsTeam += playerPointsOrNaN;
+                }
+                document.getElementById(idResultPointsTeam(result.name)).textContent = pointsTeam;
+
+                // Nets can be fractions
+                let netTeam = 0;
+                for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+                    const playerNetOrNaN = parseFloat(document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent);
+                    if (isNaN(playerNetOrNaN)) {
+                        continue;
+                    }
+                    netTeam += playerNetOrNaN;
+                }
+                document.getElementById(idResultNetTeam(result.name)).textContent = netTeam;
+            }
+        }
+
+        function updateResult(result, pars, playerIndex, score, points) {
+            const holeIndices = Array.from({ length: result.endExclusive - result.startInclusive }, (_, i) => result.startInclusive + i);
+
+            const resultScore = sumNumbersByIndex(score.scores, holeIndices);
+            document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent = resultScore;
+
+            const resultPoints = sumNumbersByIndex(points.points, holeIndices);
+            document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent = resultPoints;
+
+            const resultNet = computeNet(points, pars, holeIndices, playerIndex);
+            document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent = resultNet;
+        }
+
+        function computeScore(numHoles, playerIndex) {
+            let scores = [];
+            let total = 0;
+            for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+                const rawScore = document.getElementById(idHolePlayer(holeIndex, playerIndex)).value;
+                scores.push(rawScore);
+
+                const score = parseInt(rawScore);
+                if (isNaN(score)) {
                     continue;
                 }
-                pointsTeam += playerPointsOrNaN;
+                total += score;
             }
-            document.getElementById(idResultPointsTeam(result.name)).textContent = pointsTeam;
+            return { "overall_score": total, "scores": scores };
+        }
 
-            // Nets can be fractions
-            let netTeam = 0;
-            for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-                const playerNetOrNaN = parseFloat(document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent);
-                if (isNaN(playerNetOrNaN)) {
+        function computePoints(pars, playerIndex) {
+            let scoresOrNaN = [];
+            for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
+                scoresOrNaN.push(parseInt(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value));
+            }
+
+            // We need to compute points iff the user has entered a value for the corresponding hole.
+
+            let points = [];
+            let total = 0;
+            for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
+                if (isNaN(scoresOrNaN[holeIndex])) {
+                    points.push("");
                     continue;
                 }
-                netTeam += playerNetOrNaN;
+
+                const point = 2 - (scoresOrNaN[holeIndex] - pars[holeIndex]);
+                points.push(point);
+                total += point;
             }
-            document.getElementById(idResultNetTeam(result.name)).textContent = netTeam;
-        }
-    }
-
-    function updateResult(result, pars, playerIndex, score, points) {
-        const holeIndices = Array.from({ length: result.endExclusive - result.startInclusive }, (_, i) => result.startInclusive + i);
-
-        const resultScore = sumNumbersByIndex(score.scores, holeIndices);
-        document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent = resultScore;
-
-        const resultPoints = sumNumbersByIndex(points.points, holeIndices);
-        document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent = resultPoints;
-
-        const resultNet = computeNet(points, pars, holeIndices, playerIndex);
-        document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent = resultNet;
-    }
-
-    function computeScore(numHoles, playerIndex) {
-        let scores = [];
-        let total = 0;
-        for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-            const rawScore = document.getElementById(idHolePlayer(holeIndex, playerIndex)).value;
-            scores.push(rawScore);
-
-            const score = parseInt(rawScore);
-            if (isNaN(score)) {
-                continue;
-            }
-            total += score;
-        }
-        return { "overall_score": total, "scores": scores };
-    }
-
-    function computePoints(pars, playerIndex) {
-        let scoresOrNaN = [];
-        for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
-            scoresOrNaN.push(parseInt(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value));
+            return { "overall_points": total, "points": points };
         }
 
-        // We need to compute points iff the user has entered a value for the corresponding hole.
+        function computeNet(points, pars, holeIndices, playerIndex) {
+            const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value);
 
-        let points = [];
-        let total = 0;
-        for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
-            if (isNaN(scoresOrNaN[holeIndex])) {
-                points.push("");
-                continue;
+            if (isNaN(targetOrNaN)) {
+                return "";
             }
 
-            const point = 2 - (scoresOrNaN[holeIndex] - pars[holeIndex]);
-            points.push(point);
-            total += point;
-        }
-        return { "overall_points": total, "points": points };
-    }
+            // Weighted just by number of holes.
+            // Points are already independent of par.
+            const resultTarget = targetOrNaN * (holeIndices.length / pars.length);
 
-    function computeNet(points, pars, holeIndices, playerIndex) {
-        const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value);
+            const resultPoints = sumNumbersByIndex(points.points, holeIndices);
 
-        if (isNaN(targetOrNaN)) {
-            return "";
+            return resultPoints - resultTarget;
         }
 
-        // Weighted just by number of holes.
-        // Points are already independent of par.
-        const resultTarget = targetOrNaN * (holeIndices.length / pars.length);
-
-        const resultPoints = sumNumbersByIndex(points.points, holeIndices);
-
-        return resultPoints - resultTarget;
-    }
-
-    function sumNumbersByIndex(numbersOrNaN, indices) {
-        let out = 0;
-        for (let index of indices) {
-            const numOrNaN = parseInt(numbersOrNaN[index]);
-            if (isNaN(numOrNaN)) {
-                continue;
+        function sumNumbersByIndex(numbersOrNaN, indices) {
+            let out = 0;
+            for (let index of indices) {
+                const numOrNaN = parseInt(numbersOrNaN[index]);
+                if (isNaN(numOrNaN)) {
+                    continue;
+                }
+                out += numOrNaN;
             }
-            out += numOrNaN;
-        }
-        return out;
-    }
-
-    function updateTeamTarget(numPlayers) {
-        let total = 0;
-        for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-            const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value);
-            if (isNaN(possibleTarget)) {
-                continue;
-            }
-            total += possibleTarget;
+            return out;
         }
 
-        document.getElementById("team_target").textContent = total;
-    }
-
-    // For each player:
-    //  <date, team, course, player, hole1, ... hole18, target, tScore, tPoints, tNet, fScore, fPoints, fNet, bScore, bPoints, bNet>
-    // The totals for the team:
-    //  <data, team, course, team  , ""   , ... ""    , target, 0     , tPoints, tNet, 0     , fPoints, fNet, 0     , bPoints, bNet>
-    function submit() {
-        const localSpreadsheetConfig = spreadsheetConfig();
-        const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
-
-        let flatResults = [];
-
-        for (let playerIndex = 0; playerIndex < selectedTeamConfig.players.length; playerIndex++) {
-            // Skip players that dont have a name.
-            const rawName = document.getElementById(idPlayerName(playerIndex)).value;
-            if (rawName === "" || rawName === null) {
-                continue;
+        function updateTeamTarget(numPlayers) {
+            let total = 0;
+            for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+                const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value);
+                if (isNaN(possibleTarget)) {
+                    continue;
+                }
+                total += possibleTarget;
             }
 
-            let playerStats = [
+            document.getElementById("team_target").textContent = total;
+        }
+
+        // For each player:
+        //  <date, team, course, player, hole1, ... hole18, target, tScore, tPoints, tNet, fScore, fPoints, fNet, bScore, bPoints, bNet>
+        // The totals for the team:
+        //  <data, team, course, team  , ""   , ... ""    , target, 0     , tPoints, tNet, 0     , fPoints, fNet, 0     , bPoints, bNet>
+        function submit() {
+            const localSpreadsheetConfig = spreadsheetConfig();
+            const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+
+            let flatResults = [];
+
+            for (let playerIndex = 0; playerIndex < selectedTeamConfig.players.length; playerIndex++) {
+                // Skip players that dont have a name.
+                const rawName = document.getElementById(idPlayerName(playerIndex)).value;
+                if (rawName === "" || rawName === null) {
+                    continue;
+                }
+
+                let playerStats = [
+                    document.getElementById("date").textContent,                // Date
+                    document.getElementById("team").value,                      // Team
+                    localSpreadsheetConfig.courseConfig.courseName,             // Course Name
+                    document.getElementById(idPlayerName(playerIndex)).value    // Player Name
+                ];
+
+                for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+                    playerStats.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)   // Holes
+                }
+
+                playerStats.push(document.getElementById(idTarget(playerIndex)).value); // Target
+
+                for (const result of RESULTS) {
+                    playerStats.push(document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent);   // Score
+                    playerStats.push(document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent);  // Points
+                    playerStats.push(document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent);     // Net
+                }
+
+                flatResults.push(playerStats);
+            }
+
+            let allScoresEntered = true;
+            for (let currentPlayerStats of flatResults) {
+                for (let resultIndex = 0; resultIndex < localSpreadsheetConfig.courseConfig.pars.length; resultIndex++) {
+                    // Skip date, team, courseName, playerName.
+                    if (currentPlayerStats[resultIndex + 4] === "") {
+                        allScoresEntered = false;
+                        break;
+                    }
+                }
+            }
+
+            // Add team level results.
+            let teamStats = [
                 document.getElementById("date").textContent,                // Date
                 document.getElementById("team").value,                      // Team
                 localSpreadsheetConfig.courseConfig.courseName,             // Course Name
-                document.getElementById(idPlayerName(playerIndex)).value    // Player Name
+                document.getElementById("team").value,                      // Player Name (but just the team this time)
             ];
-
             for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                playerStats.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value)   // Holes
+                teamStats.push("");   // No hole scores at the team level. 
             }
-
-            playerStats.push(document.getElementById(idTarget(playerIndex)).value); // Target
+            teamStats.push(document.getElementById("team_target").textContent); // Target
 
             for (const result of RESULTS) {
-                playerStats.push(document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent);   // Score
-                playerStats.push(document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent);  // Points
-                playerStats.push(document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent);     // Net
+                teamStats.push("");   // Score
+                teamStats.push(document.getElementById(idResultPointsTeam(result.name)).textContent);  // Points
+                teamStats.push(document.getElementById(idResultNetTeam(result.name)).textContent);     // Net
             }
 
-            flatResults.push(playerStats);
+            flatResults.push(teamStats);
+
+            let confirmationMessage = "Be sure all scores are correct! When so, click 'OK' to SUBMIT these scores. Thanks!     ";
+            if (!allScoresEntered) {
+                confirmationMessage += " Wait-- I see some holes without scores-- please 'Cancel' and fully fill in scores!";
+            }
+            if (!confirm(confirmationMessage)) {
+                return;
+            }
+
+            lockInputs();
+
+            console.log("Submitting:\n" + JSON.stringify(flatResults));
+            // This will fail when run not in AppScript
+            // So make sure this no important logic happens after this line so testing locally still works.
+            google.script.run.saveData(flatResults);
+
+            // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
+            // This code will NOT execute when testing locally.
+            const submitConfirmation = document.getElementById("submit_confirmation");
+
+            submitConfirmation.textContent = "SUBMISSION Success - Thanks!"; submitConfirmation.style.cssText = "font-size: 40px; font-weight: bold; color: green;";
+            //submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
+            //let submitconfirmation = "SUBMISSION Success - Thanks!";
+
         }
 
-        let allScoresEntered = true;
-        for (let currentPlayerStats of flatResults) {
-            for (let resultIndex = 0; resultIndex < localSpreadsheetConfig.courseConfig.pars.length; resultIndex++) {
-                // Skip date, team, courseName, playerName.
-                if (currentPlayerStats[resultIndex + 4] === "") {
-                    allScoresEntered = false;
+
+
+        function lockInputs() {
+            const localSpreadsheetConfig = spreadsheetConfig();
+
+            const submitButton = document.getElementById("submit_button");
+            submitButton.disabled = true;
+
+            const teamInput = document.getElementById("team");
+            teamInput.disabled = true;
+
+            // For now we hardcode that at most 4 players per team.
+            for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+
+                const possiblePlayerName = document.getElementById(idPlayerName(playerIndex));
+
+                if (possiblePlayerName == null) {
                     break;
+                }
+                possiblePlayerName.disabled = true;
+
+                for (let holeIndex = 0;
+                    holeIndex < localSpreadsheetConfig.courseConfig.pars.length;
+                    holeIndex++) {
+                    const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
+                    if (possibleInput == null) {
+                        break;
+                    }
+                    possibleInput.disabled = true;
                 }
             }
         }
 
-        // Add team level results.
-        let teamStats = [
-            document.getElementById("date").textContent,                // Date
-            document.getElementById("team").value,                      // Team
-            localSpreadsheetConfig.courseConfig.courseName,             // Course Name
-            document.getElementById("team").value,                      // Player Name (but just the team this time)
-        ];
-        for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-            teamStats.push("");   // No hole scores at the team level. 
-        }
-        teamStats.push(document.getElementById("team_target").textContent); // Target
-
-        for (const result of RESULTS) {
-            teamStats.push("");   // Score
-            teamStats.push(document.getElementById(idResultPointsTeam(result.name)).textContent);  // Points
-            teamStats.push(document.getElementById(idResultNetTeam(result.name)).textContent);     // Net
-        }
-
-        flatResults.push(teamStats);
-
-        let confirmationMessage = "Be sure all scores are correct! When so, click 'OK' to SUBMIT these scores. Thanks!     ";
-        if (!allScoresEntered) {
-            confirmationMessage += " Wait-- I see some holes without scores-- please 'Cancel' and fully fill in scores!";
-        }
-        if (!confirm(confirmationMessage)) {
-            return;
-        }
-
-        lockInputs();
-
-        console.log("Submitting:\n" + JSON.stringify(flatResults));
-        // This will fail when run not in AppScript
-        // So make sure this no important logic happens after this line so testing locally still works.
-        google.script.run.saveData(flatResults);
-
-         // We still want visual confirmation that submission worked, so we modify this text *after* the call to saveData.
-        // This code will NOT execute when testing locally.
-        const submitConfirmation = document.getElementById("submit_confirmation");
-       
-        submitConfirmation.textContent = "SUBMISSION Success - Thanks!"; submitConfirmation.style.cssText = "font-size: 40px; font-weight: bold; color: green;";
-           //submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
-          //let submitconfirmation = "SUBMISSION Success - Thanks!";
-    
-    }
-
-
-
-    function lockInputs() {
-        const localSpreadsheetConfig = spreadsheetConfig();
-
-        const submitButton = document.getElementById("submit_button");
-        submitButton.disabled = true;
-
-        const teamInput = document.getElementById("team");
-        teamInput.disabled = true;
-
-        // For now we hardcode that at most 4 players per team.
-        for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
-
-            const possiblePlayerName = document.getElementById(idPlayerName(playerIndex));
-
-            if (possiblePlayerName == null) {
-                break;
+        function clearWithConfirmation() {
+            if (confirm("Be VERY sure you want to clear the hole scores!")) {
+                clearScoresAndCache();
             }
-            possiblePlayerName.disabled = true;
+        }
 
-            for (let holeIndex = 0;
-                holeIndex < localSpreadsheetConfig.courseConfig.pars.length;
-                holeIndex++) {
-                const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
-                if (possibleInput == null) {
-                    break;
+        function clearScoresAndCache() {
+            const localSpreadsheetConfig = spreadsheetConfig();
+            const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+
+            // For now we hardcode that at most 4 players per team.
+            for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+                for (let holeIndex = 0;
+                    holeIndex < localSpreadsheetConfig.courseConfig.pars.length;
+                    holeIndex++) {
+                    const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
+                    if (possibleInput == null) {
+                        break;
+                    }
+                    possibleInput.value = null;
+                    possibleInput.style.backgroundColor = "";
                 }
-                possibleInput.disabled = true;
             }
-        }
-    }
 
-    function clearWithConfirmation() {
-        if (confirm("Be VERY sure you want to clear the hole scores!")) {
-            clearScoresAndCache();
-        }
-    }
+            localStorage.clear();
 
-    function clearScoresAndCache() {
-        const localSpreadsheetConfig = spreadsheetConfig();
-        const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
-
-        // For now we hardcode that at most 4 players per team.
-        for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
-            for (let holeIndex = 0;
-                holeIndex < localSpreadsheetConfig.courseConfig.pars.length;
-                holeIndex++) {
-                const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
-                if (possibleInput == null) {
-                    break;
-                }
-                possibleInput.value = null;
-                possibleInput.style.backgroundColor = "";
-            }
+            // Basically just resets everything to 0.
+            updateAllStats(
+                RESULTS,
+                localSpreadsheetConfig.courseConfig.pars,
+                selectedTeamConfig.players.length);
         }
 
-        localStorage.clear();
+        function idHoleRow(holeIndex) {
+            return "holeRow_" + holeIndex;
+        }
 
-        // Basically just resets everything to 0.
-        updateAllStats(
-            RESULTS,
-            localSpreadsheetConfig.courseConfig.pars,
-            selectedTeamConfig.players.length);
-    }
+        function idHolePlayer(holeIndex, playerIndex) {
+            return holeIndex + "_" + playerIndex;
+        }
 
-    function idHoleRow(holeIndex) {
-        return "holeRow_" + holeIndex;
-    }
+        function idResultScorePlayer(resultName, playerIndex) {
+            return "result_" + resultName + "_score_" + playerIndex;
+        }
 
-    function idHolePlayer(holeIndex, playerIndex) {
-        return holeIndex + "_" + playerIndex;
-    }
+        function idResultPointsPlayer(resultName, playerIndex) {
+            return "result_" + resultName + "_points_" + playerIndex;
+        }
 
-    function idResultScorePlayer(resultName, playerIndex) {
-        return "result_" + resultName + "_score_" + playerIndex;
-    }
+        function idResultPointsTeam(resultName) {
+            return "result_" + resultName + "_points_team";
+        }
 
-    function idResultPointsPlayer(resultName, playerIndex) {
-        return "result_" + resultName + "_points_" + playerIndex;
-    }
+        function idPlayerName(playerIndex) {
+            return "name_" + playerIndex;
+        }
 
-    function idResultPointsTeam(resultName) {
-        return "result_" + resultName + "_points_team";
-    }
+        function idTarget(playerIndex) {
+            return "target_" + playerIndex;
+        }
 
-    function idPlayerName(playerIndex) {
-        return "name_" + playerIndex;
-    }
+        function idResultNetPlayer(resultName, playerIndex) {
+            return "result_" + resultName + "_net_" + playerIndex;
+        }
 
-    function idTarget(playerIndex) {
-        return "target_" + playerIndex;
-    }
-
-    function idResultNetPlayer(resultName, playerIndex) {
-        return "result_" + resultName + "_net_" + playerIndex;
-    }
-
-    function idResultNetTeam(resultName) {
-        return "result_" + resultName + "_net_team";
-    }
-</script>
+        function idResultNetTeam(resultName) {
+            return "result_" + resultName + "_net_team";
+        }
+    </script>
 
 </html>
