@@ -738,11 +738,14 @@
             for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
 
                 const possiblePlayerName = document.getElementById(idPlayerName(playerIndex));
+                const possiblePlayerTarget = document.getElementById(idTarget(playerIndex));
 
                 if (possiblePlayerName == null) {
                     break;
                 }
+                
                 possiblePlayerName.disabled = true;
+                possiblePlayerTarget.disabled = true;
 
                 for (let holeIndex = 0;
                     holeIndex < localSpreadsheetConfig.courseConfig.pars.length;
