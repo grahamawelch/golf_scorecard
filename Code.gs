@@ -117,3 +117,45 @@ function testSaveData() {
 
   saveData(flatResults);
 }
+
+function saveScoresForTeam(teamName, allPlayerScores) {
+  // teamName: String
+  // allPlayerScores: [["name", "target", "hole0", "hole1", ...], ...]
+
+  // https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
+  const spreadsheet = SpreadsheetApp.openById("1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ");
+  let teamSheet = spreadsheet.getSheetByName(teamName);
+
+  if (teamSheet == null) {
+    teamSheet = spreadsheet.insertSheet(teamName);
+  }
+
+  teamSheet.clear();
+
+  allPlayerScores.forEach(playerScores => teamSheet.appendRow(playerScores))
+
+}
+
+function testSaveScoresForTeam() {
+  saveScoresForTeam("9:30", [
+    ["AAA", 27, 3, 3, 3, 0, 0, 0],
+    ["BBB", 20, 4, 4, 0, 0],
+    ["CCC", 1]
+  ]);
+}
+
+function loadScoresForTeam(teamName) {
+  // https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
+  const spreadsheet = SpreadsheetApp.openById("1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ");
+  const teamSheet = spreadsheet.getSheetByName(teamName);
+
+  if (teamSheet == null) {
+    return [];
+  }
+
+  return teamSheet.getDataRange().getValues();
+}
+
+function testLoadScoresForTeam() {
+  console.log(loadScoresForTeam("9:30"));
+}
