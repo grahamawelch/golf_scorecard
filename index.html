@@ -172,10 +172,67 @@
             console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
 
             document.getElementById("table").innerHTML = "";
+
+            document.getElementById("table").appendChild(createLoadButton(spreadsheetConfig));
+
             createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
 
             document.getElementById("submit_button").disabled = false;
             document.getElementById("clear_button").disabled = false;
+        }
+
+        function createLoadButton(spreadsheetConfig) {
+            const button = document.createElement("button");
+            button.innerHTML = "Load";
+            button.onclick = function () {
+                const teamName = document.getElementById("team").value;
+
+                google.script.run.withSuccessHandler(populateScorecardWithSavedResults).loadScoresForTeam(teamName);
+                return;
+
+                // For testing.
+                populateScorecardWithSavedResults([
+                    ["AAA", 27, 3, 3, 3, 0, 0, 0],
+                    [123, 20, 4, 4, 0],
+                    ["CCC", 10, -1, 3, 1, 3, "a", 3],
+                ])
+            };
+
+            return button;
+        }
+
+        function populateScorecardWithSavedResults(allPlayerScores) {
+            // [["playerName", <target>, <score0>, <score1>, ...], ...]
+            const paramSpreadsheetConfig = spreadsheetConfig();
+
+            console.log("Loading saved scores: " + JSON.stringify(allPlayerScores));
+
+            //const spreadsheetConfig = spreadsheetConfig();
+            const selectedTeamConfig = getSelectedTeamConfig(paramSpreadsheetConfig.allTeamConfigs);
+
+            for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+                if (currPlayerIndex >= allPlayerScores.length) {
+                    break;
+                }
+                let currPlayerScores = allPlayerScores[currPlayerIndex];
+
+                if (currPlayerScores.length >= 1) {
+                    document.getElementById(idPlayerName(currPlayerIndex)).value = currPlayerScores[0];
+                }
+                if (currPlayerScores.length >= 2 && typeof currPlayerScores[1] === "number") {
+                    document.getElementById(idTarget(currPlayerIndex)).value = currPlayerScores[1];
+                }
+
+                for (let holeIndex = 0; holeIndex < paramSpreadsheetConfig.courseConfig.pars.length && holeIndex < (currPlayerScores.length + 2); holeIndex++) {
+                    let maybeScore = currPlayerScores[holeIndex + 2];
+                    if (typeof maybeScore === "number" && maybeScore > 0) {
+                        const input = document.getElementById(idHolePlayer(holeIndex, currPlayerIndex));
+                        input.oninput({target:{value: maybeScore}});
+                    }
+                }
+            }
+
+            updateAllStats(RESULTS, paramSpreadsheetConfig, selectedTeamConfig);
         }
 
         function getSelectedTeamConfig(allTeamConfigs) {
@@ -743,7 +800,7 @@
                 if (possiblePlayerName == null) {
                     break;
                 }
-                
+
                 possiblePlayerName.disabled = true;
                 possiblePlayerTarget.disabled = true;
 
