@@ -189,10 +189,16 @@
             const tr = document.createElement("tr");
 
             const saveElement = document.createElement("td");
-            saveElement.appendChild(createSaveButton(spreadsheetConfig, selectedTeamConfig))
+            saveElement.appendChild(createSaveButton(spreadsheetConfig, selectedTeamConfig));
+            saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
+            saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+            saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
             const loadElement = document.createElement("td");
             loadElement.appendChild(createLoadButton());
+            loadElement.style.paddingLeft = "20px"; // Adjust the amount of space as needed
+            loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+            loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
             const statusElement = document.createElement("td");
             statusElement.id = "save_status";
@@ -242,7 +248,7 @@
             const button = document.createElement("button");
             button.innerHTML = "Re-Load";
             button.style.fontSize = "20px";
-            button.style.color = "red";
+            button.style.color = "blue";
             button.style.padding = "10px 10px";
             button.onclick = function () {
                 const teamName = document.getElementById("team").value;
