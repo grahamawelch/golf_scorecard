@@ -173,13 +173,36 @@
 
             document.getElementById("table").innerHTML = "";
 
-            document.getElementById("table").appendChild(createSaveButton(spreadsheetConfig, selectedTeamConfig))
-            document.getElementById("table").appendChild(createLoadButton());
+            createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig);
 
             createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
 
             document.getElementById("submit_button").disabled = false;
             document.getElementById("clear_button").disabled = false;
+        }
+
+
+        function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+            const table = document.getElementById("table");
+
+            const subTable = document.createElement("table");
+            const tr = document.createElement("tr");
+
+            const saveElement = document.createElement("td");
+            saveElement.appendChild(createSaveButton(spreadsheetConfig, selectedTeamConfig))
+
+            const loadElement = document.createElement("td");
+            loadElement.appendChild(createLoadButton());
+
+            const statusElement = document.createElement("td");
+            statusElement.id = "save_status";
+
+            tr.appendChild(saveElement);
+            tr.appendChild(loadElement);
+            tr.appendChild(statusElement);
+
+            subTable.appendChild(tr);
+            table.appendChild(subTable);
         }
 
         function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
@@ -201,6 +224,12 @@
 
                 console.log("Sending to backend: " + JSON.stringify(out));
                 google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+
+                const now = new Date();
+                const hours = now.getHours().toString();
+                const minutes = now.getMinutes().toString().padStart(2, "0");
+                const time = `${hours}:${minutes}`;
+                document.getElementById("save_status").innerText = "Saved at " + time;
             }
 
             return button;
