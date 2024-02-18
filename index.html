@@ -173,7 +173,8 @@
 
             document.getElementById("table").innerHTML = "";
 
-            document.getElementById("table").appendChild(createLoadButton(spreadsheetConfig));
+            document.getElementById("table").appendChild(createSaveButton(spreadsheetConfig, selectedTeamConfig))
+            document.getElementById("table").appendChild(createLoadButton());
 
             createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
 
@@ -181,7 +182,31 @@
             document.getElementById("clear_button").disabled = false;
         }
 
-        function createLoadButton(spreadsheetConfig) {
+        function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
+            const button = document.createElement("button");
+            button.innerHTML = "Save";
+            button.onclick = function () {
+                let out = [];
+                for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+                    let currPlayerScores = [];
+                    currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+                    currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+
+                    for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+                        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+                    }
+
+                    out.push(currPlayerScores);
+                }
+
+                console.log("Sending to backend: " + JSON.stringify(out));
+                google.script.run.saveScoresForTeam(selectedTeamConfig.teamName, out);
+            }
+
+            return button;
+        }
+
+        function createLoadButton() {
             const button = document.createElement("button");
             button.innerHTML = "Load";
             button.onclick = function () {
@@ -229,7 +254,7 @@
                     let maybeScore = currPlayerScores[holeIndex + 2];
                     if (typeof maybeScore === "number" && maybeScore > 0) {
                         const input = document.getElementById(idHolePlayer(holeIndex, currPlayerIndex));
-                        input.oninput({target:{value: maybeScore}});
+                        input.oninput({ target: { value: maybeScore } });
                     }
                 }
             }
