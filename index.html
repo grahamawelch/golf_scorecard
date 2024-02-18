@@ -200,7 +200,7 @@
                 }
 
                 console.log("Sending to backend: " + JSON.stringify(out));
-                google.script.run.saveScoresForTeam(selectedTeamConfig.teamName, out);
+                google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
             }
 
             return button;
