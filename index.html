@@ -208,6 +208,9 @@
         function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
             const button = document.createElement("button");
             button.innerHTML = "Save";
+            button.style.fontSize = "20px"; 
+            button.style.color = "green";
+            button.style.padding = "10px 10px";
             button.onclick = function () {
                 let out = [];
                 for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
@@ -237,7 +240,10 @@
 
         function createLoadButton() {
             const button = document.createElement("button");
-            button.innerHTML = "Load";
+            button.innerHTML = "Re-Load";
+            button.style.fontSize = "20px";
+            button.style.color = "red";
+            button.style.padding = "10px 10px";
             button.onclick = function () {
                 const teamName = document.getElementById("team").value;
 
