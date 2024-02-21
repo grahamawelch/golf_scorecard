@@ -232,6 +232,9 @@
         const minutes = now.getMinutes().toString().padStart(2, "0");
         const time = `${hours}:${minutes}`;
         document.getElementById("save_status").innerText = "Saved at " + time;
+        document.getElementById("save_status").style.fontSize = "20px";
+        document.getElementById("save_status").style.fontWeight = "bold";
+        document.getElementById("save_status").style.color = "green";
     }
 
     // Call saveData function every 5 minutes
