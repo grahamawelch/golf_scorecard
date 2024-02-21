@@ -80,7 +80,7 @@
                         <td>
                         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         </td>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button"
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button"
                                 onclick="clearWithConfirmation()" disabled="true"
                                 style="color:red; font-size: 30px; padding: 10px 10px">Clear</button></td>
                         <td>
@@ -185,66 +185,65 @@
 
 
         function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
-            const table = document.getElementById("table");
+    const table = document.getElementById("table");
 
-            const subTable = document.createElement("table");
-            const tr = document.createElement("tr");
+    const subTable = document.createElement("table");
+    const tr = document.createElement("tr");
 
-            const saveElement = document.createElement("td");
-            saveElement.appendChild(createSaveButton(spreadsheetConfig, selectedTeamConfig));
-            saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
-            saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
-            saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
+    const saveElement = document.createElement("td");
+    // Set the text content to indicate auto-save
+    saveElement.textContent = "Auto-Saved every 5 Minutes";
+    saveElement.style.fontSize = "25px";
+    saveElement.style.fontWeight = "bold";
+    saveElement.style.color = "green";
+    saveElement.style.paddingRight = "50px"; // Adjust the amount of space as needed
+    saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+    saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
-            const loadElement = document.createElement("td");
-            loadElement.appendChild(createLoadButton());
-            loadElement.style.paddingLeft = "20px"; // Adjust the amount of space as needed
-            loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
-            loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
+    const loadElement = document.createElement("td");
+    loadElement.appendChild(createLoadButton());
+    loadElement.style.paddingLeft = "20px"; // Adjust the amount of space as needed
+    loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+    loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
-            const statusElement = document.createElement("td");
-            statusElement.id = "save_status";
+    const statusElement = document.createElement("td");
+    statusElement.id = "save_status";
 
-            tr.appendChild(saveElement);
-            tr.appendChild(loadElement);
-            tr.appendChild(statusElement);
+    // Function to save data
+    function saveData() {
+        let out = [];
+        for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+            let currPlayerScores = [];
+            currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+            currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
 
-            subTable.appendChild(tr);
-            table.appendChild(subTable);
-        }
-
-        function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
-            const button = document.createElement("button");
-            button.innerHTML = "Save";
-            button.style.fontSize = "20px"; 
-            button.style.color = "green";
-            button.style.padding = "10px 10px";
-            button.onclick = function () {
-                let out = [];
-                for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-                    let currPlayerScores = [];
-                    currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
-                    currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
-
-                    for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
-                    }
-
-                    out.push(currPlayerScores);
-                }
-
-                console.log("Sending to backend: " + JSON.stringify(out));
-                google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
-
-                const now = new Date();
-                const hours = now.getHours().toString();
-                const minutes = now.getMinutes().toString().padStart(2, "0");
-                const time = `${hours}:${minutes}`;
-                document.getElementById("save_status").innerText = "Saved at " + time;
+            for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+                currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
             }
 
-            return button;
+            out.push(currPlayerScores);
         }
+
+        console.log("Sending to backend: " + JSON.stringify(out));
+        google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+
+        const now = new Date();
+        const hours = now.getHours().toString();
+        const minutes = now.getMinutes().toString().padStart(2, "0");
+        const time = `${hours}:${minutes}`;
+        document.getElementById("save_status").innerText = "Saved at " + time;
+    }
+
+    // Call saveData function every 5 minutes
+    setInterval(saveData, 300000); // 300000 milliseconds = 5 minutes
+
+    tr.appendChild(saveElement);
+    tr.appendChild(loadElement);
+    tr.appendChild(statusElement);
+
+    subTable.appendChild(tr);
+    table.appendChild(subTable);
+}
 
         function createLoadButton() {
             const button = document.createElement("button");
