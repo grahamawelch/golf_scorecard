@@ -236,8 +236,18 @@
         document.getElementById("save_status").style.fontStyle = "italic";
     }
 
+    function triggerSaveFunction() {
+    saveData(); // Call your function
+    var url = "https://script.google.com/macros/s/AKfycbzNkglWNQqa8uarpM9EeI-7NfI9R-tKb8gWcsDqxllfgr-dKakPjRsQXXEX1_qCCwpc/exec";
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.send();
+  }
+
     // Call saveData function every 5 minutes
-    setInterval(saveData, 300000); // 300000 milliseconds = 5 minutes
+    setInterval(triggerSaveFunction, 300000); // 5 * 60 * 1000 = 300000 milliseconds = 5 minutes
+
+
 
     tr.appendChild(saveElement);
     tr.appendChild(loadElement);
