@@ -240,7 +240,7 @@
                 const hours = now.getHours().toString();
                 const minutes = now.getMinutes().toString().padStart(2, "0");
                 const time = `${hours}:${minutes}`;
-                document.getElementById("save_status").innerText = "Saved at " + time;
+                document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
             }
 
             return button;
