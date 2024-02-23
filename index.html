@@ -213,16 +213,13 @@
             table.appendChild(subTable);
         }
 
-
         function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
             const button = document.createElement("button");
             button.innerHTML = "Save";
             button.style.fontSize = "20px"; 
             button.style.color = "green";
             button.style.padding = "10px 10px";
-
-            // Function to save scores
-            function saveScores() {
+            button.onclick = function () {
                 let out = [];
                 for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
                     let currPlayerScores = [];
@@ -244,30 +241,10 @@
                 const minutes = now.getMinutes().toString().padStart(2, "0");
                 const time = `${hours}:${minutes}`;
                 document.getElementById("save_status").innerText = "Saved at " + time;
-
-                // Calculate the time for the next auto-save
-                const nextSaveTime = new Date(now.getTime() + 10 * 60 * 1000); // 10 minutes in milliseconds
-                const nextSaveHours = nextSaveTime.getHours().toString();
-                const nextSaveMinutes = nextSaveTime.getMinutes().toString().padStart(2, "0");
-                const nextSaveTimeString = `${nextSaveHours}:${nextSaveMinutes}`;
-
-                // Schedule the next auto-save if less than 5 hours have elapsed
-                const elapsedHours = (now.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-                if (elapsedHours < 5) {
-                    setTimeout(saveScores, nextSaveTime - now);
-                    console.log("Next auto-save scheduled at: " + nextSaveTimeString);
-                } else {
-                    console.log("5 hours elapsed. Auto-save stopped.");
-                }
             }
-
-            // Save scores immediately and start the timer
-            const startTime = new Date();
-            saveScores();
 
             return button;
         }
-
 
         function createLoadButton() {
             const button = document.createElement("button");
