@@ -47,10 +47,10 @@
             <div id="buttons">
                 <p> <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Instructions</u></b><br>
                     Choose your scheduled Tee Time, input all scores, <br>
-                    if you lose the browser, re-select your Tee Time and if <br>
-                    no scores are there, hit "Reload" to reload the <br>
-                    auto-saved scores.  Confirm correctness when done, then <br>
-                     "SUBMIT" to send scores to Ken. Then you are done— Thanks!</b><br>
+                    occasionally hit "Save" to save your scores (before Submitting)<br>
+                    and if problems, re-select your Tee Time & hit "Reload" to reload <br>
+                    what you saved.  Confirm correctness when done, then "SUBMIT" <br>
+                    to send scores to Ken. Then you are done— Thanks!</b><br>
                     <br>
                     <span style="background-color: cyan"><b>Albatrosses</b></span>, &nbsp<span
                         style="background-color: orange"><b>Eagles</b></span>,&nbsp & &nbsp<span
@@ -80,7 +80,7 @@
                         <td>
                         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         </td>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button"
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button"
                                 onclick="clearWithConfirmation()" disabled="true"
                                 style="color:red; font-size: 30px; padding: 10px 10px">Clear</button></td>
                         <td>
@@ -184,88 +184,7 @@
         }
 
 
-           // <!-- teamName = tee time and this is the function to auto save every 10 min after tee time for 5 hours --> 
-        function scheduleSaveFunction(teamName, spreadsheetConfig, selectedTeamConfig) {
-            // Parse tee time string to get hour and minute
-            var parts = teamName.split(':');
-            var teeHour = parseInt(parts[0]);
-            var teeMinute = parseInt(parts[1]);
-
-            // Calculate the start time for scheduling (10 minutes after tee time)
-            var startTime = new Date();
-            startTime.setHours(teeHour);
-            startTime.setMinutes(teeMinute + 10);
-
-            // Calculate the end time for scheduling (5 hours after tee time)
-            var endTime = new Date(startTime);
-            endTime.setHours(endTime.getHours() + 5);
-
-            // Schedule the "Save" function at 10-minute intervals
-            var interval = 10 * 60 * 1000; // 10 minutes in milliseconds
-            var currentTime = new Date();
-                while (startTime <= endTime && currentTime > startTime) {
-                  setTimeout(createSaveButton(spreadsheetConfig, selectedTeamConfig), startTime.getTime() - currentTime.getTime());
-                  startTime.setTime(startTime.getTime() + interval);
-                }
-        }
-
-
-
-        function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
-            return function() {
-               let out = [];
-               for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-                    let currPlayerScores = [];
-                    currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
-                    currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
-
-                    for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
-                        }
-
-                    out.push(currPlayerScores);
-                }
-
-                console.log("Sending to backend: " + JSON.stringify(out));
-                google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
-
-                const now = new Date();
-                const hours = now.getHours().toString();
-                const minutes = now.getMinutes().toString().padStart(2, "0");
-                const time = `${hours}:${minutes}`;
-                document.getElementById("save_status").innerText = "Saved at " + time;
-           };
-        }
-
-
-            // Function to create save button and schedule save function
-        function createSaveButtonAndSchedule(teamName, spreadsheetConfig, selectedTeamConfig) {
-           // Call createSaveButton function
-           const saveButtonFunction = createSaveButton(spreadsheetConfig, selectedTeamConfig);
-
-           // Call scheduleSaveFunction function
-           scheduleSaveFunction(teamName, spreadsheetConfig, selectedTeamConfig);
-
-           // Create the button element
-            const button = document.createElement("button");
-            button.innerHTML = "Save";
-            button.style.fontSize = "20px";
-            button.style.color = "green";
-            button.style.padding = "10px 10px";
-
-            button.onclick = function() {
-                // Call createSaveButtonAndSchedule when the button is clicked
-                createSaveButtonAndSchedule(teamName, spreadsheetConfig, selectedTeamConfig);
-            };
-
-            // Return the button element
-            return button;
-        }
-
-
-    
-
-    function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+        function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
             const table = document.getElementById("table");
 
             const subTable = document.createElement("table");
@@ -294,7 +213,38 @@
             table.appendChild(subTable);
         }
 
+        function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
+            const button = document.createElement("button");
+            button.innerHTML = "Save";
+            button.style.fontSize = "20px"; 
+            button.style.color = "green";
+            button.style.padding = "10px 10px";
+            button.onclick = function () {
+                let out = [];
+                for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+                    let currPlayerScores = [];
+                    currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+                    currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
 
+                    for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+                        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+                    }
+
+                    out.push(currPlayerScores);
+                }
+
+                console.log("Sending to backend: " + JSON.stringify(out));
+                google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+
+                const now = new Date();
+                const hours = now.getHours().toString();
+                const minutes = now.getMinutes().toString().padStart(2, "0");
+                const time = `${hours}:${minutes}`;
+                document.getElementById("save_status").innerText = "Saved at " + time;
+            }
+
+            return button;
+        }
 
         function createLoadButton() {
             const button = document.createElement("button");
@@ -318,7 +268,6 @@
 
             return button;
         }
-
 
         function populateScorecardWithSavedResults(allPlayerScores) {
             // [["playerName", <target>, <score0>, <score1>, ...], ...]
