@@ -209,53 +209,69 @@
     const statusElement = document.createElement("td");
     statusElement.id = "save_status";
 
-    // Function to save data
-    function saveData() {
-        let out = [];
-        for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-            let currPlayerScores = [];
-            currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
-            currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+    
+    function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+            const table = document.getElementById("table");
 
-            for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
-            }
+            const subTable = document.createElement("table");
+            const tr = document.createElement("tr");
 
-            out.push(currPlayerScores);
+            const saveElement = document.createElement("td");
+            saveElement.appendChild(createSaveButton(spreadsheetConfig, selectedTeamConfig));
+            saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
+            saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+            saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
+
+            const loadElement = document.createElement("td");
+            loadElement.appendChild(createLoadButton());
+            loadElement.style.paddingLeft = "20px"; // Adjust the amount of space as needed
+            loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+            loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
+
+            const statusElement = document.createElement("td");
+            statusElement.id = "save_status";
+
+            tr.appendChild(saveElement);
+            tr.appendChild(loadElement);
+            tr.appendChild(statusElement);
+
+            subTable.appendChild(tr);
+            table.appendChild(subTable);
         }
 
-        console.log("Sending to backend: " + JSON.stringify(out));
-        google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+        function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
+            const button = document.createElement("button");
+            button.innerHTML = "Save";
+            button.style.fontSize = "20px"; 
+            button.style.color = "green";
+            button.style.padding = "10px 10px";
+            button.onclick = function () {
+                let out = [];
+                for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+                    let currPlayerScores = [];
+                    currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+                    currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
 
-        const now = new Date();
-        const hours = now.getHours().toString();
-        const minutes = now.getMinutes().toString().padStart(2, "0");
-        const time = `${hours}:${minutes}`;
-        document.getElementById("save_status").innerText = "Saved at " + time;
-        document.getElementById("save_status").style.fontSize = "20px";
-        document.getElementById("save_status").style.fontStyle = "italic";
-    }
+                    for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+                        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+                    }
 
-    function triggerSaveFunction() {
-    saveData(); // Call your function
-    var url = "https://script.google.com/macros/s/AKfycbzNkglWNQqa8uarpM9EeI-7NfI9R-tKb8gWcsDqxllfgr-dKakPjRsQXXEX1_qCCwpc/exec";
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.send();
-  }
+                    out.push(currPlayerScores);
+                }
 
-    // Call saveData function every 5 minutes
-    setInterval(triggerSaveFunction, 300000); // 5 * 60 * 1000 = 300000 milliseconds = 5 minutes
+                console.log("Sending to backend: " + JSON.stringify(out));
+                google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
 
+                const now = new Date();
+                const hours = now.getHours().toString();
+                const minutes = now.getMinutes().toString().padStart(2, "0");
+                const time = `${hours}:${minutes}`;
+                document.getElementById("save_status").innerText = "Saved at " + time;
+            }
 
+            return button;
+        }
 
-    tr.appendChild(saveElement);
-    tr.appendChild(loadElement);
-    tr.appendChild(statusElement);
-
-    subTable.appendChild(tr);
-    table.appendChild(subTable);
-}
 
         function createLoadButton() {
             const button = document.createElement("button");
