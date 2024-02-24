@@ -214,37 +214,48 @@
         }
 
         function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
-            const button = document.createElement("button");
-            button.innerHTML = "Save";
-            button.style.fontSize = "20px"; 
-            button.style.color = "green";
-            button.style.padding = "10px 10px";
-            button.onclick = function () {
-                let out = [];
-                for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-                    let currPlayerScores = [];
-                    currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
-                    currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+    const button = document.createElement("button");
+    button.innerHTML = "Save";
+    button.style.fontSize = "20px"; 
+    button.style.color = "green";
+    button.style.padding = "10px 10px";
+    var lastSync = 0;
+    var syncInterval = 600000; // Sync every 10 minutes
+    var updatePage = function() {
+        let out = [];
+        for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+            let currPlayerScores = [];
+            currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+            currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
 
-                    for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
-                    }
-
-                    out.push(currPlayerScores);
-                }
-
-                console.log("Sending to backend: " + JSON.stringify(out));
-                google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
-
-                const now = new Date();
-                const hours = now.getHours().toString();
-                const minutes = now.getMinutes().toString().padStart(2, "0");
-                const time = `${hours}:${minutes}`;
-                document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
+            for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+                currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
             }
 
-            return button;
+            out.push(currPlayerScores);
         }
+
+        console.log("Sending to backend: " + JSON.stringify(out));
+        google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+
+        const now = new Date();
+        const hours = now.getHours().toString();
+        const minutes = now.getMinutes().toString().padStart(2, "0");
+        const time = `${hours}:${minutes}`;
+        document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
+    };
+
+    button.onclick = function () {
+        var now = new Date().getTime();
+        if ((now - lastSync) > syncInterval ) {
+            updatePage();
+            lastSync = now;
+        }
+    };
+
+    return button;
+}
+
 
         function createLoadButton() {
             const button = document.createElement("button");
