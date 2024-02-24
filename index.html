@@ -213,7 +213,7 @@
             table.appendChild(subTable);
         }
 
-       // Existing function to create the save button
+    // Define the createSaveButton function (unchanged)
 function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
     const button = document.createElement("button");
     button.innerHTML = "Save";
@@ -227,7 +227,7 @@ function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
     return button;
 }
 
-     // New function to save data and update status
+    // Define the saveData function (unchanged)
     function saveData(spreadsheetConfig, selectedTeamConfig) {
         let out = [];
         for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
@@ -252,20 +252,31 @@ function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
         document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
     }
 
-          // Function to automatically trigger the save operation every 10 minutes
+    // Define the function to schedule the save operation every 10 minutes
     function scheduleSaveOperation(spreadsheetConfig, selectedTeamConfig) {
-          // Initial save operation
+        // Initial save operation
         saveData(spreadsheetConfig, selectedTeamConfig);
 
-          // Schedule save operation every 10 minutes
+        // Schedule save operation every 10 minutes
         setInterval(function() {
-        saveData(spreadsheetConfig, selectedTeamConfig);
-        }   , 10 * 60 * 1000); // 10 minutes in milliseconds
+            saveData(spreadsheetConfig, selectedTeamConfig);
+        }, 10 * 60 * 1000); // 10 minutes in milliseconds
     }
 
-    // Example usage:
-    scheduleSaveOperation(spreadsheetConfig, selectedTeamConfig);
+    // Ensure the DOM content is loaded before executing the code
+    document.addEventListener("DOMContentLoaded", function() {
+        // Define spreadsheetConfig and selectedTeamConfig variables
+        // (Assuming these are defined somewhere in your code)
 
+        // Call the function to create the save button
+        const saveButton = createSaveButton(spreadsheetConfig, selectedTeamConfig);
+
+        // Append the save button to the document body or any other container element
+        document.body.appendChild(saveButton);
+
+        // Call the function to schedule the save operation every 10 minutes
+        scheduleSaveOperation(spreadsheetConfig, selectedTeamConfig);
+    });
 
 
         function createLoadButton() {
