@@ -213,15 +213,22 @@
             table.appendChild(subTable);
         }
 
-        function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
+       // Existing function to create the save button
+function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
     const button = document.createElement("button");
     button.innerHTML = "Save";
     button.style.fontSize = "20px"; 
     button.style.color = "green";
     button.style.padding = "10px 10px";
-    var lastSync = 0;
-    var syncInterval = 600000; // Sync every 10 minutes
-    var updatePage = function() {
+    button.onclick = function () {
+        saveData(spreadsheetConfig, selectedTeamConfig); // Call the save function when the button is clicked
+    };
+
+    return button;
+}
+
+     // New function to save data and update status
+    function saveData(spreadsheetConfig, selectedTeamConfig) {
         let out = [];
         for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
             let currPlayerScores = [];
@@ -243,18 +250,22 @@
         const minutes = now.getMinutes().toString().padStart(2, "0");
         const time = `${hours}:${minutes}`;
         document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
-    };
+    }
 
-    button.onclick = function () {
-        var now = new Date().getTime();
-        if ((now - lastSync) > syncInterval ) {
-            updatePage();
-            lastSync = now;
-        }
-    };
+          // Function to automatically trigger the save operation every 10 minutes
+    function scheduleSaveOperation(spreadsheetConfig, selectedTeamConfig) {
+          // Initial save operation
+        saveData(spreadsheetConfig, selectedTeamConfig);
 
-    return button;
-}
+          // Schedule save operation every 10 minutes
+        setInterval(function() {
+        saveData(spreadsheetConfig, selectedTeamConfig);
+        }   , 10 * 60 * 1000); // 10 minutes in milliseconds
+    }
+
+    // Example usage:
+    scheduleSaveOperation(spreadsheetConfig, selectedTeamConfig);
+
 
 
         function createLoadButton() {
