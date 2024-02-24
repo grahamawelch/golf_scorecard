@@ -213,70 +213,66 @@
             table.appendChild(subTable);
         }
 
-    // Define the createSaveButton function (unchanged)
-function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
-    const button = document.createElement("button");
-    button.innerHTML = "Save";
-    button.style.fontSize = "20px"; 
-    button.style.color = "green";
-    button.style.padding = "10px 10px";
-    button.onclick = function () {
-        saveData(spreadsheetConfig, selectedTeamConfig); // Call the save function when the button is clicked
-    };
 
-    return button;
-}
+        // Define the createSaveButton function (unchanged)
+        function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
+            const button = document.createElement("button");
+            button.innerHTML = "Save";
+            button.style.fontSize = "20px"; 
+            button.style.color = "green";
+            button.style.padding = "10px 10px";
+            button.onclick = function () {
+                saveData(spreadsheetConfig, selectedTeamConfig); // Call the save function when the button is clicked
+            };
 
-    // Define the saveData function (unchanged)
-    function saveData(spreadsheetConfig, selectedTeamConfig) {
-        let out = [];
-        for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-            let currPlayerScores = [];
-            currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
-            currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+            return button;
+        }     
 
-            for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+        const statusElement = document.createElement("td");
+        statusElement.id = "save_status";
+
+        // Function to save data
+        function saveData() {
+            let out = [];
+            for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+                let currPlayerScores = [];
+                currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+                currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+
+                for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+                    currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+                }
+
+                out.push(currPlayerScores);
             }
 
-            out.push(currPlayerScores);
+            console.log("Sending to backend: " + JSON.stringify(out));
+            google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+
+            const now = new Date();
+            const hours = now.getHours().toString();
+            const minutes = now.getMinutes().toString().padStart(2, "0");
+            const time = `${hours}:${minutes}`;
+            document.getElementById("save_status").innerText = "Saved at " + time;
+            document.getElementById("save_status").style.fontSize = "20px";
+            document.getElementById("save_status").style.fontStyle = "italic";
         }
 
-        console.log("Sending to backend: " + JSON.stringify(out));
-        google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
-
-        const now = new Date();
-        const hours = now.getHours().toString();
-        const minutes = now.getMinutes().toString().padStart(2, "0");
-        const time = `${hours}:${minutes}`;
-        document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
-    }
-
-    // Define the function to schedule the save operation every 10 minutes
-    function scheduleSaveOperation(spreadsheetConfig, selectedTeamConfig) {
-        // Initial save operation
-        saveData(spreadsheetConfig, selectedTeamConfig);
-
-        // Schedule save operation every 10 minutes
+        // Call saveData function every 1 minute to check if more than 5 minutes have passed since the last save
+        let lastSaveTime = Date.now(); // Initialize the variable to store the timestamp of the last save
         setInterval(function() {
-            saveData(spreadsheetConfig, selectedTeamConfig);
-        }, 10 * 60 * 1000); // 10 minutes in milliseconds
-    }
+            if (Date.now() - lastSaveTime >= 5 * 60 * 1000) { // Check if more than 5 minutes have passed
+                saveData(spreadsheetConfig, selectedTeamConfig);
+                lastSaveTime = Date.now(); // Update the last save time
+            }
+        }, 60 * 1000); // 60,000 milliseconds = 1 minute
 
-    // Ensure the DOM content is loaded before executing the code
-    document.addEventListener("DOMContentLoaded", function() {
-        // Define spreadsheetConfig and selectedTeamConfig variables
-        // (Assuming these are defined somewhere in your code)
+        tr.appendChild(saveElement);
+        tr.appendChild(loadElement);
+        tr.appendChild(statusElement);
 
-        // Call the function to create the save button
-        const saveButton = createSaveButton(spreadsheetConfig, selectedTeamConfig);
-
-        // Append the save button to the document body or any other container element
-        document.body.appendChild(saveButton);
-
-        // Call the function to schedule the save operation every 10 minutes
-        scheduleSaveOperation(spreadsheetConfig, selectedTeamConfig);
-    });
+        subTable.appendChild(tr);
+        table.appendChild(subTable);
 
 
         function createLoadButton() {
