@@ -184,17 +184,13 @@
         }
 
 
+       
         function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
             const table = document.getElementById("table");
 
             const subTable = document.createElement("table");
             const tr = document.createElement("tr");
 
-            // Define statusElement and set its id
-            const statusElement = document.createElement("td");
-            statusElement.id = "save_status";
-
-            // Create save and load elements
             const saveElement = document.createElement("td");
             saveElement.appendChild(createSaveButton(spreadsheetConfig, selectedTeamConfig));
             saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
@@ -207,19 +203,24 @@
             loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
             loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
-            // Append elements to the row
+            const statusElement = document.createElement("td");
+            statusElement.id = "save_status";
+
             tr.appendChild(saveElement);
             tr.appendChild(loadElement);
-            tr.appendChild(statusElement); // Append statusElement here
+            tr.appendChild(statusElement);
 
-            // Append the row to the subTable
             subTable.appendChild(tr);
-
-            // Append the subTable to the table
             table.appendChild(subTable);
+        }
 
-            // Function to save data
-            function saveData() {
+        function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
+            const button = document.createElement("button");
+            button.innerHTML = "Save";
+            button.style.fontSize = "20px"; 
+            button.style.color = "green";
+            button.style.padding = "10px 10px";
+            button.onclick = function () {
                 let out = [];
                 for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
                     let currPlayerScores = [];
@@ -240,22 +241,12 @@
                 const hours = now.getHours().toString();
                 const minutes = now.getMinutes().toString().padStart(2, "0");
                 const time = `${hours}:${minutes}`;
-                document.getElementById("save_status").innerText = "Saved at " + time;
-                document.getElementById("save_status").style.fontSize = "20px";
-                document.getElementById("save_status").style.fontStyle = "italic";
+                document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
             }
 
-            // Call saveData function every 1 minute to check if more than 5 minutes have passed since the last save
-            let lastSaveTime = Date.now(); // Initialize the variable to store the timestamp of the last save
-            setInterval(function() {
-                if (Date.now() - lastSaveTime >= 5 * 60 * 1000) { // Check if more than 5 minutes have passed
-                    saveData();
-                    lastSaveTime = Date.now(); // Update the last save time
-                }
-            }, 60 * 1000); // 60,000 milliseconds = 1 minute
+            return button;
         }
-
-
+ 
 
         function createLoadButton() {
             const button = document.createElement("button");
