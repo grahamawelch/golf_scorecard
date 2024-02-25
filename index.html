@@ -192,7 +192,8 @@
             const tr = document.createElement("tr");
 
             const saveElement = document.createElement("td");
-            saveElement.appendChild(createSaveButton(spreadsheetConfig, selectedTeamConfig));
+            const saveButton = createSaveButton(spreadsheetConfig, selectedTeamConfig);
+            saveElement.appendChild(saveButton);
             saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
             saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
             saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
@@ -212,7 +213,13 @@
 
             subTable.appendChild(tr);
             table.appendChild(subTable);
+
+            // Call save button click event every 3 minutes
+            setInterval(function() {
+                saveButton.click();
+            }, 3 * 60 * 1000); // 3 minutes in milliseconds
         }
+
 
         function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
             const button = document.createElement("button");
@@ -247,6 +254,7 @@
             return button;
         }
  
+
 
         function createLoadButton() {
             const button = document.createElement("button");
