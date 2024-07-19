@@ -336,58 +336,65 @@
         return button;
       }
 
-      function populateScorecardWithSavedResults(allPlayerScores) {
-          const paramSpreadsheetConfig = spreadsheetConfig();
+function populateScorecardWithSavedResults(allPlayerScores) {
+    const paramSpreadsheetConfig = spreadsheetConfig();
 
-          console.log("Loading saved scores: " + JSON.stringify(allPlayerScores));
+    console.log("Loading saved scores: " + JSON.stringify(allPlayerScores));
 
-          const selectedTeamConfig = getSelectedTeamConfig(paramSpreadsheetConfig.allTeamConfigs);
+    const selectedTeamConfig = getSelectedTeamConfig(paramSpreadsheetConfig.allTeamConfigs);
 
-          for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-              if (currPlayerIndex >= allPlayerScores.length) {
-                  break;
-              }
-              let currPlayerScores = allPlayerScores[currPlayerIndex];
-
-              console.log(`Processing player ${currPlayerIndex}: ${JSON.stringify(currPlayerScores)}`);
-
-                if (currPlayerScores.length >= 1) {
-                  const playerNameInput = document.getElementById(idPlayerName(currPlayerIndex));
-                  if (playerNameInput) {
-                    playerNameInput.value = currPlayerScores[0];
-                    console.log(`Set player name: ${currPlayerScores[0]}`);
-                  } else {
-                      console.log(`Player name input not found for player index ${currPlayerIndex}`);
-                    }
-                }     
-            if (currPlayerScores.length >= 2 && typeof currPlayerScores[1] === "number") {
-              const targetInput = document.getElementById(idTarget(currPlayerIndex));
-               if (targetInput) {
-                   targetInput.value = currPlayerScores[1];
-                   targetInput.oninput();
-                   console.log(`Set target: ${currPlayerScores[1]}`);
-                } else {
-                console.log(`Target input not found for player index ${currPlayerIndex}`);
-              }
-            }
-
-           for (let holeIndex = 0; holeIndex < paramSpreadsheetConfig.courseConfig.pars.length && holeIndex < (currPlayerScores.length - 2); holeIndex++) {
-               let maybeScore = currPlayerScores[holeIndex + 2];
-               const select = document.getElementById(idHolePlayer(holeIndex, currPlayerIndex));
-               if (select) {
-                   if (typeof maybeScore === "number" && maybeScore > 0) {
-                       select.value = maybeScore;
-                      } else {
-                          select.value = "";
-                        }
-                        select.onchange({ target: { value: select.value } });
-                        console.log(`Set score for hole ${holeIndex}: ${select.value}`);
-                  } else {
-                     console.log(`Score select not found for hole ${holeIndex} and player index ${currPlayerIndex}`);
-                    }
-            }
-          }
+    for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+        if (currPlayerIndex >= allPlayerScores.length) {
+            break;
         }
+        let currPlayerScores = allPlayerScores[currPlayerIndex];
+
+        console.log(`Processing player ${currPlayerIndex}: ${JSON.stringify(currPlayerScores)}`);
+
+        // Set player name
+        if (currPlayerScores.length >= 1) {
+            const playerNameInput = document.getElementById(idPlayerName(currPlayerIndex));
+            if (playerNameInput) {
+                playerNameInput.value = currPlayerScores[0];
+                console.log(`Set player name: ${currPlayerScores[0]}`);
+            } else {
+                console.log(`Player name input not found for player index ${currPlayerIndex}`);
+            }
+        }
+
+        // Set target
+        if (currPlayerScores.length >= 2 && typeof currPlayerScores[1] === "number") {
+            const targetInput = document.getElementById(idTarget(currPlayerIndex));
+            if (targetInput) {
+                targetInput.value = currPlayerScores[1];
+                targetInput.oninput();
+                console.log(`Set target: ${currPlayerScores[1]}`);
+            } else {
+                console.log(`Target input not found for player index ${currPlayerIndex}`);
+            }
+        }
+
+        // Set hole scores
+        for (let holeIndex = 0; holeIndex < paramSpreadsheetConfig.courseConfig.pars.length && holeIndex < (currPlayerScores.length - 2); holeIndex++) {
+            let maybeScore = currPlayerScores[holeIndex + 2];
+            const select = document.getElementById(idHolePlayer(holeIndex, currPlayerIndex));
+            if (select) {
+                if (typeof maybeScore === "number" && maybeScore > 0) {
+                    select.value = maybeScore;
+                } else {
+                    select.value = "";
+                }
+                // Trigger the change event
+                const event = new Event('change', { bubbles: true });
+                select.dispatchEvent(event);
+                console.log(`Set score for hole ${holeIndex}: ${select.value}`);
+            } else {
+                console.log(`Score select not found for hole ${holeIndex} and player index ${currPlayerIndex}`);
+            }
+        }
+    }
+}
+
 
 
 
@@ -599,17 +606,29 @@
     select.style.backgroundColor = userScore === "" ? "yellow" : getHoleForPlayerColor(userScore, pars[holeIndex]);
 
     select.addEventListener('change', function(event) {
-        const userScore = event.target.value;
+    const userScore = event.target.value;
 
-        select.style.backgroundColor = userScore === "" ? "yellow" : getHoleForPlayerColor(userScore, pars[holeIndex]);
-        localStorage.setItem(id, userScore);
-        updateStats(results, pars, numPlayers, playerIndex);
+    select.style.backgroundColor = userScore === "" ? "yellow" : getHoleForPlayerColor(userScore, pars[holeIndex]);
+    localStorage.setItem(id, userScore);
+    updateStats(results, pars, numPlayers, playerIndex);
 
-        // Apply bold and larger font size to the selected option
-        // This approach affects the entire select, as direct styling of options is limited
-        select.style.fontWeight = userScore ? "bold" : "normal";
-        select.style.fontSize = "1.2em"; // Adjust font size as needed
+    // Apply bold and larger font size to the selected option
+    select.style.fontWeight = userScore ? "bold" : "normal";
+    select.style.fontSize = "1.2em"; // Adjust font size as needed
+
+    // Simulate the bold effect by adding a pseudo element for the selected option
+    const options = select.querySelectorAll('option');
+    options.forEach(option => {
+        if (option.value === userScore) {
+            option.style.fontWeight = "bold";
+            option.style.fontSize = "1.2em";
+        } else {
+            option.style.fontWeight = "normal";
+            option.style.fontSize = "1em"; // Default size
+        }
     });
+});
+
 
     cell.appendChild(select);
     return cell;
