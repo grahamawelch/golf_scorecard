@@ -1,96 +1,153 @@
 <!DOCTYPE html>
 <html>
-<title>
-    ⛳️🏌️‍♂️📝
-</title>
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⛳️🏌️‍♂️📝</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 20px;
+      /* Ensuring padding for all sides */
+      box-sizing: border-box;
+      background-color: #ADD8E6;
+      font-size: 1.2em;
+      /* Set a base font size */
+      line-height: 1.5em;
+      /* Improve readability */
+      scroll-behavior: smooth;
+    }
 
-    <style>
-        body {
-            padding: 0px 0px 0px 20px;
-        }
-    </style>
+    h1 {
+      font-size: 2.5em;
+      /* Adjust the size as needed */
+      margin-top: 0;
+      /* Ensure no margin at the top */
+    }
 
+    p {
+      margin: 1em 0;
+      /* Adding margin to the top and bottom of <p> elements */
+    }
 
+    input[type="text"],
+    button {
+      font-size: 1.2em;
+      padding: 10px;
+    }
+  </style>
 </head>
+
 
 <body>
 
-    <body style="background-color:#ADD8E6;">
-        <h1>
-            <font color="Blue"><b>The Beard-Turner Senior Golf Group</b></font>
-        </h1>
-        <h2>
-            <div id="course"></div>
-        </h2>
+  <h1>
+    <font color="Blue"><b>The Beard-Turner Senior <br> 
+         </h1>
+         <h1>   
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Golf Group</b></font>
+  </h1>
+  <h1>
+    <div id="course"></div>
+  </h1>
 
-        <div id="all_input">
-            <div>
-                <div style="display: inline-block"><b>Date</b></div>
-                <div style="display: inline-block" id="date"></div>
-            </div>
+  <div id="all_input">
+    <div>
+      <div style="display: inline-block; font-size: 2em;"><b>Date: </b></div>
+      <div style="display: inline-block; font-size: 2em; font-weight: bold;" id="date"></div>
+    </div>
 
-            <div>
-                <div style="display: inline-block">
-                    <font color="Blue"><b>Team</b></font>
-                </div>
-                <input style="display: inline-block; font-size: 25px; padding: 7px 7px; width: 10ch" id="team"
-                    type="text" list="teamDatalist" placeholder="Tee Time">
-                <div id="team_options"></div>
-                <div style="display: inline-block"><b>Team Target Points</b></div>
-                <div style="display: inline-block" id="team_target"></div>
-            </div>
+    <div>
+      <div style="display: inline-block; font-size: 2em;">
+        <font color="Blue"><b>Team</b></font>
+      </div>
+      <input style="display: inline-block; font-size: 1.5em; padding: 15px 15px; width: 8ch" id="team"
+                    type="text" list="teamDatalist" placeholder="TEE TIME">
+      <div id="team_options"></div>
+      <div style="display: inline-block; font-size: 2em;"><b>Team Target Points = </b></div>
+      <div style="display: inline-block; font-size: 2em; font-weight: bold;" id="team_target"></div>
+    </div>
+  </div>
 
-            <div id="table">
-            </div>
-            <div id="buttons">
-                <p> <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Instructions</u></b><br>
-                    Choose your scheduled Tee Time, input all scores, <br>
-                    occasionally hit "Save" to save your scores (before Submitting)<br>
-                    and if problems, re-select your Tee Time & hit "Reload" to reload <br>
-                    what you saved.  Confirm correctness when done, then "SUBMIT" <br>
-                    to send scores to Ken. Then you are done— Thanks!</b><br>
-                    <br>
-                    <span style="background-color: cyan"><b>Albatrosses</b></span>, &nbsp<span
-                        style="background-color: orange"><b>Eagles</b></span>,&nbsp & &nbsp<span
-                        style="background-color: green"><b> Birdies</b></span> &nbsp;&nbsp; <b><i> are highlighted
-                    </b></i>
+  <br>
+
+  <div id="table"></div>
+
+  <div id="buttons">
+    <table>
+      <tr></tr>
+      <tr></tr>
+      <tr></tr>
+      <tr>
+        <td><button id="submit_button" onclick="submit()" disabled="true"
+                            style="color: green; font-size: 30px; padding: 10px 10px">SUBMIT</button></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div id="submit_confirmation"></div>
+        </td>
+      </tr>
+      <tr></tr>
+      <tr></tr>
+      <tr></tr>
+      <tr></tr>
+      <tr></tr>
+      <tr></tr>
+      <tr></tr>
+      <tr></tr>
+      <tr></tr>
+      <tr>
+        <td></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button"
+                            onclick="clearWithConfirmation()" disabled="true"
+                            style="color:red; font-size: 30px; padding: 10px 10px">Clear</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="table"></div>
+
+  <p id="instructions">
+    <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Instructions</u></b><br>
+            Choose your scheduled Tee Time, input all <br>
+            scores, the App auto-saves all of your <br>
+            scores every ~20 secs, if problems, <br>
+            re-select your Tee Time & hit "Reload".<br>
+    <b>If a player drops out, you must delete the<br>
+            player's name, target points, and his scores.</b> <br>
+            Then all remaining team points are correct. When <br>
+            about done, look for <span style="background-color: yellow;"> yellow hole scoreboxes,</span><br>
+            those indicates <b>"no score"</b>. When ready,<br>
+    <span style="font-weight: bold; color: green;">"SUBMIT" </span> to send scores to Ken. <br>
+            You will see a confirmation of <span style="font-weight: bold; color: green;">"SUCCESS" </span> if
+    successful.<br>
+    <b>Then you are done— Thanks!</b><br>
+    <br>
+            Note: <span style="font-weight: bold; color: red;">"Clear"</span> clears all scores.
+    <br><br>
+    <span style="background-color: cyan"><b>Albatrosses</b></span>, &nbsp;<span
+                style="background-color: orange"><b>Eagles</b></span>,&nbsp; & &nbsp;<span
+                style="background-color: green"><b> Birdies</b></span> &nbsp;&nbsp; <b><i> are highlighted
+            </b></i>
+  </p>
+  </div>
+
+  <script>
+    window.addEventListener('load', function() {
+            // Scroll to top on page load
+            window.scrollTo(0, 0);
+        });
+  </script>
+</body>
+
+</html>
 
 
-                <table>
-                    <tr>
-                        <td><button id="submit_button" onclick="submit()" disabled="true"
-                                style="color: green; font-size: 30px; padding: 10px 10px">SUBMIT</button></td>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div
-                                id="submit_confirmation"></div>
-                        </td>
-                        <div>
-                    </tr>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr>
-                        <td>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        </td>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button"
-                                onclick="clearWithConfirmation()" disabled="true"
-                                style="color:red; font-size: 30px; padding: 10px 10px">Clear</button></td>
-                        <td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </body>
-    <script>
-        const RESULTS = [{
+
+
+<script>
+  const RESULTS = [{
             name: "Total 18",
             startInclusive: 0,
             endExclusive: 18,
@@ -214,17 +271,17 @@
             subTable.appendChild(tr);
             table.appendChild(subTable);
 
-            // Call save button click event every 3 minutes
+            // Call save button click event every 20 sec
             setInterval(function() {
                 saveButton.click();
-            }, 29 * 1000); // 29 sec in milliseconds
+            }, 20 * 1000); // 20 sec in milliseconds
         }
 
 
         function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
             const button = document.createElement("button");
             button.innerHTML = "Save";
-            button.style.fontSize = "20px"; 
+            button.style.fontSize = "30px"; 
             button.style.color = "green";
             button.style.padding = "10px 10px";
             button.onclick = function () {
@@ -256,62 +313,83 @@
  
 
 
-        function createLoadButton() {
-            const button = document.createElement("button");
-            button.innerHTML = "Re-Load";
-            button.style.fontSize = "20px";
-            button.style.color = "blue";
-            button.style.padding = "10px 10px";
-            button.onclick = function () {
-                const teamName = document.getElementById("team").value;
+      function createLoadButton() {
+        const button = document.createElement("button");
+        button.innerHTML = "Re-Load";
+        button.style.fontSize = "30px";
+        button.style.color = "blue";
+        button.style.padding = "10px 10px";
+        button.onclick = function () {
+            const teamName = document.getElementById("team").value;
 
-                google.script.run.withSuccessHandler(populateScorecardWithSavedResults).loadScoresForTeam(teamName);
-                return;
+            google.script.run.withSuccessHandler(populateScorecardWithSavedResults).loadScoresForTeam(teamName);
+            return;
 
-                // For testing.
-                populateScorecardWithSavedResults([
-                    ["AAA", 27, 3, 3, 3, 0, 0, 0],
-                    [123, 20, 4, 4, 0],
-                    ["CCC", 10, -1, 3, 1, 3, "a", 3],
-                ])
-            };
+            // For testing.
+            populateScorecardWithSavedResults([
+                ["AAA", 27, 3, 3, 3, 0, 0, 0],
+                [123, 20, 4, 4, 0],
+                ["CCC", 10, -1, 3, 1, 3, "a", 3],
+            ]);
+        };
 
-            return button;
-        }
+        return button;
+      }
 
-        function populateScorecardWithSavedResults(allPlayerScores) {
-            // [["playerName", <target>, <score0>, <score1>, ...], ...]
-            const paramSpreadsheetConfig = spreadsheetConfig();
+      function populateScorecardWithSavedResults(allPlayerScores) {
+          const paramSpreadsheetConfig = spreadsheetConfig();
 
-            console.log("Loading saved scores: " + JSON.stringify(allPlayerScores));
+          console.log("Loading saved scores: " + JSON.stringify(allPlayerScores));
 
-            //const spreadsheetConfig = spreadsheetConfig();
-            const selectedTeamConfig = getSelectedTeamConfig(paramSpreadsheetConfig.allTeamConfigs);
+          const selectedTeamConfig = getSelectedTeamConfig(paramSpreadsheetConfig.allTeamConfigs);
 
-            for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-                if (currPlayerIndex >= allPlayerScores.length) {
-                    break;
-                }
-                let currPlayerScores = allPlayerScores[currPlayerIndex];
+          for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+              if (currPlayerIndex >= allPlayerScores.length) {
+                  break;
+              }
+              let currPlayerScores = allPlayerScores[currPlayerIndex];
+
+              console.log(`Processing player ${currPlayerIndex}: ${JSON.stringify(currPlayerScores)}`);
 
                 if (currPlayerScores.length >= 1) {
-                    document.getElementById(idPlayerName(currPlayerIndex)).value = currPlayerScores[0];
-                }
-                if (currPlayerScores.length >= 2 && typeof currPlayerScores[1] === "number") {
-                    const input = document.getElementById(idTarget(currPlayerIndex));
-                    input.value = currPlayerScores[1];
-                    input.oninput();
-                }
-
-                for (let holeIndex = 0; holeIndex < paramSpreadsheetConfig.courseConfig.pars.length && holeIndex < (currPlayerScores.length + 2); holeIndex++) {
-                    let maybeScore = currPlayerScores[holeIndex + 2];
-                    if (typeof maybeScore === "number" && maybeScore > 0) {
-                        const input = document.getElementById(idHolePlayer(holeIndex, currPlayerIndex));
-                        input.oninput({ target: { value: maybeScore } });
+                  const playerNameInput = document.getElementById(idPlayerName(currPlayerIndex));
+                  if (playerNameInput) {
+                    playerNameInput.value = currPlayerScores[0];
+                    console.log(`Set player name: ${currPlayerScores[0]}`);
+                  } else {
+                      console.log(`Player name input not found for player index ${currPlayerIndex}`);
                     }
-                }
+                }     
+            if (currPlayerScores.length >= 2 && typeof currPlayerScores[1] === "number") {
+              const targetInput = document.getElementById(idTarget(currPlayerIndex));
+               if (targetInput) {
+                   targetInput.value = currPlayerScores[1];
+                   targetInput.oninput();
+                   console.log(`Set target: ${currPlayerScores[1]}`);
+                } else {
+                console.log(`Target input not found for player index ${currPlayerIndex}`);
+              }
             }
+
+           for (let holeIndex = 0; holeIndex < paramSpreadsheetConfig.courseConfig.pars.length && holeIndex < (currPlayerScores.length - 2); holeIndex++) {
+               let maybeScore = currPlayerScores[holeIndex + 2];
+               const select = document.getElementById(idHolePlayer(holeIndex, currPlayerIndex));
+               if (select) {
+                   if (typeof maybeScore === "number" && maybeScore > 0) {
+                       select.value = maybeScore;
+                      } else {
+                          select.value = "";
+                        }
+                        select.onchange({ target: { value: select.value } });
+                        console.log(`Set score for hole ${holeIndex}: ${select.value}`);
+                  } else {
+                     console.log(`Score select not found for hole ${holeIndex} and player index ${currPlayerIndex}`);
+                    }
+            }
+          }
         }
+
+
 
         function getSelectedTeamConfig(allTeamConfigs) {
             const teamName = document.getElementById("team").value;
@@ -380,70 +458,77 @@
 
             const headerCell = document.createElement("td");
             headerCell.textContent = "Name";
+            headerCell.style.fontSize = "1.5em"; // Add this line to set the inline font size
+            headerCell.style.fontWeight = "bold"; // Set the inline font weight to bold
             row.appendChild(headerCell);
 
-            for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
-                const playerCell = document.createElement("td");
+           for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
+            const playerCell = document.createElement("td");
 
-                const input = document.createElement("input");
-                input.type = "string";
-                input.id = idPlayerName(playerIndex);
-                input.style = "font-size: 15px; padding: 5px 5px; width: 10ch";
+            const input = document.createElement("input");
+            input.type = "string"; 
+            input.id = idPlayerName(playerIndex);
+            input.style = "font-family: 'Arial Narrow', Arial, sans-serif; font-size: 16px; padding: 5px 5px; width: 12ch; font-weight: bold;"; // Using Arial Narrow with adjusted size and bold font weight
 
-                input.value = teamConfig.players[playerIndex].playerName
+            input.value = teamConfig.players[playerIndex].playerName;
 
-                playerCell.appendChild(input);
+            playerCell.appendChild(input);
 
-                row.appendChild(playerCell);
-            }
-
+            row.appendChild(playerCell);
+          }
             return row;
         }
 
         function generateTargetRow(results, pars, teamConfig) {
-            const row = document.createElement("tr");
+          const row = document.createElement("tr");
 
-            const headerCell = document.createElement("td");
-            headerCell.textContent = "Target";
-            row.appendChild(headerCell);
+          const headerCell = document.createElement("td");
+          headerCell.textContent = "Target";
+          headerCell.style.fontSize = "1.5em"; // Add this line to set the inline font size
+          headerCell.style.fontWeight = "bold"; // Set the inline font weight to bold
+          row.appendChild(headerCell);
 
-            let teamTarget = 0;
+          let teamTarget = 0;
 
-            for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
-                const currPlayerIndex = playerIndex;
+          for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
+              const currPlayerIndex = playerIndex;
 
-                const playerCell = document.createElement("td");
-                playerCell.align = "center";
+              const playerCell = document.createElement("td");
+              playerCell.align = "center";
 
-                const input = document.createElement("input");
-                input.type = "number";
-                input.id = idTarget(playerIndex);
-                input.style = "width: 4ch";
-                input.disabled = false;
+              const input = document.createElement("input");
+              input.type = "number";
+              input.id = idTarget(playerIndex);
+              input.style = "width: 3ch";
+              input.style.fontSize = "1.2em"; // Set the font size to 1.5em
+              input.disabled = false;
 
-                input.value = teamConfig.players[playerIndex].playerTarget;
+              input.value = teamConfig.players[playerIndex].playerTarget;
 
-                const playerTargetOrNan = parseInt(teamConfig.players[playerIndex].playerTarget);
-                if (playerTargetOrNan != NaN) {
-                    teamTarget += playerTargetOrNan;
-                }
+              const playerTargetOrNan = parseInt(teamConfig.players[playerIndex].playerTarget);
+              if (playerTargetOrNan != NaN) {
+                 teamTarget += playerTargetOrNan;
+              }
 
-                input.min = 0;
-                input.oninput = function (event) {
-                    updateStats(results, pars, teamConfig.players.length, currPlayerIndex);
-                    updateTeamTarget(teamConfig.players.length);
-                };
+              input.min = 0;
+              input.oninput = function (event) {
+                updateStats(results, pars, teamConfig.players.length, currPlayerIndex);
+                updateTeamTarget(teamConfig.players.length);
+              };
 
-                playerCell.appendChild(input);
+              playerCell.appendChild(input);
 
-                row.appendChild(playerCell);
+              row.appendChild(playerCell);
             }
 
 
-            document.getElementById("team_target").textContent = teamTarget;
+          document.getElementById("team_target").textContent = teamTarget;
 
-            return row;
+          return row;
         }
+
+
+
 
         function generateHoleRow(results, pars, holeIndex, numPlayers) {
             const row = document.createElement("tr");
@@ -464,43 +549,75 @@
         function generateHoleHeader(holeIndex, par) {
             const cell = document.createElement("td");
             cell.textContent = (holeIndex + 1) + " (" + par + ")";
+            cell.style.fontSize = "1.5em"; // Set the inline font size to 1.5em
 
             return cell;
         }
 
-        function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex) {
-            const cell = document.createElement("td");
-            cell.align = "center";
 
-            const input = document.createElement("input");
-            input.type = "number";
-            const id = idHolePlayer(holeIndex, playerIndex);
-            input.id = id;
-            input.style = "width: 4ch";
 
-            const possibleSavedScore = localStorage.getItem(id);
-            input.value = getUserScore(possibleSavedScore, pars[holeIndex]);
 
-            input.min = Math.max(pars[holeIndex] - 3, 1);    // At best an Albatross (or hole in 1)
-            input.max = pars[holeIndex] + 2;                 // At worst, a double-bogey
+  function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex) {
+    const cell = document.createElement("td");
+    cell.style.textAlign = "center"; // Use style instead of align
 
-            input.style.backgroundColor = getHoleForPlayerColor(input.value, pars[holeIndex]);
+    const select = document.createElement("select");
+    const id = idHolePlayer(holeIndex, playerIndex);
+    select.id = id;
+    select.style.width = "5ch"; // Set width to 4ch
+    select.style.fontSize = "1.2em"; // Increase font size to make text taller
+    select.style.height = "2.5em"; // Increase height to make the box taller
+    select.style.padding = "2px"; // Adjust padding if needed
+    select.style.boxSizing = "border-box"; // Ensure padding is included in the height
 
-            input.oninput = function (event) {
-                const userScore = getUserScore(event.target.value, pars[holeIndex]);
+    const possibleSavedScore = localStorage.getItem(id);
+    const userScore = possibleSavedScore !== null ? possibleSavedScore : "";
 
-                input.value = userScore;
+    const minScore = Math.max(pars[holeIndex] - 3, 1); // At best an Albatross (or hole in 1)
+    const maxScore = pars[holeIndex] + 2; // At worst, a double-bogey
 
-                input.style.backgroundColor = getHoleForPlayerColor(userScore, pars[holeIndex]);
+    // Add a null option
+    const nullOption = document.createElement("option");
+    nullOption.value = "";
+    if (userScore === "") {
+        nullOption.selected = true;
+    }
+    select.appendChild(nullOption);
 
-                localStorage.setItem(id, userScore);
-                updateStats(results, pars, numPlayers, playerIndex);
-            };
-
-            cell.appendChild(input);
-
-            return cell;
+    for (let score = minScore; score <= maxScore; score++) {
+        const option = document.createElement("option");
+        option.value = score;
+        option.text = score;
+        if (score == userScore) {
+            option.selected = true;
         }
+        select.appendChild(option);
+    }
+
+    // Set the color of the selected option to black
+    select.style.color = "black";
+    select.style.backgroundColor = userScore === "" ? "yellow" : getHoleForPlayerColor(userScore, pars[holeIndex]);
+
+    select.addEventListener('change', function(event) {
+        const userScore = event.target.value;
+
+        select.style.backgroundColor = userScore === "" ? "yellow" : getHoleForPlayerColor(userScore, pars[holeIndex]);
+        localStorage.setItem(id, userScore);
+        updateStats(results, pars, numPlayers, playerIndex);
+
+        // Apply bold and larger font size to the selected option
+        // This approach affects the entire select, as direct styling of options is limited
+        select.style.fontWeight = userScore ? "bold" : "normal";
+        select.style.fontSize = "1.2em"; // Adjust font size as needed
+    });
+
+    cell.appendChild(select);
+    return cell;
+}
+
+
+
+
 
         function getUserScore(value, par) {
             let userScore = value;
@@ -529,18 +646,28 @@
         }
 
         function generateResultTable(partialResult, numPlayers) {
-            const headerRow = document.createElement("tr");
-            headerRow.textContent = partialResult.name;
-            headerRow.style = "font-weight: bold; text-decoration: underline";
+          const headerRow = document.createElement("tr");
+          headerRow.textContent = partialResult.name;
+          headerRow.style = "font-weight: bold; text-decoration: underline; font-size: 1.5em;";
 
-            const scoreRow = generateResultScoreRow(partialResult.name, numPlayers);
-            const pointsRow = generateResultPointsRow(partialResult.name, numPlayers);
-            const netRow = generateResultNetRow(partialResult.name, numPlayers);
-            const pointsTeamRow = generateResultPointsTeamRow(partialResult.name);
-            const netTeamRow = generateResultNetTeamRow(partialResult.name);
+          const scoreRow = generateResultScoreRow(partialResult.name, numPlayers);
+          scoreRow.style.fontSize = "1.5em";
 
-            return [headerRow, scoreRow, pointsRow, netRow, pointsTeamRow, netTeamRow];
+          const pointsRow = generateResultPointsRow(partialResult.name, numPlayers);
+          pointsRow.style.fontSize = "1.5em";
+
+          const netRow = generateResultNetRow(partialResult.name, numPlayers);
+          netRow.style.fontSize = "1.5em";
+
+          const pointsTeamRow = generateResultPointsTeamRow(partialResult.name);
+          pointsTeamRow.style.fontSize = "1.5em";
+
+          const netTeamRow = generateResultNetTeamRow(partialResult.name);
+          netTeamRow.style.fontSize = "1.5em";
+
+          return [headerRow, scoreRow, pointsRow, netRow, pointsTeamRow, netTeamRow];
         }
+
 
         function generateResultScoreRow(resultName, numPlayers) {
             const row = document.createElement("tr");
@@ -912,15 +1039,15 @@
                     const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
                     if (possibleInput == null) {
                         break;
+                        }
+                      possibleInput.value = ""; // Set to empty string
+                      possibleInput.style.backgroundColor = "yellow"; // Set background color to yellow when empty
                     }
-                    possibleInput.value = null;
-                    possibleInput.style.backgroundColor = "";
-                }
             }
 
             localStorage.clear();
 
-            // Basically just resets everything to 0.
+            // Basically just resets everything to empty 
             updateAllStats(
                 RESULTS,
                 localSpreadsheetConfig.courseConfig.pars,
@@ -962,6 +1089,9 @@
         function idResultNetTeam(resultName) {
             return "result_" + resultName + "_net_team";
         }
-    </script>
+    
+</script>
+
+
 
 </html>
