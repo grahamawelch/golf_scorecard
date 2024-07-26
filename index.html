@@ -32,23 +32,34 @@
       /* Adding margin to the top and bottom of <p> elements */
     }
 
-    input[type="text"],
-    button {
-      font-size: 1.2em;
-      padding: 10px;
+
+    /* Sticky header class */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      /* Sticky position at the top */
+      background-color: #ADD8E6;
+      /* Background color to distinguish header */
+      z-index: 1000;
+      /* Ensure it's on top of other content */
+      font-size: 1.5em;
+      /* Set font size */
+      font-weight: bold;
+      /* Set font weight */
     }
   </style>
+
 </head>
 
 
 <body>
 
-    <h1>
-        <font color="Blue"><b>The Beard-Turner Senior <br> 
+  <h1>
+    <font color="Blue"><b>The Beard-Turner Senior <br>
              </h1>
-             <h1>   
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Golf Group V 2.0</b></font>
-      </h1>
+             <h1>  
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Golf Group V 2.1</b></font>
+  </h1>
   <h1>
     <div id="course"></div>
   </h1>
@@ -114,7 +125,7 @@
             scores, the App auto-saves all of your <br>
             scores every ~20 secs, if problems, <br>
             re-select your Tee Time & hit "Reload".<br>
-            <b>It should reload your saved scores within <br>
+    <b>It should reload your saved scores within <br>
             ~20 sec. </b><b>If a player drops out, <br>
             you must delete the player's name, <br>
             target points, and his scores.</b> <br>
@@ -133,22 +144,14 @@
                 style="background-color: green"><b> Birdies</b></span> &nbsp;&nbsp; <b><i> are highlighted
             </b></i>
   </p>
-  </div>
+
 
   <script>
     window.addEventListener('load', function() {
             // Scroll to top on page load
             window.scrollTo(0, 0);
         });
-  </script>
-</body>
 
-</html>
-
-
-
-
-<script>
   const RESULTS = [{
             name: "Total 18",
             startInclusive: 0,
@@ -227,6 +230,8 @@
             return teamDatalist;
         }
 
+
+
         function teamOnchange(RESULTS, spreadsheetConfig) {
             const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
 
@@ -240,6 +245,7 @@
 
             document.getElementById("submit_button").disabled = false;
             document.getElementById("clear_button").disabled = false;
+
         }
 
 
@@ -283,7 +289,7 @@
         function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
             const button = document.createElement("button");
             button.innerHTML = "Save";
-            button.style.fontSize = "30px"; 
+            button.style.fontSize = "30px";
             button.style.color = "green";
             button.style.padding = "10px 10px";
             button.onclick = function () {
@@ -398,50 +404,52 @@ function populateScorecardWithSavedResults(allPlayerScores) {
 }
 
 
+      function getSelectedTeamConfig(allTeamConfigs) {
+        const teamName = document.getElementById("team").value;
 
-
-        function getSelectedTeamConfig(allTeamConfigs) {
-            const teamName = document.getElementById("team").value;
-
-            let selectedTeamConfig = {
-                "teamName": "",
-                "players": [
-                    { "playerName": "", "playerTarget": null },
-                    { "playerName": "", "playerTarget": null },
-                    { "playerName": "", "playerTarget": null },
-                    { "playerName": "", "playerTarget": null },
+          let selectedTeamConfig = {
+              "teamName": "",
+              "players": [
+                  { "playerName": "", "playerTarget": null },
+                  { "playerName": "", "playerTarget": null },
+                  { "playerName": "", "playerTarget": null },
+                  { "playerName": "", "playerTarget": null },
                 ]
-            };
+          };
 
-            for (let teamConfig of allTeamConfigs) {
-                if (teamName === teamConfig.teamName) {
-                    selectedTeamConfig = teamConfig;
-                }
-            }
+          for (let teamConfig of allTeamConfigs) {
+            if (teamName === teamConfig.teamName) {
+                selectedTeamConfig = teamConfig;
+              }
+          }
 
-            return selectedTeamConfig;
+          return selectedTeamConfig;
         }
 
-        function createScorecardTable(RESULTS, courseConfig, teamConfig) {
-            document.getElementById("table").appendChild(
-                generateTable(RESULTS, courseConfig, teamConfig));
 
-            for (const result of RESULTS) {
-                const refRow = document.getElementById(idHoleRow(result.endExclusive - 1));
-                const refTable = refRow.parentElement;
+      // Function that gets called after the page expands
+    function createScorecardTable(RESULTS, courseConfig, teamConfig) {
+      document.getElementById("table").appendChild(
+      generateTable(RESULTS, courseConfig, teamConfig));
 
-                const newRows = generateResultTable(result, teamConfig.players.length);
+      for (const result of RESULTS) {
+        const refRow = document.getElementById(idHoleRow(result.endExclusive - 1));
+        const refTable = refRow.parentElement;
 
-                // Loop over these rows in reverse, so they appear in order.
-                for (let rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
-                    const placeholderRow = refTable.insertRow(refRow.rowIndex + 1);
-                    refTable.replaceChild(newRows[rowIndex], placeholderRow);
-                }
-            }
+        const newRows = generateResultTable(result, teamConfig.players.length);
 
-            // We could have loaded some cached scores.
-            updateAllStats(RESULTS, courseConfig.pars, teamConfig.players.length);
+        // Loop over these rows in reverse, so they appear in order.
+        for (let rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
+            const placeholderRow = refTable.insertRow(refRow.rowIndex + 1);
+            refTable.replaceChild(newRows[rowIndex], placeholderRow);
         }
+      }
+
+        // We could have loaded some cached scores.
+      updateAllStats(RESULTS, courseConfig.pars, teamConfig.players.length);
+
+    }
+
 
         function generateTable(results, courseConfig, teamConfig) {
             const table = document.createElement("table");
@@ -460,33 +468,42 @@ function populateScorecardWithSavedResults(allPlayerScores) {
             }
 
             return table;
+
         }
 
+
         function generateNameRow(teamConfig) {
-            const row = document.createElement("tr");
+          const row = document.createElement("tr");
+          row.classList.add("sticky-header"); // Add sticky header class
 
-            const headerCell = document.createElement("td");
-            headerCell.textContent = "Name";
-            headerCell.style.fontSize = "1.5em"; // Add this line to set the inline font size
-            headerCell.style.fontWeight = "bold"; // Set the inline font weight to bold
-            row.appendChild(headerCell);
+          const headerCell = document.createElement("td");
+          headerCell.textContent = "Name";
+          headerCell.style.fontSize = "1.5em"; // Set the font size
+          headerCell.style.fontWeight = "bold"; // Set the font weight
+          row.appendChild(headerCell);
 
-           for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
+          for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
             const playerCell = document.createElement("td");
 
             const input = document.createElement("input");
-            input.type = "string"; 
+            input.type = "text";
             input.id = idPlayerName(playerIndex);
-            input.style = "font-family: 'Arial Narrow', Arial, sans-serif; font-size: 16px; padding: 5px 5px; width: 12ch; font-weight: bold;"; // Using Arial Narrow with adjusted size and bold font weight
+            input.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
+            input.style.fontSize = "20px";
+            input.style.padding = "5px 5px";
+            input.style.width = "8ch";
+            input.style.fontWeight = "bold";
 
             input.value = teamConfig.players[playerIndex].playerName;
 
             playerCell.appendChild(input);
-
             row.appendChild(playerCell);
           }
-            return row;
+
+          return row;
         }
+
+
 
         function generateTargetRow(results, pars, teamConfig) {
           const row = document.createElement("tr");
@@ -551,6 +568,9 @@ function populateScorecardWithSavedResults(allPlayerScores) {
                 const holeCell = generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex);
                 row.appendChild(holeCell);
             }
+
+             // Call the resize function after generating the row
+          //resizePage();
 
             return row;
         }
@@ -635,8 +655,6 @@ function populateScorecardWithSavedResults(allPlayerScores) {
     cell.appendChild(select);
     return cell;
 }
-
-
 
 
 
@@ -969,7 +987,7 @@ function populateScorecardWithSavedResults(allPlayerScores) {
                 document.getElementById("team").value,                      // Player Name (but just the team this time)
             ];
             for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                teamStats.push("");   // No hole scores at the team level. 
+                teamStats.push("");   // No hole scores at the team level.
             }
             teamStats.push(document.getElementById("team_target").textContent); // Target
 
@@ -1068,7 +1086,7 @@ function populateScorecardWithSavedResults(allPlayerScores) {
 
             localStorage.clear();
 
-            // Basically just resets everything to empty 
+            // Basically just resets everything to empty
             updateAllStats(
                 RESULTS,
                 localSpreadsheetConfig.courseConfig.pars,
@@ -1110,9 +1128,9 @@ function populateScorecardWithSavedResults(allPlayerScores) {
         function idResultNetTeam(resultName) {
             return "result_" + resultName + "_net_team";
         }
-    
-</script>
+   
+  </script>
 
-
+</body>
 
 </html>
