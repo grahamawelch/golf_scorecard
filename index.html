@@ -18,18 +18,25 @@
       line-height: 1.5em;
       /* Improve readability */
       scroll-behavior: smooth;
+      zoom: 1.25; /* Magnify the entire page */
     }
 
     h1 {
-      font-size: 2.5em;
+      font-size: 2.2em;
       /* Adjust the size as needed */
       margin-top: 0;
       /* Ensure no margin at the top */
     }
 
-    p {
-      margin: 1em 0;
-      /* Adding margin to the top and bottom of <p> elements */
+    #course {
+      font-size: 1.75em;
+      font-weight: bold;
+      margin-bottom: 20px; /* Reduce space below the course */
+    }
+
+  #instructions {
+    margin: 1em 0; /* Adding margin to the top and bottom */
+    font-size: 1.6em; /* Set font size to 1.3em */
     }
 
 
@@ -55,30 +62,33 @@
 <body>
 
   <h1>
-    <font color="Blue"><b>The Beard-Turner Senior <br>
+    <font color="Blue"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Beard-Turner<br>
              </h1>
              <h1>  
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Golf Group V 2.1</b></font>
+                  &nbsp;&nbsp;Senior Golf Group V 2.1</b></font>
   </h1>
-  <h1>
-    <div id="course"></div>
-  </h1>
+
+<div id="course" style="font-size: 1.75em; font-weight: bold;"></div>
 
   <div id="all_input">
     <div>
-      <div style="display: inline-block; font-size: 2em;"><b>Date: </b></div>
-      <div style="display: inline-block; font-size: 2em; font-weight: bold;" id="date"></div>
+      <div style="display: inline-block; font-size: 1.75em;"><b>Date: </b></div>
+      <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="date"></div>
     </div>
 
     <div>
-      <div style="display: inline-block; font-size: 2em;">
+      <div style="display: inline-block; font-size: 1.75em;">
         <font color="Blue"><b>Team</b></font>
       </div>
-      <input style="display: inline-block; font-size: 1.5em; padding: 15px 15px; width: 8ch" id="team"
-                    type="text" list="teamDatalist" placeholder="TEE TIME">
+      <input style="display: inline-block; font-size: 1.5em; padding: 5px 5px; width: 8ch" 
+         id="team" 
+         type="text" 
+         list="teamDatalist" 
+         placeholder="TEE TIME" 
+         readonly>
       <div id="team_options"></div>
-      <div style="display: inline-block; font-size: 2em;"><b>Team Target Points = </b></div>
-      <div style="display: inline-block; font-size: 2em; font-weight: bold;" id="team_target"></div>
+      <div style="display: inline-block; font-size: 1.75em;"><b>Team Target Points = </b></div>
+      <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="team_target"></div>
     </div>
   </div>
 
