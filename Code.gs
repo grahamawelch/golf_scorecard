@@ -56,8 +56,8 @@ function extractRawConfig() {
   let allTeamValues = [];
   let currTeamRow = 2;
   while (true) {
-    const teamValues = sheet.getRange(currTeamRow, 1, 1, 9).getValues()[0].filter(Boolean);
-    if (teamValues.length === 0) {
+    const teamValues = sheet.getRange(currTeamRow, 1, 1, 9).getValues()[0];
+    if (teamValues.filter(Boolean).length === 0) {
       break;
     }
     allTeamValues.push(teamValues);
@@ -73,16 +73,24 @@ function constructStructuredConfig(rawConfig) {
     "date": rawConfig[0][0],
     "courseName": rawConfig[0][1],
     "pars": rawConfig[0].slice(2)
-  }
+  };
 
-  let allTeamConfigs = []
+  let allTeamConfigs = [];
   for (let currTeamConfig of rawConfig[1]) {
     let allPlayerConfigs = [];
-    for (let rowIndex = 1; rowIndex < currTeamConfig.length; rowIndex += 2) {
+    for (let colIndex = 1; colIndex < currTeamConfig.length; colIndex += 2) {
+      let playerName = currTeamConfig[colIndex] !== undefined ? currTeamConfig[colIndex] : ''; // Leave playerName empty if it is empty
+      let playerTarget = playerName === 'x' ? '' : (currTeamConfig[colIndex + 1] !== undefined ? currTeamConfig[colIndex + 1] : '');
+
       allPlayerConfigs.push({
-        "playerName": currTeamConfig[rowIndex],
-        "playerTarget": currTeamConfig[rowIndex + 1],
+        "playerName": playerName,
+        "playerTarget": playerTarget
       });
+    }
+
+    // Ensure there are always 4 player slots, filling in with 'x' and empty target if missing
+    while (allPlayerConfigs.length < 4) {
+      allPlayerConfigs.push({"playerName": "x", "playerTarget": ""});
     }
 
     allTeamConfigs.push({
