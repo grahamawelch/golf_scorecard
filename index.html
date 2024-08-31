@@ -18,7 +18,7 @@
       line-height: 1.5em;
       /* Improve readability */
       scroll-behavior: smooth;
-      zoom: 1.25; /* Magnify the entire page */
+      zoom: 1.8; /* Start with a zoom of 1.8x */
     }
 
     h1 {
@@ -82,13 +82,13 @@
 
     <div>
       <div style="display: inline-block; font-size: 1.75em;">
-        <font color="Blue"><b>Team</b></font>
+        <font color="Blue"><b>Tee Time: </b></font>
       </div>
-      <input style="display: inline-block; font-size: 1.5em; padding: 5px 5px; width: 8ch" 
+      <input style="display: inline-block; font-size: 1.5em; padding: 5px 5px; width: 5ch" 
          id="team" 
          type="text" 
          list="teamDatalist" 
-         placeholder="TEE TIME" 
+         placeholder="----->" 
          readonly>
       <div id="team_options"></div>
       <div style="display: inline-block; font-size: 1.75em;"><b>Team Target Points = </b></div>
@@ -192,6 +192,18 @@
   }
 });
 
+
+document.addEventListener("DOMContentLoaded", function() {
+    const teeTimeInput = document.getElementById('team');
+
+    // Listen for changes in the tee time input field
+    teeTimeInput.addEventListener('input', function() {
+        if (teeTimeInput.value) {
+            // Scale down the page to 1.4x after selecting a tee time
+            document.documentElement.style.zoom = '1.5';
+        }
+    });
+});
 
   const RESULTS = [{
             name: "Total 18",
