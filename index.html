@@ -84,12 +84,16 @@
       <div style="display: inline-block; font-size: 1.75em;">
         <font color="Blue"><b>Tee Time: </b></font>
       </div>
-      <input style="display: inline-block; font-size: 1.5em; padding: 5px 20px; width: 8ch" 
-         id="team" 
-         type="text" 
-         list="teamDatalist" 
-         placeholder="Select--->" 
-         readonly>
+      <div>
+        <div style="display: inline-block; font-size: 1.75em;">
+          <font color="Blue"><b>Tee Time: </b></font>
+          <select style="display: inline-block; font-size: 1em; padding: 5px 5px; width: 8ch" 
+                  id="team" 
+                  placeholder="Select">
+            <option value="" disabled selected>Select</option>
+          </select>
+        </div>
+        </div>
       <div id="team_options"></div>
       <div style="display: inline-block; font-size: 1.75em;"><b>Team Target Points = </b></div>
       <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="team_target"></div>
@@ -272,16 +276,27 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         function createTeamOptions(allTeamConfigs) {
-            const teamDatalist = document.createElement("datalist");
-            teamDatalist.id = "teamDatalist";
+    const teamSelect = document.getElementById("team");  // Assuming 'team' is the id of your <select> element
 
-            for (let teamIndex = 0; teamIndex < allTeamConfigs.length; teamIndex++) {
-                const teamOption = document.createElement("option");
-                teamOption.value = allTeamConfigs[teamIndex].teamName;
-                teamDatalist.appendChild(teamOption);
-            }
-            return teamDatalist;
+    // Clear existing options except the placeholder
+    teamSelect.innerHTML = '<option value="" disabled selected>Select</option>';
+
+    // Populate the <select> options with team names
+    for (let teamIndex = 0; teamIndex < allTeamConfigs.length; teamIndex++) {
+        const teamOption = document.createElement("option");
+        teamOption.value = allTeamConfigs[teamIndex].teamName;
+        teamOption.text = allTeamConfigs[teamIndex].teamName;  // Set display text for option
+        teamSelect.appendChild(teamOption);
+    }
+
+    // Add an event listener to disable the select once a team is selected
+    teamSelect.addEventListener('change', function() {
+        if (teamSelect.value) {  // Ensure a valid selection (not the placeholder)
+            teamSelect.disabled = true;  // Disable the select after selection
+            console.log(`Selected team: ${teamSelect.value}`);
         }
+    });
+  }
 
 
 
