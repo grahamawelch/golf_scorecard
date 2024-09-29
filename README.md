@@ -2,9 +2,11 @@
 
 A simple website that offers a UI mimicking a golf score card.
 
-It should automatically compute scores as values are entered.
+It should automatically compute scores as Stableford values are entered.  It auto saves every 20 seconds
+and if problems arise, can use the RELOAD button to reload the saved scores. 
 
-Via Google App Script you can write these scores onto a spreadsheet.
+Once done with the round, the SUBMIT button then sends the scores to a Google spreadsheet-- where
+further scripting ID's: Top Players for the day, a listing of scores/players, the team scores and winning teams
+for the Front 9, Back 9, and Total, and the skin winners for both the A/B and C/D groups.
 
-As of 2/22/2024, Alan stop trying to do the auto save function and reverted back to the
-last 18 Feb 2024 version with the SAVE button.  So do not use the code past there.
+
