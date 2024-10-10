@@ -166,6 +166,19 @@
 
   <div id="table"></div>
 
+  <tr></tr>
+  <tr></tr>
+  <tr></tr>
+
+  <!-- Button to manually refresh the Google Sheet -->
+  <button id="refresh-btn" onclick="refreshIframe()">Refresh Scoreboard</button>
+
+  <!-- Iframe to display the Google Sheet -->
+  <iframe id="google-sheet"
+    src="https://docs.google.com/spreadsheets/d/1WGfjUmueuTakLZlrx4K_R0pWMrRzceMr59hfgczQAJQ/edit?usp=sharing"
+    style="border:none;">
+  </iframe>
+
   <p id="instructions">
     <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Instructions</u></b><br>
             Choose your scheduled Tee Time, input all <br>
