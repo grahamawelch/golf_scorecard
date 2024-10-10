@@ -54,6 +54,35 @@
       font-weight: bold;
       /* Set font weight */
     }
+
+    
+    iframe {
+      width: 100%;
+      /* Full width */
+      height: 1200px;
+      /* Set height */
+      border: none;
+      display: block;
+      overflow: auto;
+      /* margin-left: -40px; Negative margin to offset left padding */
+    }
+
+    /* Styling for the refresh button */
+    #refresh-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.5em;
+      background-color: green;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #refresh-btn:hover {
+      background-color: darkgreen;
+      /* The color for hover state */
+    }
+
   </style>
 
 </head>
@@ -1000,10 +1029,13 @@ function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex
             document.getElementById("team_target").textContent = total;
         }
 
+
         // For each player:
         //  <date, team, course, player, hole1, ... hole18, target, tScore, tPoints, tNet, fScore, fPoints, fNet, bScore, bPoints, bNet>
         // The totals for the team:
         //  <data, team, course, team  , ""   , ... ""    , target, 0     , tPoints, tNet, 0     , fPoints, fNet, 0     , bPoints, bNet>
+
+
         function submit() {
             const localSpreadsheetConfig = spreadsheetConfig();
             const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
@@ -1077,6 +1109,32 @@ function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex
             if (!confirm(confirmationMessage)) {
                 return;
             }
+
+
+        // Call the "Save" functionality before submitting
+        let out = [];
+        for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+            let currPlayerScores = [];
+            currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+            currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+
+            for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+                currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+            }
+
+            out.push(currPlayerScores);
+        }
+
+        console.log("Saving before submitting: " + JSON.stringify(out));
+
+        google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+
+        const now = new Date();
+        const hours = now.getHours().toString();
+        const minutes = now.getMinutes().toString().padStart(2, "0");
+        const time = `${hours}:${minutes}`;
+        document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
+
 
             lockInputs();
 
@@ -1200,6 +1258,19 @@ function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex
             return "result_" + resultName + "_net_team";
         }
    
+        // Function to refresh the iframe
+        function refreshIframe() {
+            var iframe = document.getElementById('google-sheet');
+            iframe.src = iframe.src; // This will refresh the iframe
+        }
+
+        // Ensure the iframe loads at the correct size from the beginning
+        window.onload = function() {
+            var iframe = document.getElementById('google-sheet');
+            iframe.style.width = '100%';
+            iframe.style.height = '1200px'; // Fixed height
+        };
+  
   </script>
 
 </body>
