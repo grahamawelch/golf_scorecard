@@ -108,12 +108,32 @@ function constructStructuredConfig(rawConfig) {
 
 // App Script function to save data to sheet
 function saveData(flatResults) {
-  // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
-  // https://docs.google.com/spreadsheets/d/1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM/edit#gid=0
   const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
+  
+  //G2
+  //const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
 
-  flatResults.forEach(result => sheet.appendRow(result));
-  sheet.appendRow(["***"]);
+  // Log the data to ensure it's coming through
+  Logger.log("Saving data: " + JSON.stringify(flatResults));
+
+  const lock = LockService.getScriptLock();
+  
+  try {
+    lock.waitLock(3000);
+    
+    flatResults.forEach(result => {
+      Logger.log("Appending row: " + result); // Log each row being appended
+      sheet.appendRow(result);
+    });
+    sheet.appendRow(["***"]);
+    
+    Logger.log("Data saved successfully.");
+    
+  } catch (e) {
+    Logger.log("Error during saveData: " + e.message);
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // You can directly execute this method in the AppsScript UI.
