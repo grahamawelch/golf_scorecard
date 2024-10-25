@@ -55,7 +55,7 @@
       /* Set font weight */
     }
 
-    
+   
     iframe {
       width: 100%;
       /* Full width */
@@ -103,66 +103,55 @@
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://live.staticflickr.com/65535/54033042787_0126e057cd_w_d.jpg" alt="BT Logo Small 2">
 
 <h2>
-<font color="blue"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V 3.0</b></font>
+<font color="blue"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V 3.1</b></font>
 </h2>
 
 <div id="course" style="font-size: 1.75em; font-weight: bold;"></div>
-
-    <div id="all_input">
+<div id="all_input">
     <div>
-      <div style="display: inline-block; font-size: 1.75em;"><b>Date: </b></div>
-      <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="date"></div>
+        <div style="display: inline-block; font-size: 1.75em;"><b>Date: </b></div>
+        <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="date"></div>
     </div>
-          <div>
+    <div>
         <div style="display: inline-block; font-size: 1.75em;">
-          <font color="Blue"><b>Tee Time: </b></font>
-          <select style="display: inline-block; font-size: 1em; padding: 5px 5px; width: 8ch" 
-                  id="team" 
-                  placeholder="Select">
-            <option value="" disabled selected>Select</option>
-          </select>
+            <font color="Blue"><b>Tee Time: </b></font>
+            <select style="display: inline-block; font-size: 1em; padding: 5px 5px; width: 8ch" id="team" placeholder="Select">
+                <option value="" disabled selected>Select</option>
+            </select>
         </div>
-        </div>
-      <div id="team_options"></div>
-      <div style="display: inline-block; font-size: 1.75em;"><b>Team Target Points = </b></div>
-      <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="team_target"></div>
     </div>
-  </div>
-
-  <br>
-
-  <div id="table"></div>
-
-  <div id="buttons">
+    <div id="team_options"></div>
+    <div style="display: inline-block; font-size: 1.75em;"><b>Team Target Points = </b></div>
+    <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="team_target"></div>
+</div>
+<br>
+<div id="table"></div>
+<div id="buttons">
     <table>
-      <tr></tr>
-      <tr></tr>
-      <tr></tr>
-      <tr>
-        <td><button id="submit_button" onclick="submit()" disabled="true"
-                            style="color: green; font-size: 30px; padding: 10px 10px">SUBMIT</button></td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div id="submit_confirmation"></div>
-        </td>
-      </tr>
-      <tr></tr>
-      <tr></tr>
-      <tr></tr>
-      <tr></tr>
-      <tr></tr>
-      <tr></tr>
-      <tr></tr>
-      <tr></tr>
-      <tr></tr>
-      <tr>
-        <td></td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        </td>
-        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button"
-                            onclick="clearWithConfirmation()" disabled="true"
-                            style="color:red; font-size: 30px; padding: 10px 10px">Clear</button></td>
-      </tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr>
+            <td><button id="submit_button" onclick="submit()" disabled="true" style="color: green; font-size: 30px; padding: 10px 10px">SUBMIT</button></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div id="submit_confirmation"></div></td>
+        </tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr>
+            <td></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button" onclick="clearWithConfirmation()" disabled="true" style="color:red; font-size: 30px; padding: 10px 10px">Clear</button></td>
+        </tr>
     </table>
-  </div>
+</div>
+
 
   <div id="table"></div>
 
@@ -175,7 +164,7 @@
 
   <!-- Iframe to display the Google Sheet -->
   <iframe id="google-sheet"
-    src="https://docs.google.com/spreadsheets/d/1m3bLGCeeF4B-QUDUX_ZLplE_ASC3XU1SR6i3TtzTT5k/edit?gid=0#gid=0"
+    src="https://docs.google.com/spreadsheets/d/1WGfjUmueuTakLZlrx4K_R0pWMrRzceMr59hfgczQAJQ/edit?usp=sharing"
     style="border:none;">
   </iframe>
 
@@ -256,6 +245,70 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+
+ // Function to create a row of checkboxes for player deletion
+function createCheckboxRow(teamConfig) {
+  const containerDiv = document.createElement("div");
+  containerDiv.style.display = "flex";
+  containerDiv.style.alignItems = "center";
+
+  // Add null row above for spacing
+  const nullRowAbove = document.createElement("div");
+  nullRowAbove.style.height = "150px"; // Adjust height as needed
+  containerDiv.appendChild(nullRowAbove);
+
+  // Add header for delete player/points
+  const headerDiv = document.createElement("div");
+  headerDiv.innerHTML = "<b style='font-size: 1.25em;'>Delete Player</b>";
+  headerDiv.style.marginRight = "20px"; // Adjust spacing as needed
+  containerDiv.appendChild(headerDiv);
+
+  // Create a single row of 4 checkboxes
+  const boxDiv = document.createElement("div");
+  for (let j = 0; j < teamConfig.players.length; j++) {
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.style.width = "30px"; // Keep original size
+    checkbox.style.height = "30px"; // Keep original size
+    checkbox.style.marginRight = "65px"; // Space out 65px
+    checkbox.onchange = function() {
+      if (checkbox.checked) {
+        deletePlayerAndTarget(j, checkbox);
+        updateTeamTarget(teamConfig.players.length); // Update team target points
+      }
+    };
+    boxDiv.appendChild(checkbox);
+  }
+  containerDiv.appendChild(boxDiv);
+
+  // Add null row below for spacing
+  const nullRowBelow = document.createElement("div");
+  nullRowBelow.style.height = "40px"; // Adjust height as needed
+  containerDiv.appendChild(nullRowBelow);
+
+  return containerDiv;
+}
+
+// Function to update team target points
+function updateTeamTarget(playerCount) {
+  let teamTarget = 0;
+  for (let playerIndex = 0; playerIndex < playerCount; playerIndex++) {
+    const input = document.getElementById(idTarget(playerIndex));
+    if (input) {
+      const playerTargetOrZero = parseInt(input.value);
+      if (!isNaN(playerTargetOrZero)) {
+        teamTarget += playerTargetOrZero;
+      }
+    }
+  }
+  document.getElementById("team_target").textContent = teamTarget;
+}
+
+
+
+
+
+
   const RESULTS = [{
             name: "Total 18",
             startInclusive: 0,
@@ -299,30 +352,30 @@ document.addEventListener("DOMContentLoaded", function() {
             ]
         }
 
-        function spreadsheetConfig() {
-            // This function exists to making testing iteration more straightforward.
-            // AppScript will inject the variable CONFIG *before* the HTML content.
-            if (typeof CONFIG === "undefined") {
-                console.log("Falling back to TEST_CONFIG.");
-                return TEST_CONFIG;
-            }
-            console.log("Loaded config:\n" + JSON.stringify(CONFIG));
-            return CONFIG;
-        }
+  function spreadsheetConfig() {
+      // This function exists to making testing iteration more straightforward.
+      // AppScript will inject the variable CONFIG *before* the HTML content.
+      if (typeof CONFIG === "undefined") {
+          console.log("Falling back to TEST_CONFIG.");
+          return TEST_CONFIG;
+      }
+      console.log("Loaded config:\n" + JSON.stringify(CONFIG));
+      return CONFIG;
+  }
 
-        createScorecard(RESULTS, spreadsheetConfig());
+  createScorecard(RESULTS, spreadsheetConfig());
 
-        function createScorecard(RESULTS, spreadsheetConfig) {
-            document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
-            document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
+  function createScorecard(RESULTS, spreadsheetConfig) {
+      document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
+      document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
 
-            document.getElementById("team").onchange = function (event) {
-                teamOnchange(RESULTS, spreadsheetConfig);
-            }
-            document.getElementById("team_options").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
-        }
+      document.getElementById("team").onchange = function (event) {
+          teamOnchange(RESULTS, spreadsheetConfig);
+      }
+      document.getElementById("team_options").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
+  }
 
-        function createTeamOptions(allTeamConfigs) {
+  function createTeamOptions(allTeamConfigs) {
     const teamSelect = document.getElementById("team");  // Assuming 'team' is the id of your <select> element
 
     // Clear existing options except the placeholder
@@ -346,118 +399,121 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
 
+  function teamOnchange(RESULTS, spreadsheetConfig) {
+    const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
+    console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
+    document.getElementById("table").innerHTML = "";
+    createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig);
+    createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
+    document.getElementById("submit_button").disabled = false;
+    document.getElementById("clear_button").disabled = false;
 
-        function teamOnchange(RESULTS, spreadsheetConfig) {
-            const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
+    // Insert the new row below the Save/Load buttons
+    const tableDiv = document.getElementById("table");
+    const saveLoadTable = tableDiv.querySelector("table"); // Assuming save/load buttons are inside a table
 
-            console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
+    if (saveLoadTable) {
+      const checkboxRow = createCheckboxRow(selectedTeamConfig);
+      saveLoadTable.parentNode.insertBefore(checkboxRow, saveLoadTable.nextSibling);
+    }
+  }
 
-            document.getElementById("table").innerHTML = "";
-
-            createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig);
-
-            createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
-
-            document.getElementById("submit_button").disabled = false;
-            document.getElementById("clear_button").disabled = false;
-
-        }
 
 
        
-        function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
-            const table = document.getElementById("table");
+  function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+      const table = document.getElementById("table");
 
-            const subTable = document.createElement("table");
-            const tr = document.createElement("tr");
+      const subTable = document.createElement("table");
+      const tr = document.createElement("tr");
 
-            const saveElement = document.createElement("td");
-            const saveButton = createSaveButton(spreadsheetConfig, selectedTeamConfig);
-            saveElement.appendChild(saveButton);
-            saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
-            saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
-            saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
+      const saveElement = document.createElement("td");
+      const saveButton = createSaveButton(spreadsheetConfig, selectedTeamConfig);
+      saveElement.appendChild(saveButton);
+      saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
+      saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+      saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
-            const loadElement = document.createElement("td");
-            loadElement.appendChild(createLoadButton());
-            loadElement.style.paddingLeft = "20px"; // Adjust the amount of space as needed
-            loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
-            loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
+      const loadElement = document.createElement("td");
+      loadElement.appendChild(createLoadButton());
+      loadElement.style.paddingLeft = "20px"; // Adjust the amount of space as needed
+      loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+      loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
-            const statusElement = document.createElement("td");
-            statusElement.id = "save_status";
+      const statusElement = document.createElement("td");
+      statusElement.id = "save_status";
 
-            tr.appendChild(saveElement);
-            tr.appendChild(loadElement);
-            tr.appendChild(statusElement);
+      tr.appendChild(saveElement);
+      tr.appendChild(loadElement);
+      tr.appendChild(statusElement);
 
-            subTable.appendChild(tr);
-            table.appendChild(subTable);
+      subTable.appendChild(tr);
+      table.appendChild(subTable);
 
-            // Call save button click event every 20 sec
-            setInterval(function() {
-                saveButton.click();
-            }, 20 * 1000); // 20 sec in milliseconds
-        }
+      // Call save button click event every 20 sec
+      setInterval(function() {
+          saveButton.click();
+      }, 20 * 1000); // 20 sec in milliseconds
+  }
 
 
-        function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
-            const button = document.createElement("button");
-            button.innerHTML = "Save";
-            button.style.fontSize = "30px";
-            button.style.color = "green";
-            button.style.padding = "10px 10px";
-            button.onclick = function () {
-                let out = [];
-                for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-                    let currPlayerScores = [];
-                    currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
-                    currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+  function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
+      const button = document.createElement("button");
+      button.innerHTML = "Save";
+      button.style.fontSize = "30px";
+      button.style.color = "green";
+      button.style.padding = "10px 10px";
+      button.onclick = function () {
+          let out = [];
+          for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+              let currPlayerScores = [];
+              currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+              currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
 
-                    for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
-                    }
+              for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+                  currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+              }
 
-                    out.push(currPlayerScores);
-                }
+              out.push(currPlayerScores);
+          }
 
-                console.log("Sending to backend: " + JSON.stringify(out));
-                google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+          console.log("Sending to backend: " + JSON.stringify(out));
+          google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
 
-                const now = new Date();
-                const hours = now.getHours().toString();
-                const minutes = now.getMinutes().toString().padStart(2, "0");
-                const time = `${hours}:${minutes}`;
-                document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
-            }
+          const now = new Date();
+          const hours = now.getHours().toString();
+          const minutes = now.getMinutes().toString().padStart(2, "0");
+          const time = `${hours}:${minutes}`;
+          document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
+      }
 
-            return button;
-        }
+      return button;
+  }
  
 
 
-      function createLoadButton() {
-        const button = document.createElement("button");
-        button.innerHTML = "Re-Load";
-        button.style.fontSize = "30px";
-        button.style.color = "blue";
-        button.style.padding = "10px 10px";
-        button.onclick = function () {
-            const teamName = document.getElementById("team").value;
+  function createLoadButton() {
+    const button = document.createElement("button");
+    button.innerHTML = "Re-Load";
+    button.style.fontSize = "30px";
+    button.style.color = "blue";
+    button.style.padding = "10px 10px";
+    button.onclick = function () {
+        const teamName = document.getElementById("team").value;
 
-            google.script.run.withSuccessHandler(populateScorecardWithSavedResults).loadScoresForTeam(teamName);
-            return;
+        google.script.run.withSuccessHandler(populateScorecardWithSavedResults).loadScoresForTeam(teamName);
+        return;
 
-            // For testing.
-            populateScorecardWithSavedResults([
-                ["AAA", 27, 3, 3, 3, 0, 0, 0],
-                [123, 20, 4, 4, 0],
-                ["CCC", 10, -1, 3, 1, 3, "a", 3],
-            ]);
-        };
+        // For testing.
+        populateScorecardWithSavedResults([
+            ["AAA", 27, 3, 3, 3, 0, 0, 0],
+            [123, 20, 4, 4, 0],
+            ["CCC", 10, -1, 3, 1, 3, "a", 3],
+        ]);
+    };
 
-        return button;
-      }
+    return button;
+  }
 
 function populateScorecardWithSavedResults(allPlayerScores) {
     const paramSpreadsheetConfig = spreadsheetConfig();
@@ -518,28 +574,27 @@ function populateScorecardWithSavedResults(allPlayerScores) {
     }
 }
 
+    function getSelectedTeamConfig(allTeamConfigs) {
+    const teamName = document.getElementById("team").value;
 
-      function getSelectedTeamConfig(allTeamConfigs) {
-        const teamName = document.getElementById("team").value;
+    let selectedTeamConfig = {
+    "teamName": "",
+    "players": [
+    { "playerName": "", "playerTarget": null },
+    { "playerName": "", "playerTarget": null },
+    { "playerName": "", "playerTarget": null },
+    { "playerName": "", "playerTarget": null },
+    ]
+    };
 
-          let selectedTeamConfig = {
-              "teamName": "",
-              "players": [
-                  { "playerName": "", "playerTarget": null },
-                  { "playerName": "", "playerTarget": null },
-                  { "playerName": "", "playerTarget": null },
-                  { "playerName": "", "playerTarget": null },
-                ]
-          };
+    for (let teamConfig of allTeamConfigs) {
+    if (teamName === teamConfig.teamName) {
+    selectedTeamConfig = teamConfig;
+    }
+    }
 
-          for (let teamConfig of allTeamConfigs) {
-            if (teamName === teamConfig.teamName) {
-                selectedTeamConfig = teamConfig;
-              }
-          }
-
-          return selectedTeamConfig;
-        }
+    return selectedTeamConfig;
+    }
 
 
       // Function that gets called after the page expands
@@ -566,135 +621,136 @@ function populateScorecardWithSavedResults(allPlayerScores) {
     }
 
 
-        function generateTable(results, courseConfig, teamConfig) {
-            const table = document.createElement("table");
+  function generateTable(results, courseConfig, teamConfig) {
+      const table = document.createElement("table");
 
-            const numHoles = courseConfig.pars.length;
+      const numHoles = courseConfig.pars.length;
 
-            const nameRow = generateNameRow(teamConfig);
-            table.appendChild(nameRow);
+      const nameRow = generateNameRow(teamConfig);
+      table.appendChild(nameRow);
 
-            const targetRow = generateTargetRow(results, courseConfig.pars, teamConfig);
-            table.appendChild(targetRow);
+      const targetRow = generateTargetRow(results, courseConfig.pars, teamConfig);
+      table.appendChild(targetRow);
 
-            for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-                const row = generateHoleRow(results, courseConfig.pars, holeIndex, teamConfig.players.length);
-                table.appendChild(row);
-            }
-
-            return table;
-
-        }
-
-
-        function generateNameRow(teamConfig) {
-          const row = document.createElement("tr");
-          row.classList.add("sticky-header"); // Add sticky header class
-
-          const headerCell = document.createElement("td");
-          headerCell.textContent = "Name";
-          headerCell.style.fontSize = "1.5em"; // Set the font size
-          headerCell.style.fontWeight = "bold"; // Set the font weight
-          row.appendChild(headerCell);
-
-          for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
-            const playerCell = document.createElement("td");
-
-            const input = document.createElement("input");
-            input.type = "text";
-            input.id = idPlayerName(playerIndex);
-            input.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
-            input.style.fontSize = "20px";
-            input.style.padding = "5px 5px";
-            input.style.width = "8ch";
-            input.style.fontWeight = "bold";
-
-            input.value = teamConfig.players[playerIndex].playerName;
-
-            playerCell.appendChild(input);
-            row.appendChild(playerCell);
-          }
-
-          return row;
-        }
-
-
-
-  function generateTargetRow(results, pars, teamConfig) {
-      const row = document.createElement("tr");
-
-      const headerCell = document.createElement("td");
-      headerCell.textContent = "Target";
-      headerCell.style.fontSize = "1.5em"; // Set the inline font size
-      headerCell.style.fontWeight = "bold"; // Set the inline font weight to bold
-      row.appendChild(headerCell);
-
-      let teamTarget = 0;
-
-      for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
-          const currPlayerIndex = playerIndex;
-
-          const playerCell = document.createElement("td");
-          playerCell.align = "center";
-
-          const input = document.createElement("input");
-          input.type = "number";
-          input.id = idTarget(playerIndex);
-          input.style.width = "3ch";
-          input.style.fontSize = "1.2em"; // Set the font size to 1.5em
-          input.disabled = false;
-
-          const playerTarget = teamConfig.players[playerIndex].playerTarget;
-          input.value = playerTarget;
-
-          const playerTargetOrZero = parseInt(playerTarget);
-          if (!isNaN(playerTargetOrZero)) {
-              teamTarget += playerTargetOrZero;
-          }
-
-          input.min = 0;
-          input.oninput = function (event) {
-              updateStats(results, pars, teamConfig.players.length, currPlayerIndex);
-              updateTeamTarget(teamConfig.players.length);
-          };
-
-          playerCell.appendChild(input);
-          row.appendChild(playerCell);
+      for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+          const row = generateHoleRow(results, courseConfig.pars, holeIndex, teamConfig.players.length);
+          table.appendChild(row);
       }
 
-        document.getElementById("team_target").textContent = teamTarget;
+      return table;
 
-        return row;
+  }
+
+
+
+
+function deletePlayerAndTarget(playerIndex, checkbox) {
+  const playerName = document.getElementById(idPlayerName(playerIndex)).value;
+  const confirmation = confirm(`Really want to delete ${playerName}, his Target Pts, and Scores? Suggest you first Cancel, then hit SAVE button, then proceed.  That way you have about 20 seconds to reload and get the info back.  But if sure, hit OK.`);
+
+  if (confirmation) {
+    document.getElementById(idPlayerName(playerIndex)).value = "";
+    document.getElementById(idTarget(playerIndex)).value = "";
+
+    // Clear scores for the selected deleted player
+    clearScoresAndCacheForPlayer(playerIndex);
+  } else {
+    checkbox.checked = false; // Uncheck the checkbox if the user cancels
+  }
+}
+
+
+function generateNameRow(teamConfig) {
+    const row = document.createElement("tr");
+    row.classList.add("sticky-header"); // Add sticky header class
+    const headerCell = document.createElement("td");
+    headerCell.textContent = "Name";
+    headerCell.style.fontSize = "1.5em"; // Set the font size
+    headerCell.style.fontWeight = "bold"; // Set the font weight
+    row.appendChild(headerCell);
+    for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
+      const playerCell = document.createElement("td");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.id = idPlayerName(playerIndex);
+      input.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
+      input.style.fontSize = "20px";
+      input.style.padding = "5px 5px";
+      input.style.width = "8ch";
+      input.style.fontWeight = "bold";
+      input.value = teamConfig.players[playerIndex].playerName;
+      playerCell.appendChild(input);
+      row.appendChild(playerCell);
     }
+    return row;
+  }
 
 
-
-        function generateHoleRow(results, pars, holeIndex, numPlayers) {
-            const row = document.createElement("tr");
-
-            row.id = idHoleRow(holeIndex);
-
-            const headerCell = generateHoleHeader(holeIndex, pars[holeIndex]);
-            row.appendChild(headerCell);
-
-            for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
-                const holeCell = generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex);
-                row.appendChild(holeCell);
-            }
-
-             // Call the resize function after generating the row
-          //resizePage();
-
-            return row;
+ 
+function generateTargetRow(results, pars, teamConfig) {
+    const row = document.createElement("tr");
+    const headerCell = document.createElement("td");
+    headerCell.textContent = "Target";
+    headerCell.style.fontSize = "1.5em"; // Set the inline font size
+    headerCell.style.fontWeight = "bold"; // Set the inline font weight to bold
+    row.appendChild(headerCell);
+    let teamTarget = 0;
+    for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
+        const currPlayerIndex = playerIndex;
+        const playerCell = document.createElement("td");
+        playerCell.align = "center";
+        const input = document.createElement("input");
+        input.type = "number";
+        input.id = idTarget(playerIndex);
+        input.style.width = "3ch";
+        input.style.fontSize = "1.2em"; // Set the font size to 1.2em
+        input.disabled = false;
+        const playerTarget = teamConfig.players[playerIndex].playerTarget;
+        input.value = playerTarget;
+        const playerTargetOrZero = parseInt(playerTarget);
+        if (!isNaN(playerTargetOrZero)) {
+            teamTarget += playerTargetOrZero;
         }
+        input.min = 0;
+        input.oninput = function (event) {
+            updateStats(results, pars, teamConfig.players.length, currPlayerIndex);
+            updateTeamTarget(teamConfig.players.length);
+        };
+        playerCell.appendChild(input);
+        row.appendChild(playerCell);
+    }
+    document.getElementById("team_target").textContent = teamTarget;
+    return row;
+}
 
-        function generateHoleHeader(holeIndex, par) {
-            const cell = document.createElement("td");
-            cell.textContent = (holeIndex + 1) + " (" + par + ")";
-            cell.style.fontSize = "1.5em"; // Set the inline font size to 1.5em
 
-            return cell;
-        }
+
+  function generateHoleRow(results, pars, holeIndex, numPlayers) {
+      const row = document.createElement("tr");
+
+      row.id = idHoleRow(holeIndex);
+
+      const headerCell = generateHoleHeader(holeIndex, pars[holeIndex]);
+      row.appendChild(headerCell);
+
+      for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+          const holeCell = generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex);
+          row.appendChild(holeCell);
+      }
+
+        // Call the resize function after generating the row
+    //resizePage();
+
+      return row;
+  }
+
+  function generateHoleHeader(holeIndex, par) {
+      const cell = document.createElement("td");
+      cell.textContent = (holeIndex + 1) + " (" + par + ")";
+      cell.style.fontSize = "1.5em"; // Set the inline font size to 1.5em
+
+      return cell;
+  }
 
 
 
@@ -1043,10 +1099,6 @@ function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex
         }
 
 
-        // For each player:
-        //  <date, team, course, player, hole1, ... hole18, target, tScore, tPoints, tNet, fScore, fPoints, fNet, bScore, bPoints, bNet>
-        // The totals for the team:
-        //  <data, team, course, team  , ""   , ... ""    , target, 0     , tPoints, tNet, 0     , fPoints, fNet, 0     , bPoints, bNet>
 
 
         function submit() {
@@ -1235,6 +1287,33 @@ function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex
                 selectedTeamConfig.players.length);
         }
 
+  function clearScoresAndCacheForPlayer(playerIndex) {
+    const localSpreadsheetConfig = spreadsheetConfig();
+    const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+
+    for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+      const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
+      if (possibleInput == null) {
+        break;
+      }
+      possibleInput.value = ""; // Set to empty string
+      possibleInput.style.backgroundColor = "yellow"; // Set background color to yellow when empty
+    }
+
+    // Optionally clear local storage related to this player, if applicable.
+    // localStorage.clear(); // This clears everything; use with caution.
+
+    // Update stats for the remaining players
+    updateAllStats(
+      RESULTS,
+      localSpreadsheetConfig.courseConfig.pars,
+      selectedTeamConfig.players.length
+    );
+  }
+
+
+
+
         function idHoleRow(holeIndex) {
             return "holeRow_" + holeIndex;
         }
@@ -1283,7 +1362,7 @@ function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex
             iframe.style.width = '100%';
             iframe.style.height = '1200px'; // Fixed height
         };
-  
+ 
   </script>
 
 </body>
