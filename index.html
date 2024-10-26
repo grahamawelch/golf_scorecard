@@ -450,10 +450,10 @@ function updateTeamTarget(playerCount) {
       subTable.appendChild(tr);
       table.appendChild(subTable);
 
-      // Call save button click event every 20 sec
+      // Call save button click event every 25 sec
       setInterval(function() {
           saveButton.click();
-      }, 20 * 1000); // 20 sec in milliseconds
+      }, 25 * 1000); // 25 sec in milliseconds
   }
 
 
@@ -644,9 +644,11 @@ function populateScorecardWithSavedResults(allPlayerScores) {
 
 
 
-function deletePlayerAndTarget(playerIndex, checkbox) {
+  function deletePlayerAndTarget(playerIndex, checkbox) {
   const playerName = document.getElementById(idPlayerName(playerIndex)).value;
-  const confirmation = confirm(`Really want to delete ${playerName}, his Target Pts, and Scores? Suggest you first Cancel, then hit SAVE button, then proceed.  That way you have about 20 seconds to reload and get the info back.  But if sure, hit OK.`);
+  const confirmation = confirm(`Do you really want to delete ${playerName}, his Target Pts, and Scores? If sure, hit OK, if not, hit Cancel.  Note: After the deletion, you do have about 20 seconds to hit the Reload button to retrieve the deleted info.  But after that, it is gone.`);
+
+  saveBeforeDelete();
 
   if (confirmation) {
     document.getElementById(idPlayerName(playerIndex)).value = "";
@@ -658,6 +660,37 @@ function deletePlayerAndTarget(playerIndex, checkbox) {
     checkbox.checked = false; // Uncheck the checkbox if the user cancels
   }
 }
+
+
+  function saveBeforeDelete() {
+      const localSpreadsheetConfig = spreadsheetConfig();
+      const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+                  
+  // Call the "Save" functionality before submitting
+  let out = [];
+  for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+      let currPlayerScores = [];
+      currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+      currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+
+      for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+          currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+      }
+
+      out.push(currPlayerScores);
+  }
+
+  console.log("Saving before player Deletion: " + JSON.stringify(out));
+
+  google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+
+  const now = new Date();
+  const hours = now.getHours().toString();
+  const minutes = now.getMinutes().toString().padStart(2, "0");
+  const time = `${hours}:${minutes}`;
+  document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
+  }
+
 
 
 function generateNameRow(teamConfig) {
