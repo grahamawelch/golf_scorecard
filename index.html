@@ -161,12 +161,10 @@
 
   <!-- Button to manually refresh the Google Sheet -->
   <button id="refresh-btn" onclick="refreshIframe()">Refresh Scoreboard</button>
-
+  
   <!-- Iframe to display the Google Sheet -->
-  <iframe id="google-sheet"
-    src="https://docs.google.com/spreadsheets/d/1m3bLGCeeF4B-QUDUX_ZLplE_ASC3XU1SR6i3TtzTT5k/edit?gid=0#gid=0"
-    style="border:none;">
-  </iframe>
+  <iframe id="google-sheet" style="border:none; width: 100%; height: 1200px;"></iframe>
+
 
   <p id="instructions">
     <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Instructions</u></b><br>
@@ -231,6 +229,58 @@
     teamInput.style.width = "12ch"; // Set width to 12ch for desktop devices
   }
 });
+
+
+
+
+    // Define the URLs for A sheet (Scoreboard2) and B sheet (Scoreboard)
+    const aSheetURL = "https://docs.google.com/spreadsheets/d/1xp1WaBTCvKjIma7TRK_Iu_CVAI9CXSLEgp-UwF1WKlI/edit?gid=0#gid=0"; 
+    // A sheet is Scoreboard2 URL
+    const bSheetURL = "https://docs.google.com/spreadsheets/d/1WGfjUmueuTakLZlrx4K_R0pWMrRzceMr59hfgczQAJQ/edit?gid=0#gid=0";
+    // B sheet is Scoreboard URL
+
+    
+
+
+      // Function to set the iframe src based on the day of the week
+    function setIframeSrc() {
+      const today = new Date().getDay();
+      const iframe = document.getElementById('google-sheet');
+
+      // Log the current day of the week to the console
+      console.log("Today's day of the week:", today);
+
+      if (today === 0 || today === 1) { // Sunday (0) and Monday (1)
+        console.log("Loading Sheet Scoreboard2");
+        iframe.src = aSheetURL;
+      } else if (today >= 2 && today <= 6) { // Tuesday (2) to Saturday (6)
+        console.log("Loading Sheet Scoreboard");
+        iframe.src = bSheetURL;
+      }
+
+      console.log("Iframe src set to:", iframe.src);
+    }
+
+        // Function to refresh the iframe by replacing the src with a unique query parameter
+    function refreshIframe() {
+      const iframe = document.getElementById('google-sheet');
+      const currentSrc = iframe.src.split("?")[0]; // Remove existing query parameters
+      const newSrc = `${currentSrc}?t=${new Date().getTime()}`; // Add timestamp as a query parameter
+      iframe.src = newSrc; // Refresh the iframe with the new src
+      console.log("Iframe refreshed with new src:", newSrc);
+    }
+
+
+    // Ensure the iframe loads at the correct size from the beginning and set the initial src
+    window.onload = function() {
+      console.log("Window loaded");
+      const iframe = document.getElementById('google-sheet');
+      iframe.style.width = '100%';
+      iframe.style.height = '1200px'; // Fixed height
+
+      setIframeSrc(); // Set the initial src
+    };
+
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -1382,19 +1432,6 @@ function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex
         function idResultNetTeam(resultName) {
             return "result_" + resultName + "_net_team";
         }
-   
-        // Function to refresh the iframe
-        function refreshIframe() {
-            var iframe = document.getElementById('google-sheet');
-            iframe.src = iframe.src; // This will refresh the iframe
-        }
-
-        // Ensure the iframe loads at the correct size from the beginning
-        window.onload = function() {
-            var iframe = document.getElementById('google-sheet');
-            iframe.style.width = '100%';
-            iframe.style.height = '1200px'; // Fixed height
-        };
  
   </script>
 
