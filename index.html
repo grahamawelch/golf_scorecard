@@ -249,23 +249,24 @@
 
 
 
-      // Function to set the iframe src based on the day of the week
+        // Function to set the iframe src based on the day of the week
     function setIframeSrc() {
-      const today = new Date().getDay();
-      const iframe = document.getElementById('google-sheet');
+    const today = new Date().getDay();
+    const iframe = document.getElementById('google-sheet');
 
-      // Log the current day of the week to the console
-      console.log("Today's day of the week:", today);
+    // Log the current day of the week to the console
+    console.log("Today's day of the week:", today);
 
-      if (today === 0 || today === 1) { // Sunday (0) and Monday (1)
+    if (today === 0 || today === 1 || today === 6) { // Sunday (0), Monday (1), and Saturday (6)
         console.log("Loading Sheet Scoreboard2");
         iframe.src = aSheetURL;
-      } else if (today >= 2 && today <= 6) { // Tuesday (2) to Saturday (6)
+    } else if (today >= 2 && today <= 5) { // Tuesday (2) to Friday (5)
         console.log("Loading Sheet Scoreboard");
         iframe.src = bSheetURL;
-      }
+    }
 
-      console.log("Iframe src set to:", iframe.src);
+    // Log the iframe src to the console
+    console.log("Iframe src set to:", iframe.src);
     }
 
         // Function to refresh the iframe by replacing the src with a unique query parameter
