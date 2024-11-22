@@ -103,7 +103,7 @@
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://live.staticflickr.com/65535/54033042787_0126e057cd_w_d.jpg" alt="BT Logo Small 2">
 
 <h2>
-<font color="blue"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V 3.2</b></font>
+<font color="blue"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V 3.3</b></font>
 </h2>
 
 <div id="course" style="font-size: 1.75em; font-weight: bold;"></div>
@@ -480,38 +480,40 @@ function updateTeamTarget(playerCount) {
 
        
   function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
-      const table = document.getElementById("table");
+    const table = document.getElementById("table");
 
-      const subTable = document.createElement("table");
-      const tr = document.createElement("tr");
+    const subTable = document.createElement("table");
+    const tr = document.createElement("tr");
 
-      const saveElement = document.createElement("td");
-      const saveButton = createSaveButton(spreadsheetConfig, selectedTeamConfig);
-      saveElement.appendChild(saveButton);
-      saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
-      saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
-      saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
+    const saveElement = document.createElement("td");
+    const saveButton = createSaveButton(spreadsheetConfig, selectedTeamConfig);
+    saveElement.appendChild(saveButton);
+    saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
+    saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+    saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
-      const loadElement = document.createElement("td");
-      loadElement.appendChild(createLoadButton());
-      loadElement.style.paddingLeft = "20px"; // Adjust the amount of space as needed
-      loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
-      loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
+    const loadElement = document.createElement("td");
+    loadElement.appendChild(createLoadButton());
+    loadElement.style.paddingLeft = "20px"; // Adjust the amount of space as needed
+    loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
+    loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
-      const statusElement = document.createElement("td");
-      statusElement.id = "save_status";
+    const statusElement = document.createElement("td");
+    statusElement.id = "save_status";
 
-      tr.appendChild(saveElement);
-      tr.appendChild(loadElement);
-      tr.appendChild(statusElement);
+    tr.appendChild(saveElement);
+    tr.appendChild(loadElement);
+    tr.appendChild(statusElement);
 
-      subTable.appendChild(tr);
-      table.appendChild(subTable);
+    subTable.appendChild(tr);
+    table.appendChild(subTable);
 
-      // Call save button click event every 25 sec
-      setInterval(function() {
-          saveButton.click();
-      }, 25 * 1000); // 25 sec in milliseconds
+    // Call save button click event every 25 sec, with an initial delay of 45 sec
+    setTimeout(function() {
+        setInterval(function() {
+            saveButton.click();
+        }, 25 * 1000); // 25 sec in milliseconds
+    }, 45 * 1000); // Initial delay of 45 sec
   }
 
 
@@ -709,14 +711,28 @@ function populateScorecardWithSavedResults(allPlayerScores) {
   saveBeforeDelete();
 
   if (confirmation) {
-    document.getElementById(idPlayerName(playerIndex)).value = "";
-    document.getElementById(idTarget(playerIndex)).value = "";
+    document.getElementById(idPlayerName(playerIndex)).value = "x";
+    document.getElementById(idTarget(playerIndex)).value = "0";
 
     // Clear scores for the selected deleted player
     clearScoresAndCacheForPlayer(playerIndex);
+    
+    // Update localStorage to reflect the deletion
+    localStorage.removeItem(idPlayerName(playerIndex));
+    localStorage.removeItem(idTarget(playerIndex));
+
+    // Remove the scores for this player from localStorage
+    for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
+      const scoreId = idHolePlayer(holeIndex, playerIndex);
+      localStorage.removeItem(scoreId);
+    }
   } else {
     checkbox.checked = false; // Uncheck the checkbox if the user cancels
   }
+
+  console.log("Saving after player Deletion: " + JSON.stringify(out));
+
+  google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
 }
 
 
