@@ -955,7 +955,10 @@ function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex
         }
 
         function getHoleForPlayerColor(userScore, par) {
-            // Check -1 first incase the hole is par 2 for some reason.
+            // Color Par- Albatross
+            if (parseInt(userScore) === (par)) {
+                return "#A9A9A9"; // Gray
+            }            
             if (parseInt(userScore) === (par - 1)) {
                 return "#90EE90"; // Green
             }
