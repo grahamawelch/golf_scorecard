@@ -474,6 +474,13 @@ function updateTeamTarget(playerCount) {
       const checkboxRow = createCheckboxRow(selectedTeamConfig);
       saveLoadTable.parentNode.insertBefore(checkboxRow, saveLoadTable.nextSibling);
     }
+
+    const reloadButton = document.getElementById("reload_button");
+    if (reloadButton && typeof reloadButton.onclick === "function") {
+        reloadButton.onclick();
+    } else {
+        console.warn("Re-Load button not found or onclick not defined.");
+    }
   }
 
 
@@ -555,6 +562,7 @@ function updateTeamTarget(playerCount) {
   function createLoadButton() {
     const button = document.createElement("button");
     button.innerHTML = "Re-Load";
+    button.id = "reload_button"; 
     button.style.fontSize = "30px";
     button.style.color = "blue";
     button.style.padding = "10px 10px";
