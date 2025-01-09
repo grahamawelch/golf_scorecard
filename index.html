@@ -530,7 +530,17 @@ function updateTeamTarget(playerCount) {
       button.style.fontSize = "30px";
       button.style.color = "green";
       button.style.padding = "10px 10px";
+
+      let isSaving = false; // Lock flag
+
       button.onclick = function () {
+          if (isSaving) {
+              console.log("Save in progress, please wait...");
+              return;
+          }
+
+          isSaving = true; // Lock the function
+
           let out = [];
           for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
               let currPlayerScores = [];
@@ -545,13 +555,18 @@ function updateTeamTarget(playerCount) {
           }
 
           console.log("Sending to backend: " + JSON.stringify(out));
-          google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+          google.script.run.withSuccessHandler(function() {
+              isSaving = false; // Unlock the function after save is complete
 
-          const now = new Date();
-          const hours = now.getHours().toString();
-          const minutes = now.getMinutes().toString().padStart(2, "0");
-          const time = `${hours}:${minutes}`;
-          document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
+              // Save to localStorage
+              localStorage.setItem("savedScores", JSON.stringify(out));
+
+              const now = new Date();
+              const hours = now.getHours().toString();
+              const minutes = now.getMinutes().toString().padStart(2, "0");
+              const time = `${hours}:${minutes}`;
+              document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
+          }).saveScoresForTeam(document.getElementById("team").value, out);
       }
 
       return button;
