@@ -87,6 +87,9 @@
 
 <body>
 
+  
+  <audio id="audio" src="https://www.dropbox.com/scl/fi/666kzmgv2f3t6c1alhx1g/startup-sound.mp3?rlkey=isnzy1syfswgg5p3n2gskz1zp&st=5ryggmm7&raw=1" type="audio/mpeg"></audio>
+
 
     <div class="image-container">
         <img src="https://live.staticflickr.com/65535/54259105499_43c986c7ea_z.jpg" alt="GoogleGolf Scoring System Logo">
@@ -568,6 +571,9 @@
     });
   }
 
+
+  let hasPlayed = false; // Variable to track if the startup sound has already been played
+
   function teamOnchange(RESULTS, spreadsheetConfig) {
       const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
       console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
@@ -592,7 +598,20 @@
       } else {
           console.warn("Re-Load button not found or onclick not defined.");
       }
+
+      // Play sound only on the first change
+      if (!hasPlayed) {
+          const audio = document.getElementById("audio");
+          audio.play().then(function() {
+              console.log("Audio played successfully.");
+          }).catch(function(error) {
+              console.error("Audio playback failed:", error);
+          });
+
+          hasPlayed = true; // Set the flag to true so the sound doesn't play again
+      }
   }
+
 
         
   function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
