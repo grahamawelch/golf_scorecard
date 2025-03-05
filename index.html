@@ -1530,22 +1530,32 @@ function generateTargetRow(results, pars, teamConfig) {
   // Lock inputs (prevent further changes)
   lockInputs();
 
-  // --- Submit the flat results ---
-  google.script.run
-    .withSuccessHandler(function (result) {
-      const submitConfirmation = document.getElementById("submit_confirmation");
-      submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
-      submitConfirmation.style.cssText =
-        "font-size: 40px; font-weight: bold; color: green;";
-    })
-    .withFailureHandler(function (error) {
-      const submitConfirmation = document.getElementById("submit_confirmation");
-      submitConfirmation.textContent =
-        "FAILURE - Be sure to Text Scorecard!";
-      submitConfirmation.style.cssText =
-        "font-size: 40px; font-weight: bold; color: red;";
-    })
-    .saveData(flatResults);
+// --- Submit the flat results ---
+google.script.run
+  .withSuccessHandler(function (result) {
+    const submitConfirmation = document.getElementById("submit_confirmation");
+    submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
+    submitConfirmation.style.cssText =
+      "font-size: 40px; font-weight: bold; color: green;";
+
+    // Voice confirmation for success
+    const successUtterance = new SpeechSynthesisUtterance("Submission success. Thanks!");
+    successUtterance.rate = 1.0; 
+    window.speechSynthesis.speak(successUtterance);
+  })
+  .withFailureHandler(function (error) {
+    const submitConfirmation = document.getElementById("submit_confirmation");
+    submitConfirmation.textContent =
+      "FAILURE - Be sure to Text Scorecard!";
+    submitConfirmation.style.cssText =
+      "font-size: 40px; font-weight: bold; color: red;";
+
+    // Voice notification for failure
+    const failureUtterance = new SpeechSynthesisUtterance("Failed, please try again in 5 seconds.");
+    failureUtterance.rate = 1.0;
+    window.speechSynthesis.speak(failureUtterance);
+  })
+  .saveData(flatResults);
 }
 
 
