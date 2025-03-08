@@ -15,8 +15,8 @@
       font-size: 1.2em;  /* Set a base font size */
       line-height: 1.5em; /* Improve readability */
       scroll-behavior: smooth;
-      zoom: 1.8; /* Start with a zoom of 1.8x */
     }
+
 
     h1 {
       font-size: 2.2em;
@@ -25,11 +25,28 @@
       /* Ensure no margin at the top */
     }
 
+    h2 {
+      color: blue;
+      font-weight: bold;
+      font-style: italic;
+      padding-left: 0.25in; /* Adds 1/2 inch padding on the left */
+      text-align: left; /* Aligns text to the left */
+      font-size: 1.4em; /* Adjust base font size */
+    }
+
     #course {
       font-size: 1.75em;
       font-weight: bold;
-      margin-bottom: 20px; /* Reduce space below the course */
+      margin-bottom: 20px;
     }
+
+    #title {
+      font-size: 1em;
+      color: blue;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
 
     #instructions {
     margin: 1em 0; /* Adding margin to the top and bottom */
@@ -97,17 +114,18 @@
     </div>
 
 
-     <!-- yes, the below spacing is not eloquent-- but found necessary to keep all parts aligned -- especially the Delete Player boxes-->
-<h3>
-<font color="blue"><b>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>Your Google Based DIY Golf Group <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V 4.2</b></i></font></h3>
+   <!-- yes, the below spacing is not eloquent-- but found necessary to keep all parts aligned -- especially the Delete Player boxes -->
 
+   <div id="title">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V 4.3<br>
+    </div>
+  
+  
+  <div id="course"> </div>
 
-
-<div id="course" style="font-size: 1.75em; font-weight: bold;"></div>
-<div id="all_input">
+  <div id="all_input">
     <div>
         <div style="display: inline-block; font-size: 1.75em;"><b>Date: </b></div>
         <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="date"></div>
@@ -197,28 +215,40 @@
           window.scrollTo(0, 0);
       });
 
-  document.addEventListener("DOMContentLoaded", function() {
+   document.addEventListener("DOMContentLoaded", function () {
     const isMobile = /Mobi/i.test(navigator.userAgent);
     const isAndroid = /Android/i.test(navigator.userAgent);
-    const teamInput = document.getElementById('team');
+    const teamInput = document.getElementById("team");
+
+    // Ensure elements exist before modifying them
+    const title = document.getElementById("title");
+    const course = document.getElementById("course");
+    const instructions = document.getElementById("instructions");
 
     if (isMobile && !isAndroid) {
-      // Set readonly for mobile devices (excluding Android)
-      teamInput.readOnly = true;
-      // Apply zoom for mobile devices (excluding Android)
-      document.body.style.zoom = "1.0"; // No zoom for mobile devices (excluding Android)
+        // Set readonly for mobile devices (excluding Android)
+        if (teamInput) teamInput.readOnly = true;
+        document.body.style.zoom = "1.0"; // No zoom for iPhones
     } else if (isAndroid) {
-      // Settings for Android devices
-      teamInput.readOnly = false; // You can change this if needed
-      document.body.style.zoom = "1"; // same size for Android devices
-      // Reduce font size for Android devices
-      instructions.style.fontSize = ".5em";  // Zoom out for Android devices
-      teamInput.style.width = "12ch"; // Set width to 12ch for Android devices
+        // Settings for Android devices
+        if (teamInput) {
+            teamInput.readOnly = false;
+            teamInput.style.width = "12ch"; // Set width to 12ch for Android devices
+        }
+        
+        document.body.style.zoom = "1"; // Keep same zoom for Android devices
+
+        // Reduce font size for Android devices
+        if (title) title.style.fontSize = "0.25em";
+        if (course) course.style.fontSize = "0.25em";
+        if (instructions) instructions.style.fontSize = "0.25em";
     } else {
-      // Settings for non-mobile devices (desktop)
-      teamInput.readOnly = false;
-      document.body.style.zoom = "0.75"; // Zoom out for desktop devices
-      teamInput.style.width = "12ch"; // Set width to 12ch for desktop devices
+        // Settings for non-mobile devices (desktop)
+        if (teamInput) {
+            teamInput.readOnly = false;
+            teamInput.style.width = "12ch"; // Set width to 12ch for desktop devices
+        }
+        document.body.style.zoom = "0.5"; // Zoom out for desktop devices
     }
   });
 
@@ -413,14 +443,14 @@
     teeTimeInput.addEventListener('input', function() {
       if (teeTimeInput.value) {
         // Scale down the page to 1.4x after selecting a tee time
-        document.documentElement.style.zoom = '1.5';
+        document.documentElement.style.zoom = '1.4';
         }
     });
     });
 
 
     // Function to create a row of checkboxes for player deletion
-  function createCheckboxRow(teamConfig) {
+    function createCheckboxRow(teamConfig) {
     const containerDiv = document.createElement("div");
     containerDiv.style.display = "flex";
     containerDiv.style.alignItems = "center";
@@ -432,7 +462,7 @@
 
     // Add header for delete player/points
     const headerDiv = document.createElement("div");
-    headerDiv.innerHTML = "<b style='font-size: 1.25em;'>Delete Player</b>";
+    headerDiv.innerHTML = "<b style='font-size: 1em;'>Delete Player</b>";
     headerDiv.style.marginRight = "20px"; // Adjust spacing as needed
     containerDiv.appendChild(headerDiv);
 
@@ -442,8 +472,9 @@
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.style.width = "30px"; // Keep original size
-      checkbox.style.height = "30px"; // Keep original size
-      checkbox.style.marginRight = "65px"; // Space out 65px
+      checkbox.style.height = "20px"; // Keep original size
+      checkbox.style.marginLeft = "70px"; // Space out 20px
+      //checkbox.style.marginRight = "60px"; // Space out 65px
       checkbox.onchange = function() {
         if (checkbox.checked) {
           deletePlayerAndTarget(j, checkbox);
