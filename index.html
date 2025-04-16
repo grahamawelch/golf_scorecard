@@ -119,7 +119,7 @@
    <div id="title">
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V 4.3<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V 4.4<br>
     </div>
   
   
@@ -460,30 +460,58 @@
     nullRowAbove.style.height = "150px"; // Adjust height as needed
     containerDiv.appendChild(nullRowAbove);
 
-    // Add header for delete player/points
-    const headerDiv = document.createElement("div");
-    headerDiv.innerHTML = "<b style='font-size: 1em;'>Delete Player</b>";
-    headerDiv.style.marginRight = "20px"; // Adjust spacing as needed
-    containerDiv.appendChild(headerDiv);
+      // Add header for delete player/points
+      const headerDiv = document.createElement("div");
+  headerDiv.innerHTML = "<b style='font-size: 1.4em; color: red;'>Delete Player</b>"; // Set color to red
+  headerDiv.style.marginRight = "20px"; // Adjust spacing as needed
+  containerDiv.appendChild(headerDiv);
 
-    // Create a single row of 4 checkboxes
-    const boxDiv = document.createElement("div");
-    for (let j = 0; j < teamConfig.players.length; j++) {
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.style.width = "30px"; // Keep original size
-      checkbox.style.height = "20px"; // Keep original size
-      checkbox.style.marginLeft = "70px"; // Space out 20px
-      //checkbox.style.marginRight = "60px"; // Space out 65px
-      checkbox.onchange = function() {
-        if (checkbox.checked) {
-          deletePlayerAndTarget(j, checkbox);
-          updateTeamTarget(teamConfig.players.length); // Update team target points
-        }
-      };
-      boxDiv.appendChild(checkbox);
-    }
-    containerDiv.appendChild(boxDiv);
+
+  // Create a single row of 4 checkboxes
+  const boxDiv = document.createElement("div");
+
+  for (let j = 0; j < teamConfig.players.length; j++) {
+    const checkboxContainer = document.createElement("label"); // Container for custom checkbox
+    checkboxContainer.style.display = "inline-block";
+    checkboxContainer.style.marginLeft = "50px"; // Space out 20px
+    checkboxContainer.style.width = "30px";
+    checkboxContainer.style.height = "30px"; // Slightly increased for better visibility
+    checkboxContainer.style.backgroundColor = "red"; // Set container background to red
+    checkboxContainer.style.borderRadius = "4px"; // Optional: rounded corners
+    checkboxContainer.style.cursor = "pointer"; // Pointer cursor for better UI
+    checkboxContainer.style.textAlign = "center"; // Center check mark
+    checkboxContainer.style.lineHeight = "30px"; // Align the check mark vertically
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.style.opacity = "0"; // Hide the default checkbox
+    checkbox.style.width = "30px"; // Match the container size
+    checkbox.style.height = "30px"; // Match the container size
+    checkbox.style.margin = "0"; // Remove margin to align correctly
+
+    // Style for checked state
+    checkbox.onchange = function () {
+      if (checkbox.checked) {
+        checkboxContainer.style.color = "white"; // Set the check mark to white
+        checkboxContainer.innerHTML = "✔"; // Show the check mark in the box
+      } else {
+        checkboxContainer.style.color = ""; // Reset color
+        checkboxContainer.innerHTML = ""; // Remove check mark
+      }
+
+      // Handle checkbox actions
+      if (checkbox.checked) {
+        deletePlayerAndTarget(j, checkbox);
+        updateTeamTarget(teamConfig.players.length); // Update team target points
+      }
+    };
+
+    checkboxContainer.appendChild(checkbox); // Add hidden checkbox to the container
+    boxDiv.appendChild(checkboxContainer); // Add the container to the box row
+  }
+
+  containerDiv.appendChild(boxDiv);
+
 
     // Add null row below for spacing
     const nullRowBelow = document.createElement("div");
