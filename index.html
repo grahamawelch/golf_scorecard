@@ -97,6 +97,7 @@
         height: auto; /* Maintain aspect ratio */
     }
 
+
   </style>
 
 </head>
@@ -104,8 +105,8 @@
 
 <body>
 
-  
   <audio id="audio" src="https://www.dropbox.com/scl/fi/666kzmgv2f3t6c1alhx1g/startup-sound.mp3?rlkey=isnzy1syfswgg5p3n2gskz1zp&st=5ryggmm7&raw=1" type="audio/mpeg"></audio>
+
 
 
     <div class="image-container">
@@ -113,19 +114,20 @@
         <img src="https://live.staticflickr.com/65535/54033042787_0126e057cd_w_d.jpg" alt="BT Logo">
     </div>
 
+<br>
 
-   <!-- yes, the below spacing is not eloquent-- but found necessary to keep all parts aligned -- especially the Delete Player boxes -->
+  <!-- yes, the below spacing is not eloquent-- but found necessary to keep all parts aligned -- especially the Delete Player boxes -->
 
-   <div id="title">
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V 4.4<br>
-    </div>
-  
-  
-  <div id="course"> </div>
+  <div id="title">
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V. 5.0<br>
+  </div>
 
-  <div id="all_input">
+
+<div id="course"> </div>
+
+<div id="all_input">
     <div>
         <div style="display: inline-block; font-size: 1.75em;"><b>Date: </b></div>
         <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="date"></div>
@@ -133,15 +135,17 @@
     <div>
         <div style="display: inline-block; font-size: 1.75em;">
             <font color="Blue"><b>Tee Time: </b></font>
-            <select style="display: inline-block; font-size: 1em; padding: 5px 5px; width: 8ch" id="team" placeholder="Select">
+            <select style="display: inline-block; font-size: 1em; padding: 5px 5px; width: 8ch" id="team" placeholder= "Select">
                 <option value="" disabled selected>Select</option>
             </select>
         </div>
     </div>
     <div id="team_options"></div>
-    <div style="display: inline-block; font-size: 1.75em;"><b>Team Target Points = </b></div>
+    <div style="display: inline-block; font-size: 1.75em;"><b>Team Target Points =  </b></div>
     <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="team_target"></div>
-</div>
+</div> 
+
+
 <br>
 <div id="table"></div>
 <div id="buttons">
@@ -150,7 +154,7 @@
         <tr></tr>
         <tr></tr>
         <tr>
-            <td><button id="submit_button" onclick="submit()" disabled="true" style="color: green; font-size: 30px; padding: 10px 10px">SUBMIT</button></td>
+            <td><button id="submit_button" onclick="submit()" disabled="true" style="color: green; font-size: 30px; padding: 10px 10px">Submit & Email</button></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div id="submit_confirmation"></div></td>
         </tr>
         <tr></tr>
@@ -208,6 +212,15 @@
 
   <script>
   
+    document.addEventListener("click", function playOnce() {
+        var audio = document.getElementById("audio");
+        audio.play().catch(function(error) {
+            console.error("Audio playback failed:", error);
+        });
+        document.removeEventListener("click", playOnce); // Removes listener after first click
+    });
+
+
 // Window positioning and tailoring to Mobile and Android -- may need to add for others. 
 
   window.addEventListener('load', function() {
@@ -215,7 +228,9 @@
           window.scrollTo(0, 0);
       });
 
-   document.addEventListener("DOMContentLoaded", function () {
+
+
+  document.addEventListener("DOMContentLoaded", function () {
     const isMobile = /Mobi/i.test(navigator.userAgent);
     const isAndroid = /Android/i.test(navigator.userAgent);
     const teamInput = document.getElementById("team");
@@ -251,6 +266,7 @@
         document.body.style.zoom = "0.5"; // Zoom out for desktop devices
     }
   });
+
 
 
       // clear out localstore for prior days so it doesn't interfere
@@ -299,7 +315,7 @@
     */
 
 
-// Function to set the iframe src based on the day of the week
+  // Function to set the iframe src based on the day of the week
   //defaulting all days to Singles Stroke play via Scoreboard2 aka aSheet
     
     function setIframeSrc() {
@@ -313,26 +329,26 @@
       // by defalt, every day uses the asheet-- Strokeplay -- singles
 
       if (today === 0) { // Sunday
-          console.log("Loading Sheet Scoreboard2");
-          iframe.src = aSheetURL;
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
       } else if (today === 1) { // Monday
-          console.log("Loading Sheet Scoreboard2");
-          iframe.src = aSheetURL;
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
       } else if (today === 2) { // Tuesday
-          console.log("Loading Sheet Scoreboard2");
-          iframe.src = aSheetURL;
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
       } else if (today === 3) { // Wednesday
-          console.log("Loading Sheet Scoreboard2");
-          iframe.src = aSheetURL;
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
       } else if (today === 4) { // Thursday
-          console.log("Loading Sheet Scoreboard2");
-          iframe.src = aSheetURL;
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
       } else if (today === 5) { // Friday
-          console.log("Loading Sheet Scoreboard2");
-          iframe.src = aSheetURL;
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
       } else if (today === 6) { // Saturday
-          console.log("Loading Sheet Scoreboard2");
-          iframe.src = aSheetURL;
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
       }
 
       // Log the iframe src to the console
@@ -349,8 +365,6 @@
 
     setIframeSrc(); // Set the initial src
   };
-
-
 
 
 //Par Info -- setting Max and Min scores for each hole-- Important, ensure the below "score" functions have the same values
@@ -414,7 +428,8 @@
 // global variables to affect the auto saving periods
   let initialDelaySec = 15;  // Variable for initial delay in seconds, that is added to the saveInterval for the first Save
   let saveIntervalSec = 25;  // Variable for save interval in seconds
-
+  
+  let hasPlayed = false; // Variable to track if the startup sound has already been played
 
 
  // obfuscation start -- if desired
@@ -422,6 +437,7 @@
    // global variables used for autosave feature
   let inputsLocked = false; 
   let saveInterval; 
+
   
   console.log("Initialized inputsLocked:", inputsLocked);
 
@@ -450,7 +466,7 @@
 
 
     // Function to create a row of checkboxes for player deletion
-    function createCheckboxRow(teamConfig) {
+  function createCheckboxRow(teamConfig) {
     const containerDiv = document.createElement("div");
     containerDiv.style.display = "flex";
     containerDiv.style.alignItems = "center";
@@ -460,8 +476,9 @@
     nullRowAbove.style.height = "150px"; // Adjust height as needed
     containerDiv.appendChild(nullRowAbove);
 
+
       // Add header for delete player/points
-      const headerDiv = document.createElement("div");
+  const headerDiv = document.createElement("div");
   headerDiv.innerHTML = "<b style='font-size: 1.4em; color: red;'>Delete Player</b>"; // Set color to red
   headerDiv.style.marginRight = "20px"; // Adjust spacing as needed
   containerDiv.appendChild(headerDiv);
@@ -538,9 +555,6 @@
 
 
 
-
-
-
   const RESULTS = [{
         name: "Total 18",
         startInclusive: 0,
@@ -597,6 +611,7 @@
 
   createScorecard(RESULTS, spreadsheetConfig());
 
+/**
   function createScorecard(RESULTS, spreadsheetConfig) {
       document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
       document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
@@ -606,6 +621,19 @@
       }
       document.getElementById("team_options").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
   }
+*/
+
+function createScorecard(RESULTS, spreadsheetConfig) {
+    document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
+    document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
+
+    document.getElementById("team").onchange = function (event) {
+        teamOnchange(RESULTS, spreadsheetConfig);
+    };
+
+    createTeamOptions(spreadsheetConfig.allTeamConfigs); // This already populates the select box
+}
+
 
   function createTeamOptions(allTeamConfigs) {
     const teamSelect = document.getElementById("team");  // Assuming 'team' is the id of your <select> element
@@ -631,7 +659,7 @@
   }
 
 
-  let hasPlayed = false; // Variable to track if the startup sound has already been played
+
 
   function teamOnchange(RESULTS, spreadsheetConfig) {
       const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
@@ -670,7 +698,6 @@
           hasPlayed = true; // Set the flag to true so the sound doesn't play again
       }
   }
-
 
         
   function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
@@ -957,35 +984,44 @@
 
 
   function deletePlayerAndTarget(playerIndex, checkbox) {
-    const playerName = document.getElementById(idPlayerName(playerIndex)).value;
-    const confirmation = confirm(`Do you really want to delete ${playerName}, his Target Pts, and Scores? If sure, hit OK, if not, hit Cancel.  Note: After the deletion, you do have about 20 seconds to hit the Reload button to retrieve the deleted info.  But after that, it is gone.`);
+  const playerName = document.getElementById(idPlayerName(playerIndex)).value;
+  const confirmation = confirm(`Do you really want to delete ${playerName}, his Target Pts, and Scores? If sure, hit OK, if not, hit Cancel.  Note: After the deletion, you do have about 20 seconds to hit the Reload button to retrieve the deleted info.  But after that, it is gone.`);
 
-    saveBeforeDelete();
+  saveBeforeDelete();
 
-    if (confirmation) {
-      document.getElementById(idPlayerName(playerIndex)).value = "x";
-      document.getElementById(idTarget(playerIndex)).value = "0";
+  if (confirmation) {
+    document.getElementById(idPlayerName(playerIndex)).value = "x";
+    document.getElementById(idTarget(playerIndex)).value = "0";
 
-      // Clear scores for the selected deleted player
-      clearScoresAndCacheForPlayer(playerIndex);
-      
-      // Update localStorage to reflect the deletion
-      localStorage.removeItem(idPlayerName(playerIndex));
-      localStorage.removeItem(idTarget(playerIndex));
+    // Clear scores for the selected deleted player
+    clearScoresAndCacheForPlayer(playerIndex);
+    
+    // Update localStorage to reflect the deletion
+    localStorage.removeItem(idPlayerName(playerIndex));
+    localStorage.removeItem(idTarget(playerIndex));
 
-      // Remove the scores for this player from localStorage
-      for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
-        const scoreId = idHolePlayer(holeIndex, playerIndex);
-        localStorage.removeItem(scoreId);
-      }
-    } else {
-      checkbox.checked = false; // Uncheck the checkbox if the user cancels
+    // Remove the scores for this player from localStorage
+    for (let holeIndex = 0; holeIndex < 18; holeIndex++) {
+    const scoreId = idHolePlayer(holeIndex, playerIndex);
+    localStorage.removeItem(scoreId);
     }
+    
 
-    console.log("Saving after player Deletion: " + JSON.stringify(out));
+    // ✅ After deleting player info, update the team target points
+    updateTeamTarget(4);
+    console.log("New Team Target After Player Deletion:", document.getElementById("team_target").textContent);
 
-    google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+  } else {
+    checkbox.checked = false; // Uncheck the checkbox if the user cancels
   }
+
+  let out = [];
+
+  console.log("Saving Team Info after player Deletion");
+
+  google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+}
+
 
 
  function saveBeforeDelete() {
@@ -1607,28 +1643,29 @@ function generateTargetRow(results, pars, teamConfig) {
   // Lock inputs (prevent further changes)
   lockInputs();
 
+
 // --- Submit the flat results ---
 google.script.run
   .withSuccessHandler(function (result) {
     const submitConfirmation = document.getElementById("submit_confirmation");
-    submitConfirmation.textContent = "SUBMISSION Success - Thanks!";
+    submitConfirmation.textContent = "Submit & Email Success - Thanks!";
     submitConfirmation.style.cssText =
       "font-size: 40px; font-weight: bold; color: green;";
 
     // Voice confirmation for success
-    const successUtterance = new SpeechSynthesisUtterance("Submission success. Thanks!");
+    const successUtterance = new SpeechSynthesisUtterance("Submit & Email Success - Thanks!");
     successUtterance.rate = 1.0; 
     window.speechSynthesis.speak(successUtterance);
   })
   .withFailureHandler(function (error) {
     const submitConfirmation = document.getElementById("submit_confirmation");
     submitConfirmation.textContent =
-      "FAILURE - Be sure to Text Scorecard!";
+      "Failed, re-start App, pull up your tee time, and re-submit.";
     submitConfirmation.style.cssText =
       "font-size: 40px; font-weight: bold; color: red;";
 
     // Voice notification for failure
-    const failureUtterance = new SpeechSynthesisUtterance("Failed, please try again in 5 seconds.");
+    const failureUtterance = new SpeechSynthesisUtterance("Failed, re-start App, pull up your tee time, and re-submit.");
     failureUtterance.rate = 1.0;
     window.speechSynthesis.speak(failureUtterance);
   })
