@@ -45,9 +45,11 @@ function getConfigAsString() {
  * - [Date, CourseName, par1, par2, ... par18]
  * - [[TeamName, Player1, Target1, ...] ...]
  */
+
 function extractRawConfig() {
   // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
   // https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
+  // G2 
   const spreadsheet = SpreadsheetApp.openById("1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ");
   const sheet = spreadsheet.getSheetByName("Config");
 
@@ -106,35 +108,169 @@ function constructStructuredConfig(rawConfig) {
   return out;
 }
 
-// App Script function to save data to sheet
-function saveData(flatResults) {
-  const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
-  
-  //G2
-  //const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
 
-  // Log the data to ensure it's coming through
+
+function saveData(flatResults) {
+  //G const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
+  //G2 const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
+  //G2
+  const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
+
   Logger.log("Saving data: " + JSON.stringify(flatResults));
 
   const lock = LockService.getScriptLock();
-  
+
   try {
     lock.waitLock(3000);
-    
+
     flatResults.forEach(result => {
       Logger.log("Appending row: " + result); // Log each row being appended
       sheet.appendRow(result);
     });
     sheet.appendRow(["***"]);
-    
+
     Logger.log("Data saved successfully.");
-    
+
+    sendFlatResultsEmail(flatResults);
+
+    Logger.log("Emails sent successfully.");
+
   } catch (e) {
     Logger.log("Error during saveData: " + e.message);
   } finally {
     lock.releaseLock();
   }
 }
+
+
+
+
+
+function sendFlatResultsEmail(flatResults) {
+   // G config sheet Id  1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ 
+   // G2 "      "    Id  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
+  const sheetId = '1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ'; // The config sheet containing par ratings
+  const subject = `Your ${new Date().toLocaleDateString()} Springfield Seniors Submitted Golf Scores`;
+
+
+  const header = [
+    "Date", "Tee Time", "Course", "Player Name",
+    "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12", "H13", "H14", "H15", "H16", "H17", "H18",
+    "Target", "Total Score", "Total Points", "Total Net",
+    "Front Score", "Front Points", "Front Net", "Back Score", "Back Points", "Back Net"
+  ];
+
+
+  // STEP 1: Read pars from external sheet
+  const sheet = SpreadsheetApp.openById(sheetId).getSheets()[0];
+  const parValues = sheet.getRange('C1:T1').getValues()[0]; // Get the par values from C1:T1
+
+
+  // STEP 2: Build second header row (pars)
+  const secondHeader = [
+    "", "", "", "<b>Pars</b>",   // Bold "Pars"
+    ...parValues,                 // H1 - H18 pars
+    "",                          // Target
+    "", "", "",                  // Total Score, Total Points, Total Net
+    "", "", "",                  // Front Score, Front Points, Front Net
+    "", "", ""                   // Back Score, Back Points, Back Net
+  ];
+
+
+  // STEP 3: Read player names and emails from another sheet (Players Past Poionts Email Sheet)
+   // G Player Past Points sheet Id  1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ
+   // G2 "      "                Id  1U6Ugwd6uXTWYimMQdOOf-5ngDBzJtmaDiVSyqrBbogA
+
+  const parsSheet = SpreadsheetApp.openById('1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ').getSheetByName('Sheet1');
+  const playersData = parsSheet.getRange('A2:B' + parsSheet.getLastRow()).getValues();
+ 
+  const playerEmails = {};
+  playersData.forEach(row => {
+    const playerName = row[0];
+    const email = row[1];
+    if (playerName && email) {
+      playerEmails[playerName] = email;
+    }
+  });
+
+
+  // Now we build the email addresses for the players in the flatResults
+  let toList = [];
+  flatResults.forEach(row => {
+    let playerNameRaw = row[3]; // Player Name is in column 4 of each row
+    if (playerNameRaw) {
+      let cleanedName = playerNameRaw.replace(/!/g, "").trim(); // remove any "!" and extra spaces
+      const email = playerEmails[cleanedName];
+      if (email) {
+        toList.push(email);  // Add to the recipient list
+      }
+    }
+  });
+
+
+    // Email body with headers and data
+ let htmlBody = 
+  `<div style="font-family: Arial, sans-serif; font-size: 14px;">
+    <p>Thank you for playing today in the Springfield Seniors Group! Below is your group's resulting scorecard.</p>
+    <br><br>
+    <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr style="background-color: #d9edf7;">
+          ${header.map(col => 
+            `<th style="padding: 8px; border: 1px solid #ccc; text-align: center;">
+              ${col}
+            </th>`
+          ).join('')}
+        </tr>
+        <tr style="background-color: #d9edf7;">
+          ${secondHeader.map(par => 
+            `<th style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+              ${par !== "" ? par : ""}
+            </th>`
+          ).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${flatResults.map(row => 
+          `<tr>
+            ${row.map((cell, index) => {
+              const align = (index <= 3) ? "left" : "center";
+              return `<td style="padding: 6px; border: 1px solid #ccc; text-align: ${align};">
+                        ${cell !== undefined && cell !== null ? cell : ""}
+                      </td>`;
+            }).join('')}
+          </tr>`
+        ).join('')}
+      </tbody>
+    </table>
+    <br><br>
+    <p>Scores submitted on: ${new Date().toLocaleString()}</p>
+    <br><br>
+    <p><b><i>Powered by GoggleGolf Scoring System!</i></b></p>
+  </div>`;
+
+
+  // Send email
+  MailApp.sendEmail({
+    to: toList.join(','),  // Players' emails in the "To" field
+    cc: "welch_misc@yahoo.com",  // CC emails
+    subject: subject,
+    htmlBody: htmlBody
+  });
+
+
+  // Log the recipients (optional for debugging)
+  Logger.log("Email sent to: " + toList.join(', ') + " CC: welch_misc@yahoo.com");
+}
+
+
+// kendunnett@comporium.net
+
+
+
+
+
+
 
 // You can directly execute this method in the AppsScript UI.
 function testSaveData() {
@@ -150,7 +286,9 @@ function saveScoresForTeam(teamName, allPlayerScores) {
   // teamName: String
   // allPlayerScores: [["name", "target", "hole0", "hole1", ...], ...]
 
-  // https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
+   // G  Storage Sheet https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
+  // G2  Starage  https://docs.google.com/spreadsheets/d/1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM/edit?gid=1733728784#gid=1733728784
+
   const spreadsheet = SpreadsheetApp.openById("1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ");
   let teamSheet = spreadsheet.getSheetByName(teamName);
 
@@ -172,8 +310,12 @@ function testSaveScoresForTeam() {
   ]);
 }
 
+
 function loadScoresForTeam(teamName) {
-  // https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
+  
+  // G  Storage Sheet https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
+  // G2  Starage      https://docs.google.com/spreadsheets/d/1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM/edit?gid=1733728784#gid=1733728784
+
   const spreadsheet = SpreadsheetApp.openById("1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ");
   const teamSheet = spreadsheet.getSheetByName(teamName);
 
