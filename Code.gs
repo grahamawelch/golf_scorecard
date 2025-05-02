@@ -246,7 +246,7 @@ function sendFlatResultsEmail(flatResults) {
     <br><br>
     <p>Scores submitted on: ${new Date().toLocaleString()}</p>
     <br><br>
-    <p><b><i>Powered by GoggleGolf Scoring System!</i></b></p>
+    <p><b><i>Powered by GoogleGolf Scoring System!</i></b></p>
   </div>`;
 
 
