@@ -426,18 +426,22 @@
   }
 
 
-// global variables to affect the auto saving periods
-  let initialDelaySec = 15;  // Variable for initial delay in seconds, that is added to the saveInterval for the first Save
-  let saveIntervalSec = 25;  // Variable for save interval in seconds
-  
-  let hasPlayed = false; // Variable to track if the startup sound has already been played
-
-
  // obfuscation start -- if desired
 
-   // global variables used for autosave feature
-  let inputsLocked = false; 
-  let saveInterval; 
+
+
+      // global variables to affect the auto saving periods and lock
+    let initialDelaySec = 15;
+    let saveIntervalSec = 25;
+    let saveInterval = null;
+    let inputsLocked = false; 
+  
+   let hasPlayed = false; // Variable to track if the startup sound has already been played
+
+
+
+
+
 
   
   console.log("Initialized inputsLocked:", inputsLocked);
@@ -466,93 +470,86 @@
     });
 
 
-    // Function to create a row of checkboxes for player deletion
-  function createCheckboxRow(teamConfig) {
-    const containerDiv = document.createElement("div");
-    containerDiv.style.display = "flex";
-    containerDiv.style.alignItems = "center";
 
-    // Add null row above for spacing
-    const nullRowAbove = document.createElement("div");
-    nullRowAbove.style.height = "150px"; // Adjust height as needed
-    containerDiv.appendChild(nullRowAbove);
+function createCheckboxRow(teamConfig) {
+  const containerDiv = document.createElement("div");
+  containerDiv.style.display = "flex";
+  containerDiv.style.alignItems = "center";
 
+  // Add spacing row
+  const nullRowAbove = document.createElement("div");
+  nullRowAbove.style.height = "20px"; 
+  containerDiv.appendChild(nullRowAbove);
 
-      // Add header for delete player/points
+  // Add header for delete player
   const headerDiv = document.createElement("div");
-  headerDiv.innerHTML = "<b style='font-size: 1.4em; color: red;'>Delete Player</b>"; // Set color to red
-  headerDiv.style.marginRight = "20px"; // Adjust spacing as needed
+  headerDiv.innerHTML = "<b style='font-size: 1.4em; color: red;'>Delete Player</b>"; 
+  headerDiv.style.marginRight = "20px"; 
   containerDiv.appendChild(headerDiv);
 
-
-  // Create a single row of 4 checkboxes
+  // Create a single row of checkboxes
   const boxDiv = document.createElement("div");
 
   for (let j = 0; j < teamConfig.players.length; j++) {
-    const checkboxContainer = document.createElement("label"); // Container for custom checkbox
+    const checkboxContainer = document.createElement("label");
     checkboxContainer.style.display = "inline-block";
-    checkboxContainer.style.marginLeft = "50px"; // Space out 20px
+    checkboxContainer.style.marginLeft = "50px";
     checkboxContainer.style.width = "30px";
-    checkboxContainer.style.height = "30px"; // Slightly increased for better visibility
-    checkboxContainer.style.backgroundColor = "red"; // Set container background to red
-    checkboxContainer.style.borderRadius = "4px"; // Optional: rounded corners
-    checkboxContainer.style.cursor = "pointer"; // Pointer cursor for better UI
-    checkboxContainer.style.textAlign = "center"; // Center check mark
-    checkboxContainer.style.lineHeight = "30px"; // Align the check mark vertically
+    checkboxContainer.style.height = "30px";
+    checkboxContainer.style.backgroundColor = "red";
+    checkboxContainer.style.borderRadius = "4px";
+    checkboxContainer.style.cursor = "pointer";
+    checkboxContainer.style.textAlign = "center";
+    checkboxContainer.style.lineHeight = "30px";
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.style.opacity = "0"; // Hide the default checkbox
-    checkbox.style.width = "30px"; // Match the container size
-    checkbox.style.height = "30px"; // Match the container size
-    checkbox.style.margin = "0"; // Remove margin to align correctly
+    checkbox.style.opacity = "0"; 
+    checkbox.style.width = "30px"; 
+    checkbox.style.height = "30px"; 
+    checkbox.style.margin = "0"; 
 
-    // Style for checked state
+    // Handle checkbox actions with pop-up confirmation
     checkbox.onchange = function () {
       if (checkbox.checked) {
-        checkboxContainer.style.color = "white"; // Set the check mark to white
-        checkboxContainer.innerHTML = "✔"; // Show the check mark in the box
-      } else {
-        checkboxContainer.style.color = ""; // Reset color
-        checkboxContainer.innerHTML = ""; // Remove check mark
-      }
+        const playerName = document.getElementById(idPlayerName(j)).value;
+        const confirmation = confirm(
+          `Do you really want to delete ${playerName}, his Target Pts, and Scores?\n\n` +
+          `If sure, hit OK, if not, hit Cancel.\n\n` +
+          `Note: After the deletion, you have about 5 secs average to hit the Reload button to retrieve the deleted info. But after that, it is gone.`
+        );
 
-      // Handle checkbox actions
-      if (checkbox.checked) {
-        deletePlayerAndTarget(j, checkbox);
-        updateTeamTarget(teamConfig.players.length); // Update team target points
+        if (!confirmation) {
+          checkbox.checked = false; // Ensure checkbox remains unchecked if canceled
+          return;
+        }
+
+        checkboxContainer.style.color = "white"; 
+        checkboxContainer.innerHTML = "✔"; 
+        deletePlayerAndTarget(j, checkbox); 
+        updateTeamTarget(teamConfig.players.length); 
+      } else {
+        checkboxContainer.style.color = ""; 
+        checkboxContainer.innerHTML = ""; 
       }
     };
 
-    checkboxContainer.appendChild(checkbox); // Add hidden checkbox to the container
-    boxDiv.appendChild(checkboxContainer); // Add the container to the box row
+    checkboxContainer.appendChild(checkbox); 
+    boxDiv.appendChild(checkboxContainer); 
   }
 
   containerDiv.appendChild(boxDiv);
 
 
-    // Add null row below for spacing
-    const nullRowBelow = document.createElement("div");
-    nullRowBelow.style.height = "40px"; // Adjust height as needed
-    containerDiv.appendChild(nullRowBelow);
+  // Add final spacing row
+  const nullRowBelow = document.createElement("div");
+  nullRowBelow.style.height = "200px"; 
+  containerDiv.appendChild(nullRowBelow);
 
-    return containerDiv;
-  }
+  return containerDiv;
+}
 
-    // Function to update team target points
-  function updateTeamTarget(playerCount) {
-    let teamTarget = 0;
-    for (let playerIndex = 0; playerIndex < playerCount; playerIndex++) {
-      const input = document.getElementById(idTarget(playerIndex));
-      if (input) {
-        const playerTargetOrZero = parseInt(input.value);
-        if (!isNaN(playerTargetOrZero)) {
-          teamTarget += playerTargetOrZero;
-        }
-      }
-    }
-    document.getElementById("team_target").textContent = teamTarget;
-  }
+
 
 
 
@@ -612,17 +609,7 @@
 
   createScorecard(RESULTS, spreadsheetConfig());
 
-/**
-  function createScorecard(RESULTS, spreadsheetConfig) {
-      document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
-      document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
 
-      document.getElementById("team").onchange = function (event) {
-          teamOnchange(RESULTS, spreadsheetConfig);
-      }
-      document.getElementById("team_options").appendChild(createTeamOptions(spreadsheetConfig.allTeamConfigs));
-  }
-*/
 
 function createScorecard(RESULTS, spreadsheetConfig) {
     document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
@@ -662,199 +649,250 @@ function createScorecard(RESULTS, spreadsheetConfig) {
 
 
 
-  function teamOnchange(RESULTS, spreadsheetConfig) {
-      const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
-      console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
-      document.getElementById("table").innerHTML = "";
-      createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig);
-      createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
-      document.getElementById("submit_button").disabled = false;
-      document.getElementById("clear_button").disabled = false;
 
-      // Insert the new row below the Save/Load buttons
-      const tableDiv = document.getElementById("table");
-      const saveLoadTable = tableDiv.querySelector("table"); // Assuming save/load buttons are inside a table
 
-      if (saveLoadTable) {
-          const checkboxRow = createCheckboxRow(selectedTeamConfig);
-          saveLoadTable.parentNode.insertBefore(checkboxRow, saveLoadTable.nextSibling);
-      }
 
-      const reloadButton = document.getElementById("reload_button");
-      if (reloadButton && typeof reloadButton.onclick === "function") {
-          reloadButton.onclick();
-      } else {
-          console.warn("Re-Load button not found or onclick not defined.");
-      }
+function teamOnchange(RESULTS, spreadsheetConfig) {
+  const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
+  console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
 
-      // Play sound only on the first change
-      if (!hasPlayed) {
-          const audio = document.getElementById("audio");
-          audio.play().then(function() {
-              console.log("Audio played successfully.");
-          }).catch(function(error) {
-              console.error("Audio playback failed:", error);
-          });
+  const tableDiv = document.getElementById("table");
+  tableDiv.innerHTML = "";
 
-          hasPlayed = true; // Set the flag to true so the sound doesn't play again
-      }
+  // Insert checkbox row first
+  const checkboxRow = createCheckboxRow(selectedTeamConfig);
+  tableDiv.appendChild(checkboxRow);
+
+  // Create Save and Load button containers (includes autosave logic)
+  createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig);
+
+  // Add spacing below the buttons
+  const breakDiv = document.createElement("div");
+  breakDiv.style.height = "20px"; // Adjust as needed
+  tableDiv.appendChild(breakDiv);
+
+  // Create scorecard table
+  createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
+
+  // Enable form buttons
+  document.getElementById("submit_button").disabled = false;
+  document.getElementById("clear_button").disabled = false;
+
+  // Load saved scores from Google Sheets
+  const teamName = document.getElementById("team").value;
+  google.script.run
+    .withSuccessHandler(populateScorecardWithSavedResults)
+    .withFailureHandler(function (error) {
+      console.error("Failed to load scores:", error);
+      alert("Failed to load scores. Please try again or check the team name.");
+    })
+    .loadScoresForTeam(teamName);
+
+  // Play sound only on first team change
+  if (!hasPlayed) {
+    const audio = document.getElementById("audio");
+    audio.play().then(() => {
+      console.log("Audio played successfully.");
+    }).catch((error) => {
+      console.error("Audio playback failed:", error);
+    });
+    hasPlayed = true;
   }
+}
 
-        
-  function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
-      const table = document.getElementById("table");
 
-      const subTable = document.createElement("table");
-      const tr = document.createElement("tr");
 
-      const saveElement = document.createElement("td");
-      const saveButton = createSaveButton(spreadsheetConfig, selectedTeamConfig);
-      saveElement.appendChild(saveButton);
-      saveElement.style.paddingRight = "100px"; // Adjust the amount of space as needed
-      saveElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
-      saveElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
 
-      const loadElement = document.createElement("td");
-      loadElement.appendChild(createLoadButton());
-      loadElement.style.paddingLeft = "20px"; // Adjust the amount of space as needed
-      loadElement.style.paddingBottom = "10px"; // Adjust the amount of vertical space as needed
-      loadElement.style.paddingTop = "10px"; // Adjust the amount of vertical space as needed
+function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+  try {
+    console.log("➡ createSaveLoadButtons called.");
 
-      const statusElement = document.createElement("td");
-      statusElement.id = "save_status";
-
-      tr.appendChild(saveElement);
-      tr.appendChild(loadElement);
-      tr.appendChild(statusElement);
-
-      subTable.appendChild(tr);
-      table.appendChild(subTable);
-
-      console.log("Setting up interval for save button clicks.");
-      // Call save button click event based on user set variables -- saveIntervalSec + initialDelaySec
-    
-    function startAutoSave() {
-        console.log("Starting autosave with initialDelaySec:", initialDelaySec, "and saveIntervalSec:", saveIntervalSec);
-        
-        setTimeout(function () {
-            console.log("Initial delay of", initialDelaySec, "seconds completed.");
-            
-            saveInterval = setInterval(function () {
-                console.log("Save interval of", saveIntervalSec, "seconds triggered.");
-                console.log("Checking inputsLocked before save click:", inputsLocked);
-                
-                // Check if inputs are locked before clicking the save button
-                if (inputsLocked) {
-                    clearInterval(saveInterval); // Stop the interval if inputs are locked
-                    console.log("Save interval stopped due to input lock.");
-                } else {
-                    console.log("Triggering save button click.");
-                    saveButton.click();
-                }
-            }, saveIntervalSec * 1000); // Use of variable for save interval in milliseconds
-            
-        }, initialDelaySec * 1000); // Use of variable for initial delay in milliseconds
+    const table = document.getElementById("table");
+    if (!table) {
+      console.error("❌ Table element with id 'table' not found.");
+      return;
     }
 
-      // Call the function to start the autosave feature
-    startAutoSave();
+    // Remove any previous button sets if they exist
+    const existingSubTables = table.querySelectorAll("table");
+    existingSubTables.forEach(sub => sub.remove());
 
-  }
+    const subTable = document.createElement("table");
+    const tr = document.createElement("tr");
 
+    // Create Save Button
+    const saveElement = document.createElement("td");
+    const saveButtonContainer = createSaveButton(spreadsheetConfig, selectedTeamConfig);
+    const buttonEl = saveButtonContainer.querySelector("button"); // ✅ Correct reference
+    console.log("✅ Save button created.");
 
-  function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
-    const button = document.createElement("button");
-    button.innerHTML = "Save";
-    button.style.fontSize = "30px";
-    button.style.color = "green";
-    button.style.padding = "10px 10px";
+    // Create Load Button using the correct function
+    const loadElement = document.createElement("td");
+    const loadButton = createLoadButton();
+    console.log("✅ Load button created.");
 
-    let isSaving = false; // Lock flag
+    // Status Display for AutoSave
+    const statusElement = document.createElement("td");
+    const autoSaveStatus = document.createElement("span");
+    autoSaveStatus.id = "autosave_status";
+    autoSaveStatus.style.fontSize = "20px";
+    autoSaveStatus.style.color = "green";
+    statusElement.appendChild(autoSaveStatus);
 
-    button.onclick = function () {
-        if (isSaving) {
-            console.log("Save in progress, please wait...");
+    // Append elements
+    saveElement.appendChild(saveButtonContainer);
+    loadElement.appendChild(loadButton);
+
+    // Apply spacing
+    saveElement.style.paddingRight = "25px";
+    saveElement.style.paddingBottom = "10px";
+    saveElement.style.paddingTop = "10px";
+    loadElement.style.paddingLeft = "20px";
+    loadElement.style.paddingBottom = "10px";
+    loadElement.style.paddingTop = "10px";
+
+    // Build table row
+    tr.appendChild(saveElement);
+    tr.appendChild(loadElement);
+    tr.appendChild(statusElement);
+    subTable.appendChild(tr);
+
+    // Append to main table
+    table.appendChild(subTable);
+
+    console.log("✅ Buttons added to DOM.");
+
+    // Auto-save using intervals---  buttonE1 is actually calling the Save button on-click function
+    if (buttonEl && typeof initialDelaySec !== "undefined" && typeof saveIntervalSec !== "undefined") {
+      setTimeout(() => {
+        console.log("⌛ Initial delay complete");
+        saveInterval = setInterval(() => {
+          console.log("⏱ Save tick. Checking lock:", inputsLocked);
+          if (inputsLocked) {
+            console.log("🚫 Skipping due to lock");
             return;
-        }
+          }
+          console.log("💾 Auto-save triggered");
+          buttonEl.click();
+        }, saveIntervalSec * 1000);
+      }, initialDelaySec * 1000);
+    } else {
+      console.error("❌ Could not start auto-save — missing button or delay values");
+    }
 
-        isSaving = true; // Lock the function
-
-        let out = [];
-        for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-            let currPlayerScores = [];
-            currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
-            currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
-
-            for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-                currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
-            }
-
-            out.push(currPlayerScores);
-        }
-
-        console.log("Sending to backend: " + JSON.stringify(out));
-
-        google.script.run
-            .withSuccessHandler(function() {
-                isSaving = false; // Unlock the function after save is complete
-
-                // Get today's date in YYYY-MM-DD format.
-                const today = new Date().toISOString().split("T")[0];
-
-                // Create an object with the current date and your data.
-                const dataToSave = {
-                    date: today,
-                    scores: out  // a'out' is the scores object/data
-                };
-
-                // Save the object to localStorage.
-                localStorage.setItem("savedScores", JSON.stringify(dataToSave));
-
-                // Update the UI with the current time.
-                const now = new Date();
-                const hours = now.getHours().toString();
-                const minutes = now.getMinutes().toString().padStart(2, "0");
-                const time = `${hours}:${minutes}`;
-                document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
-            })
-            .withFailureHandler(function(error) {
-                isSaving = false; // Unlock the function even if there is a failure
-
-                const statusElem = document.getElementById("save_status");
-                statusElem.textContent = "Failed to Save";
-                statusElem.style.cssText = "font-size: 40px; font-weight: bold; color: red;";
-                console.error("Error saving scores:", error);
-            })
-            .saveScoresForTeam(document.getElementById("team").value, out);
-    };
-
-    return button;
+  } catch (e) {
+    console.error("❌ Exception in createSaveLoadButtons:", e);
+  }
 }
- 
 
-  function createLoadButton() {
+
+
+function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
+  const container = document.createElement("div");
+
+  const button = document.createElement("button");
+  button.innerHTML = "Save";
+  button.style.fontSize = "30px";
+  button.style.color = "green";
+  button.style.padding = "10px 10px";
+
+  const statusSpan = document.createElement("span");
+  statusSpan.style.fontSize = "20px";
+  statusSpan.style.color = "green";
+  statusSpan.style.marginLeft = "10px";
+  statusSpan.id = "save_status";
+
+  let isSaving = false;
+
+  button.onclick = function () {
+    if (isSaving || window.isSavingDisabled) {
+      console.log("Save is temporarily disabled or already in progress.");
+      return;
+    }
+
+    isSaving = true;
+
+    let out = [];
+    for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+      let currPlayerScores = [];
+      currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+      currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+
+      for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+      }
+
+      out.push(currPlayerScores);
+    }
+
+    console.log("Sending to backend: " + JSON.stringify(out));
+
+    google.script.run
+      .withSuccessHandler(function () {
+        isSaving = false;
+        const now = new Date();
+        const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
+        statusSpan.innerHTML = `<b><i>Saved at</i></b> ${time}`;
+        statusSpan.style.color = "green";
+      })
+      .withFailureHandler(function (error) {
+        isSaving = false;
+        statusSpan.textContent = "Failed to Save";
+        statusSpan.style.color = "red";
+        console.error("Error saving scores:", error);
+      })
+      .saveScoresForTeam(document.getElementById("team").value, out);
+  };
+
+  window.saveButtonReference = button; // ✅ Store reference for potential use
+
+  container.appendChild(button);
+  container.appendChild(statusSpan);
+
+  return container;
+}
+
+
+
+function createLoadButton() {
+    const container = document.createElement("div");
+
     const button = document.createElement("button");
-    button.id = "reload_button"; 
+    button.id = "reload_button";
     button.innerHTML = "Re-Load";
     button.style.fontSize = "30px";
     button.style.color = "blue";
     button.style.padding = "10px 10px";
+
+    const statusSpan = document.createElement("span");
+    statusSpan.id = "reload_status";
+    statusSpan.style.fontSize = "20px";
+    statusSpan.style.color = "blue";
+    statusSpan.style.marginLeft = "10px";
+
     button.onclick = function () {
         const teamName = document.getElementById("team").value;
-
-        google.script.run.withSuccessHandler(populateScorecardWithSavedResults).loadScoresForTeam(teamName);
-        return;
-
-        // For testing.
-        populateScorecardWithSavedResults([
-            ["AAA", 27, 3, 3, 3, 0, 0, 0],
-            [123, 20, 4, 4, 0],
-            ["CCC", 10, -1, 3, 1, 3, "a", 3],
-        ]);
+        google.script.run
+            .withSuccessHandler(function (results) {
+                populateScorecardWithSavedResults(results);
+                const now = new Date();
+                const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
+                statusSpan.innerHTML = `<b><i>Re-Loaded at</i></b> ${time}`;
+                statusSpan.style.color = "blue";
+            })
+            .withFailureHandler(function (error) {
+                statusSpan.textContent = "Failed to Re-Load";
+                statusSpan.style.color = "red";
+                console.error("Error loading scores:", error);
+            })
+            .loadScoresForTeam(teamName);
     };
 
-    return button;
-  }
+    container.appendChild(button);
+    container.appendChild(statusSpan);
+
+    return container;
+}
 
 
   function populateScorecardWithSavedResults(allPlayerScores) {
@@ -984,43 +1022,27 @@ function createScorecard(RESULTS, spreadsheetConfig) {
   }
 
 
-  function deletePlayerAndTarget(playerIndex, checkbox) {
-  const playerName = document.getElementById(idPlayerName(playerIndex)).value;
-  const confirmation = confirm(`Do you really want to delete ${playerName}, his Target Pts, and Scores? If sure, hit OK, if not, hit Cancel.  Note: After the deletion, you do have about 20 seconds to hit the Reload button to retrieve the deleted info.  But after that, it is gone.`);
 
+function deletePlayerAndTarget(playerIndex, checkbox) {
   saveBeforeDelete();
 
-  if (confirmation) {
-    document.getElementById(idPlayerName(playerIndex)).value = "x";
-    document.getElementById(idTarget(playerIndex)).value = "0";
+  document.getElementById(idPlayerName(playerIndex)).value = "x";
+  document.getElementById(idTarget(playerIndex)).value = "0";
 
-    // Clear scores for the selected deleted player
-    clearScoresAndCacheForPlayer(playerIndex);
-    
-    // Update localStorage to reflect the deletion
-    localStorage.removeItem(idPlayerName(playerIndex));
-    localStorage.removeItem(idTarget(playerIndex));
+  // Clear scores for the selected deleted player
+  clearScoresAndCacheForPlayer(playerIndex);
 
-    // Remove the scores for this player from localStorage
-    for (let holeIndex = 0; holeIndex < 18; holeIndex++) {
+  // Update localStorage
+  localStorage.removeItem(idPlayerName(playerIndex));
+  localStorage.removeItem(idTarget(playerIndex));
+
+  for (let holeIndex = 0; holeIndex < 18; holeIndex++) {
     const scoreId = idHolePlayer(holeIndex, playerIndex);
     localStorage.removeItem(scoreId);
-    }
-    
-
-    // ✅ After deleting player info, update the team target points
-    updateTeamTarget(4);
-    console.log("New Team Target After Player Deletion:", document.getElementById("team_target").textContent);
-
-  } else {
-    checkbox.checked = false; // Uncheck the checkbox if the user cancels
   }
 
-  let out = [];
-
-  console.log("Saving Team Info after player Deletion");
-
-  google.script.run.saveScoresForTeam(document.getElementById("team").value, out);
+  updateTeamTarget(getSelectedTeamConfig(spreadsheetConfig().allTeamConfigs).players.length);
+  console.log("New Team Target After Player Deletion:", document.getElementById("team_target").textContent);
 }
 
 
@@ -1592,16 +1614,22 @@ function generateTargetRow(results, pars, teamConfig) {
   }
   flatResults.push(teamStats);
 
-  // Confirmation dialog
-  let confirmationMessage =
-    "Be sure all scores are correct! When so, click 'OK' to SUBMIT these scores. Thanks!";
-  if (!allScoresEntered) {
-    confirmationMessage +=
-      " Wait-- I see some holes without scores-- please 'Cancel' and fully fill in scores!";
-  }
-  if (!confirm(confirmationMessage)) {
-    return;
-  }
+ // Confirmation dialog
+let confirmationMessage =
+  "Be sure all scores are correct! When so, click 'OK' to SUBMIT these scores. Thanks!\n\n" +
+  "A green pop-up 'Submit & Email Success' message indicates a successful submission.\n\n";
+
+if (!allScoresEntered) {
+  confirmationMessage +=
+    "Wait-- I see some holes without scores-- please 'Cancel' and fully fill in scores!\n\n";
+}
+
+confirmationMessage +=
+  "With V. 5.0, now each player will get an email of the submitted scorecard immediately upon a successful submission!";
+
+if (!confirm(confirmationMessage)) {
+  return;
+}
 
   // --- Save Scores Before Submitting ---
   // Build an array of raw scores (this is similar to what your save button used to do)
