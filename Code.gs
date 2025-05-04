@@ -48,8 +48,9 @@ function getConfigAsString() {
 
 function extractRawConfig() {
   // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
-  // https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
-  // G2 
+   // G   https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
+   // G2  https://docs.google.com/spreadsheets/d/13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc/edit?gid=1521471540#gid=1521471540
+
   const spreadsheet = SpreadsheetApp.openById("1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ");
   const sheet = spreadsheet.getSheetByName("Config");
 
@@ -113,7 +114,7 @@ function constructStructuredConfig(rawConfig) {
 function saveData(flatResults) {
   //G const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
   //G2 const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
-  //G2
+
   const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
 
   Logger.log("Saving data: " + JSON.stringify(flatResults));
