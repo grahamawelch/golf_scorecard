@@ -1,318 +1,1808 @@
-/**
- * AppScript Project: https://script.google.com/u/1/home/projects/14XtLHDKUPwzFKIZ42P8QR4qnoO0L75Pq7ofoF-7QZXFpVgczhVyjp1ey/edit
- * 
- * There are two relevant spreadsheets:
- * 
- * Input, "Scorecard Config", https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
- * Contains info about the course and teams.
- * 
- * Output, "Scorecard Sheet", https://docs.google.com/spreadsheets/d/1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM/edit#gid=0
- * Where we write scores for each team.
- */
+<!DOCTYPE html>
+<html>
 
-// App Script function to host the html page
-function doGet() {
-  // https://developers.google.com/apps-script/reference/html/html-service
-  // This function is effectively the "server"; users navigating to your WebApp excute this function which produces the page they land on.
-  const rootPage = HtmlService.createHtmlOutput();
-  const scorecard = HtmlService.createHtmlOutputFromFile('index');
-
-  const config = getConfigAsString();
-
-  rootPage.append("<script>const CONFIG =");
-  rootPage.append(config);
-  rootPage.append("</script>");
-
-  // In order for the CONFIG variable to be available to the function creating the form
-  // it needs to be declared *before* that function.
-  // So we start with an empty page, add the CONFIG, *then* add the rest of the form.
-
-  rootPage.append(scorecard.getContent());
-
-  return rootPage;
-}
-
-function getConfigAsString() {
-  const rawConfig = extractRawConfig();
-  const structuredConfig = constructStructuredConfig(rawConfig);
-
-  const out = JSON.stringify(structuredConfig);
-  return out;
-}
-
-/**
- * Returns an array of two elements
- * - [Date, CourseName, par1, par2, ... par18]
- * - [[TeamName, Player1, Target1, ...] ...]
- */
-
-function extractRawConfig() {
-  // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
-   // G   https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
-   // G2  https://docs.google.com/spreadsheets/d/13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc/edit?gid=1521471540#gid=1521471540
-
-  const spreadsheet = SpreadsheetApp.openById("1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ");
-  const sheet = spreadsheet.getSheetByName("Config");
-
-  const courseValues = sheet.getRange(1, 1, 1, 20).getValues()[0];
-
-  let allTeamValues = [];
-  let currTeamRow = 2;
-  while (true) {
-    const teamValues = sheet.getRange(currTeamRow, 1, 1, 9).getValues()[0];
-    if (teamValues.filter(Boolean).length === 0) {
-      break;
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⛳️🏌️‍♂️📝</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 20px; /* Ensuring padding for all sides */
+      box-sizing: border-box;
+      background-color: #ADD8E6;
+      font-size: 1.2em;  /* Set a base font size */
+      line-height: 1.5em; /* Improve readability */
+      scroll-behavior: smooth;
     }
-    allTeamValues.push(teamValues);
-    currTeamRow++;
-  }
 
-  const out = [courseValues, allTeamValues];
-  return out;
-}
 
-function constructStructuredConfig(rawConfig) {
-  const courseConfig = {
-    "date": rawConfig[0][0],
-    "courseName": rawConfig[0][1],
-    "pars": rawConfig[0].slice(2)
-  };
+    h1 {
+      font-size: 2.2em;
+      /* Adjust the size as needed */
+      margin-top: 0;
+      /* Ensure no margin at the top */
+    }
 
-  let allTeamConfigs = [];
-  for (let currTeamConfig of rawConfig[1]) {
-    let allPlayerConfigs = [];
-    for (let colIndex = 1; colIndex < currTeamConfig.length; colIndex += 2) {
-      let playerName = currTeamConfig[colIndex] !== undefined ? currTeamConfig[colIndex] : ''; // Leave playerName empty if it is empty
-      let playerTarget = playerName === 'x' ? '' : (currTeamConfig[colIndex + 1] !== undefined ? currTeamConfig[colIndex + 1] : '');
+    h2 {
+      color: blue;
+      font-weight: bold;
+      font-style: italic;
+      padding-left: 0.25in; /* Adds 1/2 inch padding on the left */
+      text-align: left; /* Aligns text to the left */
+      font-size: 1.4em; /* Adjust base font size */
+    }
 
-      allPlayerConfigs.push({
-        "playerName": playerName,
-        "playerTarget": playerTarget
+    #course {
+      font-size: 1.75em;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    #title {
+      font-size: 1em;
+      color: blue;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+
+    #instructions {
+    margin: 1em 0; /* Adding margin to the top and bottom */
+    font-size: 1.3em; /* Set font size to 1.6em */
+    }
+
+    /* Sticky header class -- keeps names at top when scrolling down */
+    .sticky-header {
+      position: sticky;
+      top: 0; /* Sticky position at the top */
+      background-color: #ADD8E6;   /* Background color to distinguish header */
+      z-index: 1000; /* Ensure it's on top of other content */
+      font-size: 1.5em; /* Set font size */
+      font-weight: bold;   /* Set font weight */
+    }
+   
+    iframe {
+      width: 100%;  /* Full width */
+      height: 1200px;  /* Set height */
+      border: none;
+      display: block;
+      overflow: auto;
+    }
+
+      /* Styling for the refresh button */
+    #refresh-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.5em;
+      background-color: green;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #refresh-btn:hover {
+      background-color: darkgreen;  /* The color for hover state */
+    }
+
+    .image-container {
+        display: flex;
+        justify-content: flex-start;
+        margin-left: 3%; /* the margin to 3% from the left */
+        gap: 30px; /* gap between the images as needed */
+    }
+    .image-container img {
+       width: 200px; /* Set the desired width for both images */
+        height: auto; /* Maintain aspect ratio */
+    }
+
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <audio id="audio" src="https://www.dropbox.com/scl/fi/666kzmgv2f3t6c1alhx1g/startup-sound.mp3?rlkey=isnzy1syfswgg5p3n2gskz1zp&st=5ryggmm7&raw=1" type="audio/mpeg"></audio>
+
+
+
+    <div class="image-container">
+        <img src="https://live.staticflickr.com/65535/54259105499_43c986c7ea_z.jpg" alt="GoogleGolf Scoring System Logo">
+        <img src="https://live.staticflickr.com/65535/54033042787_0126e057cd_w_d.jpg" alt="BT Logo">
+    </div>
+
+<br>
+
+  <!-- yes, the below spacing is not eloquent-- but found necessary to keep all parts aligned -- especially the Delete Player boxes -->
+
+  <div id="title">
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V. 5.0<br>
+  </div>
+
+
+<div id="course"> </div>
+
+<div id="all_input">
+    <div>
+        <div style="display: inline-block; font-size: 1.75em;"><b>Date: </b></div>
+        <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="date"></div>
+    </div>
+    <div>
+        <div style="display: inline-block; font-size: 1.75em;">
+            <font color="Blue"><b>Tee Time: </b></font>
+            <select style="display: inline-block; font-size: 1em; padding: 5px 5px; width: 8ch" id="team" placeholder= "Select">
+                <option value="" disabled selected>Select</option>
+            </select>
+        </div>
+    </div>
+    <div id="team_options"></div>
+    <div style="display: inline-block; font-size: 1.75em;"><b>Team Target Points =  </b></div>
+    <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="team_target"></div>
+</div> 
+
+
+<br>
+<div id="table"></div>
+<div id="buttons">
+    <table>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr>
+            <td><button id="submit_button" onclick="submit()" disabled="true" style="color: green; font-size: 30px; padding: 10px 10px">Submit & Email</button></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div id="submit_confirmation"></div></td>
+        </tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr></tr>
+        <tr>
+            <td>   <!-- Button to clear alll scores -->  </td> 
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button" onclick="clearWithConfirmation()" disabled="true" style="color:red; font-size: 30px; padding: 10px 10px">Clear</button></td>
+        </tr>
+    </table>
+</div>
+
+
+  <div id="table"></div>
+
+  <tr></tr>
+  <tr></tr>
+  <tr></tr>
+
+     <!-- Button to manually refresh the Google Sheet -->
+  <button id="refresh-btn" onclick="refreshIframe()">Refresh Scoreboard</button>
+  
+     <!-- Iframe to display the Google Sheet -->
+  <iframe id="google-sheet" style="border:none; width: 100%; height: 1200px;"></iframe>
+
+
+    <p id="instructions">
+    <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Instructions</u></b><br>
+            Choose your scheduled Tee Time, input all 
+            scores. The App does auto-saves all of your 
+            scores every ~25 secs, if problems, 
+            re-select your Tee Time & hit "Reload" 
+            to regain your scores.</b><b>  If a player drops out, 
+            delete the player via the "Delete Player" top boxes-- 
+            this deletes all of his data.</b> Then all remaining 
+            team points are correct. When ready, use the <span style="font-weight: bold; color: green;">"Submit and Email" </span>
+            button to send your scores in and now all players will receive emails with the scorecard. 
+            You will see a confirmation of <span style="font-weight: bold; color: green;">"Submit & Email Success - Thanks!" </span> 
+            if successful.  If you get a Failure message, restart the App, bring up your tee time/scores, try again. <b>Then you are done!</b><br>
+    <br>
+            Note: <span style="font-weight: bold; color: red;">"Clear"</span> clears all scores.
+    <br><br>
+                <span style="background-color: cyan"><b>Albatrosses</b></span>, &nbsp;<span
+                style="background-color: orange"><b>Eagles</b></span>, &nbsp;<span
+                style="background-color: green"><b> Birdies</b></span>, &nbsp;<span style="background-color: #A9A9A9"><b>Pars</b></span>, & &nbsp;
+                <span style="background-color: #D3D3D3"><b>Bogeys</b></span>. &nbsp; <b><i> are highlighted.</b></i>
+          </p>
+
+
+  <script>
+  
+    document.addEventListener("click", function playOnce() {
+        var audio = document.getElementById("audio");
+        audio.play().catch(function(error) {
+            console.error("Audio playback failed:", error);
+        });
+        document.removeEventListener("click", playOnce); // Removes listener after first click
+    });
+
+
+// Window positioning and tailoring to Mobile and Android -- may need to add for others. 
+
+  window.addEventListener('load', function() {
+          // Scroll to top on page load
+          window.scrollTo(0, 0);
       });
+
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const isMobile = /Mobi/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const teamInput = document.getElementById("team");
+
+    // Ensure elements exist before modifying them
+    const title = document.getElementById("title");
+    const course = document.getElementById("course");
+    const instructions = document.getElementById("instructions");
+
+    if (isMobile && !isAndroid) {
+        // Set readonly for mobile devices (excluding Android)
+        if (teamInput) teamInput.readOnly = true;
+        document.body.style.zoom = "1.0"; // No zoom for iPhones
+    } else if (isAndroid) {
+        // Settings for Android devices
+        if (teamInput) {
+            teamInput.readOnly = false;
+            teamInput.style.width = "12ch"; // Set width to 12ch for Android devices
+        }
+        
+        document.body.style.zoom = "1"; // Keep same zoom for Android devices
+
+        // Reduce font size for Android devices
+        if (title) title.style.fontSize = "0.25em";
+        if (course) course.style.fontSize = "0.25em";
+        if (instructions) instructions.style.fontSize = "0.25em";
+    } else {
+        // Settings for non-mobile devices (desktop)
+        if (teamInput) {
+            teamInput.readOnly = false;
+            teamInput.style.width = "12ch"; // Set width to 12ch for desktop devices
+        }
+        document.body.style.zoom = "0.5"; // Zoom out for desktop devices
+    }
+  });
+
+
+
+      // clear out localstore for prior days so it doesn't interfere
+    (function clearOldData() {
+    const savedData = localStorage.getItem("savedScores");
+    if (savedData) {
+        try {
+        const parsedData = JSON.parse(savedData);
+        // Get today's date in YYYY-MM-DD format.
+        const today = new Date().toISOString().split("T")[0];
+        if (parsedData.date !== today) {
+            localStorage.removeItem("savedScores");
+            console.log("Removed outdated savedScores from localStorage.");
+        }
+        } catch (e) {
+        console.error("Error parsing savedScores from localStorage:", e);
+        localStorage.removeItem("savedScores");
+        }
+    }
+    })();
+
+
+
+// Iframe Code for Scoreboard sheet URLs, placement, sizing, & selection of sheet based on day. 
+  
+    // Define the URLs for asheet (Scoreboard2) and bsheet (Scoreboard)
+    const aSheetURL = "https://docs.google.com/spreadsheets/d/1v5wiCZfD5cJbJdOG1n37VymvA5sTI_IcVHjIJEAGp4k/edit?gid=0#gid=0"; 
+    // A sheet is Scoreboard2 URL
+    const bSheetURL = "https://docs.google.com/spreadsheets/d/1m3bLGCeeF4B-QUDUX_ZLplE_ASC3XU1SR6i3TtzTT5k/edit?gid=0#gid=0";
+    // B sheet is Scoreboard URL
+
+     /*
+      for G2 test Area
+    // Define the URLs for asheet (Scoreboard2) and bsheet (Scoreboard)
+    const aSheetURL = "https://docs.google.com/spreadsheets/d/1xp1WaBTCvKjIma7TRK_Iu_CVAI9CXSLEgp-UwF1WKlI/edit?gid=0#gid=0"; 
+    // A sheet is Scoreboard2 URL
+    const bSheetURL = "https://docs.google.com/spreadsheets/d/1WGfjUmueuTakLZlrx4K_R0pWMrRzceMr59hfgczQAJQ/edit?gid=0#gid=0";
+    // B sheet is Scoreboard URL
+    
+    //  for G-- test area-- to easily copy/edit into a test area
+
+      // Define the URLs for asheet (Scbrd2-Stroke Play/singles) and bsheet (Scoreboard-Stableford/team)
+    const aSheetURL = "...put your test area Scoreboard2 URL here within the quotes ...";
+
+    const bSheetURL = "...put your test area Scoreboard URL here within the quotes ...";
+    */
+
+
+  // Function to set the iframe src based on the day of the week
+  //defaulting all days to Singles Stroke play via Scoreboard2 aka aSheet
+    
+    function setIframeSrc() {
+      const today = new Date().getDay();
+      const iframe = document.getElementById('google-sheet');
+
+      // Log the current day of the week to the console
+      console.log("Today's day of the week:", today);
+
+
+      // by defalt, every day uses the asheet-- Strokeplay -- singles
+
+      if (today === 0) { // Sunday
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
+      } else if (today === 1) { // Monday
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
+      } else if (today === 2) { // Tuesday
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
+      } else if (today === 3) { // Wednesday
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
+      } else if (today === 4) { // Thursday
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
+      } else if (today === 5) { // Friday
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
+      } else if (today === 6) { // Saturday
+          console.log("Loading Sheet Scoreboard");
+          iframe.src = bSheetURL;
+      }
+
+      // Log the iframe src to the console
+      console.log("Iframe src set to:", iframe.src);
     }
 
-    // Ensure there are always 4 player slots, filling in with 'x' and empty target if missing
-    while (allPlayerConfigs.length < 4) {
-      allPlayerConfigs.push({"playerName": "x", "playerTarget": ""});
-    }
 
-    allTeamConfigs.push({
-      "teamName": currTeamConfig[0],
-      "players": allPlayerConfigs
-    });
+// Ensure the iframe loads at the correct size from the beginning and set the initial src
+  window.onload = function() {
+    console.log("Window loaded");
+    const iframe = document.getElementById('google-sheet');
+    iframe.style.width = '100%';
+    iframe.style.height = '900px'; // Fixed height
+
+    setIframeSrc(); // Set the initial src
+  };
+
+
+//Par Info -- setting Max and Min scores for each hole-- Important, ensure the below "score" functions have the same values
+
+    // Function to calculate minScore -- needs to mimic same as getUserScore()'s value, too
+  function getMinScore(par) {
+    return Math.max(par - 3, 1); // this is an Albatross, but 1 for Par 3's
   }
 
-  const out = {
-    "courseConfig": courseConfig,
-    "allTeamConfigs": allTeamConfigs,
-  };
-  return out;
+  // IMPORTANT - NEED TO SET MAX SCORE IN 2 PLACES BELOW AS THE SAME
+    // Function to calculate maxScore  -- needs to mimic same as getUserScore()'s value, too
+  function getMaxScore(par) {
+     return par + 2; // for double bogey max
+    // return par + 3; // for double bogey max
+    //return par * 2; // for 2x par max
+  }
+
+  function getUserScore(value, par) {
+    let userScore = value;
+    if (userScore === null || userScore === "") {
+        return "";
+    }
+        // This sets the MAX Score for a Player,  Watch out, "66" < "7", so we use Math functions explicitly.
+        // defualt is double bogey max = par +2,  easy to change below ...
+     userScore = Math.min(userScore, par + 2); // double bogey is max score
+    // userScore = Math.min(userScore, par + 3);  // if you want triple bogey as max
+    //userScore = Math.min(userScore, 2 * par);  // if you want 2 x par as max
+    
+           // This sets the Min Score for a Player
+    userScore = Math.max(userScore, Math.max(par - 3, 1)); // this is an Albatross, but 1 smallest -- for Par 3's
+
+    return userScore;
+  }
+
+
+// setting of color highlights score within App based on holes' par
+  function getHoleForPlayerColor(userScore, par) {
+      // Color 2xBogey or greater = white (no points), bogey or better = shaded to denote points for that hole 
+      if (parseInt(userScore) >= (par + 2)) {
+          return "#FFFFFF"; // White
+      }
+      if (parseInt(userScore) >= (par + 1)) {
+          return "#D3D3D3"; // Light Gray
+      }     
+      if (parseInt(userScore) === (par)) {
+          return "#A9A9A9"; // Dark Gray
+      }            
+      if (parseInt(userScore) === (par - 1)) {
+          return "#90EE90"; // Green
+      }
+      if (parseInt(userScore) === (par - 2)) {
+          return "#FFA500"; // Orange
+      }
+      if (parseInt(userScore) === (par - 3)) {
+          return "#00FFFF"; // Cyan
+      }
+      return "";
+  }
+
+
+ // obfuscation start -- if desired
+
+
+
+      // global variables to affect the auto saving periods and lock
+    let initialDelaySec = 15;
+    let saveIntervalSec = 25;
+    let saveInterval = null;
+    let inputsLocked = false; 
+  
+   let hasPlayed = false; // Variable to track if the startup sound has already been played
+
+
+
+
+
+
+  
+  console.log("Initialized inputsLocked:", inputsLocked);
+
+
+      // Function to refresh the iframe by replacing the src with a unique query parameter
+  function refreshIframe() {
+    const iframe = document.getElementById('google-sheet');
+    const currentSrc = iframe.src.split("?")[0]; // Remove existing query parameters
+    const newSrc = `${currentSrc}?t=${new Date().getTime()}`; // Add timestamp as a query parameter
+    iframe.src = newSrc; // Refresh the iframe with the new src
+    console.log("Iframe refreshed with new src:", newSrc);
+  }
+
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const teeTimeInput = document.getElementById('team');
+
+    // Listen for changes in the tee time input field
+    teeTimeInput.addEventListener('input', function() {
+      if (teeTimeInput.value) {
+        // Scale down the page to 1.4x after selecting a tee time
+        document.documentElement.style.zoom = '1.4';
+        }
+    });
+    });
+
+
+
+function createCheckboxRow(teamConfig) {
+  const containerDiv = document.createElement("div");
+  containerDiv.style.display = "flex";
+  containerDiv.style.alignItems = "center";
+
+  // Add spacing row
+  const nullRowAbove = document.createElement("div");
+  nullRowAbove.style.height = "20px"; 
+  containerDiv.appendChild(nullRowAbove);
+
+  // Add header for delete player
+  const headerDiv = document.createElement("div");
+  headerDiv.innerHTML = "<b style='font-size: 1.4em; color: red;'>Delete Player</b>"; 
+  headerDiv.style.marginRight = "20px"; 
+  containerDiv.appendChild(headerDiv);
+
+  // Create a single row of checkboxes
+  const boxDiv = document.createElement("div");
+
+  for (let j = 0; j < teamConfig.players.length; j++) {
+    const checkboxContainer = document.createElement("label");
+    checkboxContainer.style.display = "inline-block";
+    checkboxContainer.style.marginLeft = "50px";
+    checkboxContainer.style.width = "30px";
+    checkboxContainer.style.height = "30px";
+    checkboxContainer.style.backgroundColor = "red";
+    checkboxContainer.style.borderRadius = "4px";
+    checkboxContainer.style.cursor = "pointer";
+    checkboxContainer.style.textAlign = "center";
+    checkboxContainer.style.lineHeight = "30px";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.style.opacity = "0"; 
+    checkbox.style.width = "30px"; 
+    checkbox.style.height = "30px"; 
+    checkbox.style.margin = "0"; 
+
+    // Handle checkbox actions with pop-up confirmation
+    checkbox.onchange = function () {
+      if (checkbox.checked) {
+        const playerName = document.getElementById(idPlayerName(j)).value;
+        const confirmation = confirm(
+          `Do you really want to delete ${playerName}, his Target Pts, and Scores?\n\n` +
+          `If sure, hit OK, if not, hit Cancel.\n\n` +
+          `Note: After the deletion, you have about 5 secs average to hit the Reload button to retrieve the deleted info. But after that, it is gone.`
+        );
+
+        if (!confirmation) {
+          checkbox.checked = false; // Ensure checkbox remains unchecked if canceled
+          return;
+        }
+
+        checkboxContainer.style.color = "white"; 
+        checkboxContainer.innerHTML = "✔"; 
+        deletePlayerAndTarget(j, checkbox); 
+        updateTeamTarget(teamConfig.players.length); 
+      } else {
+        checkboxContainer.style.color = ""; 
+        checkboxContainer.innerHTML = ""; 
+      }
+    };
+
+    checkboxContainer.appendChild(checkbox); 
+    boxDiv.appendChild(checkboxContainer); 
+  }
+
+  containerDiv.appendChild(boxDiv);
+
+
+  // Add final spacing row
+  const nullRowBelow = document.createElement("div");
+  nullRowBelow.style.height = "200px"; 
+  containerDiv.appendChild(nullRowBelow);
+
+  return containerDiv;
 }
 
 
 
-function saveData(flatResults) {
-  //G const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
-  //G2 const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
 
-  const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
 
-  Logger.log("Saving data: " + JSON.stringify(flatResults));
+  const RESULTS = [{
+        name: "Total 18",
+        startInclusive: 0,
+        endExclusive: 18,
+    }, {
+        name: "Front 9",
+        startInclusive: 0,
+        endExclusive: 9
+    }, {
+        name: "Back 9",
+        startInclusive: 9,
+        endExclusive: 18
+    }];
 
-  const lock = LockService.getScriptLock();
+  const TEST_CONFIG = {
+      "courseConfig": {
+          "date": "2000-01-01",
+          "courseName": "Test Course",
+          "pars": [4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 5]
+      },
+      "allTeamConfigs": [
+          {
+              "teamName": "9:20",
+              "players": [
+                  { "playerName": "AAAA AAAAAAA", "playerTarget": 24 },
+                  { "playerName": "BBBBB BBBBBB", "playerTarget": 21 },
+                  { "playerName": "CCC CCCCCC", "playerTarget": 15 }
+              ]
+          },
+          {
+              "teamName": "9:30",
+              "players": [
+                  { "playerName": "DDDDD DDDD", "playerTarget": 29 },
+                  { "playerName": "EEEE EEEEEEEEE", "playerTarget": 25 },
+                  { "playerName": "FFFFF FFFFFF", "playerTarget": 21 },
+                  { "playerName": "GGG GGGGG", "playerTarget": 15 }
+                  // { "playerName": "HHHHHHHHH", "playerTarget": 21 },
+                  // { "playerName": "IIIIIIIII", "playerTarget": 15 }
+              ]
+          }
+      ]
+  }
 
-  try {
-    lock.waitLock(3000);
+  function spreadsheetConfig() {
+      // This function exists to making testing iteration more straightforward.
+      // AppScript will inject the variable CONFIG *before* the HTML content.
+      if (typeof CONFIG === "undefined") {
+          console.log("Falling back to TEST_CONFIG.");
+          return TEST_CONFIG;
+      }
+      console.log("Loaded config:\n" + JSON.stringify(CONFIG));
+      return CONFIG;
+  }
 
-    flatResults.forEach(result => {
-      Logger.log("Appending row: " + result); // Log each row being appended
-      sheet.appendRow(result);
+  createScorecard(RESULTS, spreadsheetConfig());
+
+
+
+function createScorecard(RESULTS, spreadsheetConfig) {
+    document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
+    document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
+
+    document.getElementById("team").onchange = function (event) {
+        teamOnchange(RESULTS, spreadsheetConfig);
+    };
+
+    createTeamOptions(spreadsheetConfig.allTeamConfigs); // This already populates the select box
+}
+
+
+  function createTeamOptions(allTeamConfigs) {
+    const teamSelect = document.getElementById("team");  // Assuming 'team' is the id of your <select> element
+
+    // Clear existing options except the placeholder
+    teamSelect.innerHTML = '<option value="" disabled selected>Select</option>';
+
+    // Populate the <select> options with team names
+    for (let teamIndex = 0; teamIndex < allTeamConfigs.length; teamIndex++) {
+        const teamOption = document.createElement("option");
+        teamOption.value = allTeamConfigs[teamIndex].teamName;
+        teamOption.text = allTeamConfigs[teamIndex].teamName;  // Set display text for option
+        teamSelect.appendChild(teamOption);
+    }
+
+    // Add an event listener to disable the select once a team is selected
+    teamSelect.addEventListener('change', function() {
+        if (teamSelect.value) {  // Ensure a valid selection (not the placeholder)
+            teamSelect.disabled = true;  // Disable the select after selection
+            console.log(`Selected team: ${teamSelect.value}`);
+        }
     });
-    sheet.appendRow(["***"]);
+  }
 
-    Logger.log("Data saved successfully.");
 
-    sendFlatResultsEmail(flatResults);
 
-    Logger.log("Emails sent successfully.");
+
+
+
+
+function teamOnchange(RESULTS, spreadsheetConfig) {
+  const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
+  console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
+
+  const tableDiv = document.getElementById("table");
+  tableDiv.innerHTML = "";
+
+  // Insert checkbox row first
+  const checkboxRow = createCheckboxRow(selectedTeamConfig);
+  tableDiv.appendChild(checkboxRow);
+
+  // Create Save and Load button containers (includes autosave logic)
+  createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig);
+
+  // Add spacing below the buttons
+  const breakDiv = document.createElement("div");
+  breakDiv.style.height = "20px"; // Adjust as needed
+  tableDiv.appendChild(breakDiv);
+
+  // Create scorecard table
+  createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
+
+  // Enable form buttons
+  document.getElementById("submit_button").disabled = false;
+  document.getElementById("clear_button").disabled = false;
+
+  // Load saved scores from Google Sheets
+  const teamName = document.getElementById("team").value;
+  google.script.run
+    .withSuccessHandler(populateScorecardWithSavedResults)
+    .withFailureHandler(function (error) {
+      console.error("Failed to load scores:", error);
+      alert("Failed to load scores. Please try again or check the team name.");
+    })
+    .loadScoresForTeam(teamName);
+
+  // Play sound only on first team change
+  if (!hasPlayed) {
+    const audio = document.getElementById("audio");
+    audio.play().then(() => {
+      console.log("Audio played successfully.");
+    }).catch((error) => {
+      console.error("Audio playback failed:", error);
+    });
+    hasPlayed = true;
+  }
+}
+
+
+
+
+function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+  try {
+    console.log("➡ createSaveLoadButtons called.");
+
+    const table = document.getElementById("table");
+    if (!table) {
+      console.error("❌ Table element with id 'table' not found.");
+      return;
+    }
+
+    // Remove any previous button sets if they exist
+    const existingSubTables = table.querySelectorAll("table");
+    existingSubTables.forEach(sub => sub.remove());
+
+    const subTable = document.createElement("table");
+    const tr = document.createElement("tr");
+
+    // Create Save Button
+    const saveElement = document.createElement("td");
+    const saveButtonContainer = createSaveButton(spreadsheetConfig, selectedTeamConfig);
+    const buttonEl = saveButtonContainer.querySelector("button"); // ✅ Correct reference
+    console.log("✅ Save button created.");
+
+    // Create Load Button using the correct function
+    const loadElement = document.createElement("td");
+    const loadButton = createLoadButton();
+    console.log("✅ Load button created.");
+
+    // Status Display for AutoSave
+    const statusElement = document.createElement("td");
+    const autoSaveStatus = document.createElement("span");
+    autoSaveStatus.id = "autosave_status";
+    autoSaveStatus.style.fontSize = "20px";
+    autoSaveStatus.style.color = "green";
+    statusElement.appendChild(autoSaveStatus);
+
+    // Append elements
+    saveElement.appendChild(saveButtonContainer);
+    loadElement.appendChild(loadButton);
+
+    // Apply spacing
+    saveElement.style.paddingRight = "25px";
+    saveElement.style.paddingBottom = "10px";
+    saveElement.style.paddingTop = "10px";
+    loadElement.style.paddingLeft = "20px";
+    loadElement.style.paddingBottom = "10px";
+    loadElement.style.paddingTop = "10px";
+
+    // Build table row
+    tr.appendChild(saveElement);
+    tr.appendChild(loadElement);
+    tr.appendChild(statusElement);
+    subTable.appendChild(tr);
+
+    // Append to main table
+    table.appendChild(subTable);
+
+    console.log("✅ Buttons added to DOM.");
+
+    // Auto-save using intervals---  buttonE1 is actually calling the Save button on-click function
+    if (buttonEl && typeof initialDelaySec !== "undefined" && typeof saveIntervalSec !== "undefined") {
+      setTimeout(() => {
+        console.log("⌛ Initial delay complete");
+        saveInterval = setInterval(() => {
+          console.log("⏱ Save tick. Checking lock:", inputsLocked);
+          if (inputsLocked) {
+            console.log("🚫 Skipping due to lock");
+            return;
+          }
+          console.log("💾 Auto-save triggered");
+          buttonEl.click();
+        }, saveIntervalSec * 1000);
+      }, initialDelaySec * 1000);
+    } else {
+      console.error("❌ Could not start auto-save — missing button or delay values");
+    }
 
   } catch (e) {
-    Logger.log("Error during saveData: " + e.message);
-  } finally {
-    lock.releaseLock();
+    console.error("❌ Exception in createSaveLoadButtons:", e);
   }
 }
 
 
 
+function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
+  const container = document.createElement("div");
 
+  const button = document.createElement("button");
+  button.innerHTML = "Save";
+  button.style.fontSize = "30px";
+  button.style.color = "green";
+  button.style.padding = "10px 10px";
 
-function sendFlatResultsEmail(flatResults) {
-  // G config sheet Id  1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ 
-  // G2 config sheet Id  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
-  const sheetId = '1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ';
-  const subject = `Your ${new Date().toLocaleDateString()} Springfield Seniors Submitted Golf Scores`;
+  const statusSpan = document.createElement("span");
+  statusSpan.style.fontSize = "20px";
+  statusSpan.style.color = "green";
+  statusSpan.style.marginLeft = "10px";
+  statusSpan.id = "save_status";
 
-  const header = [
-    "Date", "Tee Time", "Course", "Player Name",
-    "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12", "H13", "H14", "H15", "H16", "H17", "H18",
-    "Target", "Total Score", "Total Points", "Total Net",
-    "Front Score", "Front Points", "Front Net", "Back Score", "Back Points", "Back Net"
-  ];
+  let isSaving = false;
 
-  // STEP 1: Read pars from external sheet
-  const sheet = SpreadsheetApp.openById(sheetId).getSheets()[0];
-  const parValues = sheet.getRange('C1:T1').getValues()[0];
-
-  // STEP 2: Build second header row (pars)
-  const secondHeader = [
-    "", "", "", "<b>Pars</b>",
-    ...parValues,
-    "", "", "", "", "", "", ""
-  ];
-
-  // STEP 3: Read player names and emails
-  const parsSheet = SpreadsheetApp.openById('1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ').getSheetByName('Sheet1');
-  const playersData = parsSheet.getRange('A2:B' + parsSheet.getLastRow()).getValues();
-
-  const playerEmails = {};
-  playersData.forEach(row => {
-    const playerName = row[0];
-    const email = row[1];
-    if (playerName && email) {
-      playerEmails[playerName] = email;
+  button.onclick = function () {
+    if (isSaving || window.isSavingDisabled) {
+      console.log("Save is temporarily disabled or already in progress.");
+      return;
     }
-  });
 
-  // Build email recipient list
-  let toList = [];
-  flatResults.forEach(row => {
-    let playerNameRaw = row[3];
-    if (playerNameRaw) {
-      let cleanedName = playerNameRaw.replace(/!/g, "").trim();
-      const email = playerEmails[cleanedName];
-      if (email) {
-        toList.push(email);
+    isSaving = true;
+
+    let out = [];
+    for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+      let currPlayerScores = [];
+      currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+      currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+
+      for (let holeIndex = 0; holeIndex < spreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+      }
+
+      out.push(currPlayerScores);
+    }
+
+    console.log("Sending to backend: " + JSON.stringify(out));
+
+    google.script.run
+      .withSuccessHandler(function () {
+        isSaving = false;
+        const now = new Date();
+        const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
+        statusSpan.innerHTML = `<b><i>Saved at</i></b> ${time}`;
+        statusSpan.style.color = "green";
+      })
+      .withFailureHandler(function (error) {
+        isSaving = false;
+        statusSpan.textContent = "Failed to Save";
+        statusSpan.style.color = "red";
+        console.error("Error saving scores:", error);
+      })
+      .saveScoresForTeam(document.getElementById("team").value, out);
+  };
+
+  window.saveButtonReference = button; // ✅ Store reference for potential use
+
+  container.appendChild(button);
+  container.appendChild(statusSpan);
+
+  return container;
+}
+
+
+
+function createLoadButton() {
+    const container = document.createElement("div");
+
+    const button = document.createElement("button");
+    button.id = "reload_button";
+    button.innerHTML = "Re-Load";
+    button.style.fontSize = "30px";
+    button.style.color = "blue";
+    button.style.padding = "10px 10px";
+
+    const statusSpan = document.createElement("span");
+    statusSpan.id = "reload_status";
+    statusSpan.style.fontSize = "20px";
+    statusSpan.style.color = "blue";
+    statusSpan.style.marginLeft = "10px";
+
+    button.onclick = function () {
+        const teamName = document.getElementById("team").value;
+        google.script.run
+            .withSuccessHandler(function (results) {
+                populateScorecardWithSavedResults(results);
+                const now = new Date();
+                const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
+                statusSpan.innerHTML = `<b><i>Re-Loaded at</i></b> ${time}`;
+                statusSpan.style.color = "blue";
+            })
+            .withFailureHandler(function (error) {
+                statusSpan.textContent = "Failed to Re-Load";
+                statusSpan.style.color = "red";
+                console.error("Error loading scores:", error);
+            })
+            .loadScoresForTeam(teamName);
+    };
+
+    container.appendChild(button);
+    container.appendChild(statusSpan);
+
+    return container;
+}
+
+
+  function populateScorecardWithSavedResults(allPlayerScores) {
+    const paramSpreadsheetConfig = spreadsheetConfig();
+
+    console.log("Loading saved scores: " + JSON.stringify(allPlayerScores));
+
+    const selectedTeamConfig = getSelectedTeamConfig(paramSpreadsheetConfig.allTeamConfigs);
+
+    for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+        if (currPlayerIndex >= allPlayerScores.length) {
+            break;
+        }
+        let currPlayerScores = allPlayerScores[currPlayerIndex];
+
+        console.log(`Processing player ${currPlayerIndex}: ${JSON.stringify(currPlayerScores)}`);
+
+        // Set player name
+        if (currPlayerScores.length >= 1) {
+            const playerNameInput = document.getElementById(idPlayerName(currPlayerIndex));
+            if (playerNameInput) {
+                playerNameInput.value = currPlayerScores[0];
+                console.log(`Set player name: ${currPlayerScores[0]}`);
+            } else {
+                console.log(`Player name input not found for player index ${currPlayerIndex}`);
+            }
+        }
+
+        // Set target
+        if (currPlayerScores.length >= 2 && typeof currPlayerScores[1] === "number") {
+            const targetInput = document.getElementById(idTarget(currPlayerIndex));
+            if (targetInput) {
+                targetInput.value = currPlayerScores[1];
+                targetInput.oninput();
+                console.log(`Set target: ${currPlayerScores[1]}`);
+            } else {
+                console.log(`Target input not found for player index ${currPlayerIndex}`);
+            }
+        }
+
+        // Set hole scores
+        for (let holeIndex = 0; holeIndex < paramSpreadsheetConfig.courseConfig.pars.length && holeIndex < (currPlayerScores.length - 2); holeIndex++) {
+            let maybeScore = currPlayerScores[holeIndex + 2];
+            const select = document.getElementById(idHolePlayer(holeIndex, currPlayerIndex));
+            if (select) {
+                if (typeof maybeScore === "number" && maybeScore > 0) {
+                    select.value = maybeScore;
+                } else {
+                    select.value = "";
+                }
+                // Trigger the change event
+                const event = new Event('change', { bubbles: true });
+                select.dispatchEvent(event);
+                console.log(`Set score for hole ${holeIndex}: ${select.value}`);
+            } else {
+                console.log(`Score select not found for hole ${holeIndex} and player index ${currPlayerIndex}`);
+            }
+        }
+    }
+  }
+
+  function getSelectedTeamConfig(allTeamConfigs) {
+    const teamName = document.getElementById("team").value;
+
+    let selectedTeamConfig = {
+    "teamName": "",
+    "players": [
+    { "playerName": "", "playerTarget": null },
+    { "playerName": "", "playerTarget": null },
+    { "playerName": "", "playerTarget": null },
+    { "playerName": "", "playerTarget": null },
+    ]
+    };
+
+    for (let teamConfig of allTeamConfigs) {
+    if (teamName === teamConfig.teamName) {
+    selectedTeamConfig = teamConfig;
+    }
+    }
+
+    return selectedTeamConfig;
+  }
+
+
+    // Function that gets called after the page expands
+  function createScorecardTable(RESULTS, courseConfig, teamConfig) {
+    document.getElementById("table").appendChild(
+    generateTable(RESULTS, courseConfig, teamConfig));
+
+    for (const result of RESULTS) {
+      const refRow = document.getElementById(idHoleRow(result.endExclusive - 1));
+      const refTable = refRow.parentElement;
+
+      const newRows = generateResultTable(result, teamConfig.players.length);
+
+      // Loop over these rows in reverse, so they appear in order.
+      for (let rowIndex = newRows.length - 1; rowIndex >= 0; rowIndex--) {
+          const placeholderRow = refTable.insertRow(refRow.rowIndex + 1);
+          refTable.replaceChild(newRows[rowIndex], placeholderRow);
       }
     }
-  });
 
-  // Format current time as EST
-  const timestampEST = new Date().toLocaleString('en-US', {
-    timeZone: 'America/New_York'
-  });
+      // We could have loaded some cached scores.
+    updateAllStats(RESULTS, courseConfig.pars, teamConfig.players.length);
 
-  // Build HTML email body
-  let htmlBody = `
-  <div style="font-family: Arial, sans-serif; font-size: 14px;">
-    <p>Thank you for playing today in the Springfield Seniors Group! Below is your group's resulting scorecard.</p>
-    <br><br>
-    <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-      <thead>
-        <tr style="background-color: #d9edf7;">
-          ${header.map(col =>
-            `<th style="padding: 8px; border: 1px solid #ccc; text-align: center;">${col}</th>`
-          ).join('')}
-        </tr>
-        <tr style="background-color: #d9edf7;">
-          ${secondHeader.map(par =>
-            `<th style="padding: 6px; border: 1px solid #ccc; text-align: center;">
-              ${par !== "" ? par : ""}
-            </th>`
-          ).join('')}
-        </tr>
-      </thead>
-      <tbody>
-        ${flatResults.map(row =>
-          `<tr>
-            ${row.map((cell, index) => {
-              const align = (index <= 3) ? "left" : "center";
-              return `<td style="padding: 6px; border: 1px solid #ccc; text-align: ${align};">
-                        ${cell !== undefined && cell !== null ? cell : ""}
-                      </td>`;
-            }).join('')}
-          </tr>`
-        ).join('')}
-      </tbody>
-    </table>
-    <br><br>
-    <p>Scores submitted on: ${timestampEST} EST</p>
-    <br><br>
-    <p><b><i>Powered by GoogleGolf Scoring System!</i></b></p>
-  </div>`;
+  }
 
-  // Send email
-  MailApp.sendEmail({
-    to: toList.join(','),
-    cc: "welch_misc@yahoo.com",
-    subject: subject,
-    htmlBody: htmlBody
-  });
 
-  Logger.log("Email sent to: " + toList.join(', ') + " CC: welch_misc@yahoo.com");
+  function generateTable(results, courseConfig, teamConfig) {
+      const table = document.createElement("table");
+
+      const numHoles = courseConfig.pars.length;
+
+      const nameRow = generateNameRow(teamConfig);
+      table.appendChild(nameRow);
+
+      const targetRow = generateTargetRow(results, courseConfig.pars, teamConfig);
+      table.appendChild(targetRow);
+
+      for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+          const row = generateHoleRow(results, courseConfig.pars, holeIndex, teamConfig.players.length);
+          table.appendChild(row);
+      }
+
+      return table;
+
+  }
+
+
+
+function deletePlayerAndTarget(playerIndex, checkbox) {
+  saveBeforeDelete();
+
+  document.getElementById(idPlayerName(playerIndex)).value = "x";
+  document.getElementById(idTarget(playerIndex)).value = "0";
+
+  // Clear scores for the selected deleted player
+  clearScoresAndCacheForPlayer(playerIndex);
+
+  // Update localStorage
+  localStorage.removeItem(idPlayerName(playerIndex));
+  localStorage.removeItem(idTarget(playerIndex));
+
+  for (let holeIndex = 0; holeIndex < 18; holeIndex++) {
+    const scoreId = idHolePlayer(holeIndex, playerIndex);
+    localStorage.removeItem(scoreId);
+  }
+
+  updateTeamTarget(getSelectedTeamConfig(spreadsheetConfig().allTeamConfigs).players.length);
+  console.log("New Team Target After Player Deletion:", document.getElementById("team_target").textContent);
 }
 
-// kendunnett@comporium.net
+
+
+ function saveBeforeDelete() {
+      const localSpreadsheetConfig = spreadsheetConfig();
+      const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+                  
+      // --- Save Scores Before Submitting ---
+      // Build an array of raw scores (similar to save button)
+    let out = [];
+    for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+      let currPlayerScores = [];
+      currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+      currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
+
+      for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+        currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+      }
+
+      out.push(currPlayerScores);
+    }
+
+    console.log("Saving before submitting: " + JSON.stringify(out));
+
+    google.script.run
+      .withSuccessHandler(function () {
+        // Save to localStorage
+        localStorage.setItem("savedScores", JSON.stringify(out));
+
+        const now = new Date();
+        const hours = now.getHours().toString();
+        const minutes = now.getMinutes().toString().padStart(2, "0");
+        const time = `${hours}:${minutes}`;
+        document.getElementById("save_status").innerHTML =
+          "<b><i>Saved at</i></b> " + time;
+      })
+      .withFailureHandler(function (error) {
+        const statusElem = document.getElementById("save_status");
+        statusElem.textContent = "Failed to Save";
+        statusElem.style.cssText =
+          "font-size: 40px; font-weight: bold; color: red;";
+        console.error("Error saving scores:", error);
+      })
+      .saveScoresForTeam(document.getElementById("team").value, out);
+  }
+
+
+
+  function generateNameRow(teamConfig) {
+    const row = document.createElement("tr");
+    row.classList.add("sticky-header"); // Add sticky header class
+    const headerCell = document.createElement("td");
+    headerCell.textContent = "Name";
+    headerCell.style.fontSize = "1.5em"; // Set the font size
+    headerCell.style.fontWeight = "bold"; // Set the font weight
+    row.appendChild(headerCell);
+    for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
+      const playerCell = document.createElement("td");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.id = idPlayerName(playerIndex);
+      input.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
+      input.style.fontSize = "20px";
+      input.style.padding = "5px 5px";
+      input.style.width = "8ch";
+      input.style.fontWeight = "bold";
+      input.value = teamConfig.players[playerIndex].playerName;
+      playerCell.appendChild(input);
+      row.appendChild(playerCell);
+    }
+    return row;
+  }
+
+
+function generateTargetRow(results, pars, teamConfig) {
+    const row = document.createElement("tr");
+    const headerCell = document.createElement("td");
+    headerCell.textContent = "Target";
+    headerCell.style.fontSize = "1.5em"; // Set the inline font size
+    headerCell.style.fontWeight = "bold"; // Set the inline font weight to bold
+    row.appendChild(headerCell);
+    let teamTarget = 0;
+    for (let playerIndex = 0; playerIndex < teamConfig.players.length; playerIndex++) {
+        const currPlayerIndex = playerIndex;
+        const playerCell = document.createElement("td");
+        playerCell.align = "center";
+        const input = document.createElement("input");
+        input.type = "number";
+        input.id = idTarget(playerIndex);
+        input.style.width = "3ch";
+        input.style.fontSize = "1.2em"; // Set the font size to 1.2em
+        input.disabled = false;
+        const playerTarget = teamConfig.players[playerIndex].playerTarget;
+        input.value = playerTarget;
+        const playerTargetOrZero = parseInt(playerTarget);
+        if (!isNaN(playerTargetOrZero)) {
+            teamTarget += playerTargetOrZero;
+        }
+        input.min = 0;
+        input.oninput = function (event) {
+            updateStats(results, pars, teamConfig.players.length, currPlayerIndex);
+            updateTeamTarget(teamConfig.players.length);
+        };
+        playerCell.appendChild(input);
+        row.appendChild(playerCell);
+    }
+    document.getElementById("team_target").textContent = teamTarget;
+    return row;
+}
+
+
+  function generateHoleRow(results, pars, holeIndex, numPlayers) {
+      const row = document.createElement("tr");
+
+      row.id = idHoleRow(holeIndex);
+
+      const headerCell = generateHoleHeader(holeIndex, pars[holeIndex]);
+      row.appendChild(headerCell);
+
+      for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+          const holeCell = generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex);
+          row.appendChild(holeCell);
+      }
+
+        // Call the resize function after generating the row
+    //resizePage();
+
+      return row;
+  }
+
+  function generateHoleHeader(holeIndex, par) {
+      const cell = document.createElement("td");
+      cell.textContent = (holeIndex + 1) + " (" + par + ")";
+      cell.style.fontSize = "1.5em"; // Set the inline font size to 1.5em
+
+      return cell;
+  }
 
 
 
 
+  function generateHoleForPlayer(results, pars, holeIndex, numPlayers, playerIndex) {
+    const cell = document.createElement("td");
+    cell.style.textAlign = "center"; // Use style instead of align
+
+    const select = document.createElement("select");
+    const id = idHolePlayer(holeIndex, playerIndex);
+    select.id = id;
+    select.style.width = "5ch"; // Set width to 5ch
+    select.style.fontSize = "1.2em"; // Increase font size to make text taller
+    select.style.height = "2.5em"; // Increase height to make the box taller
+    select.style.padding = "2px"; // Adjust padding if needed
+    select.style.boxSizing = "border-box"; // Ensure padding is included in the height
+
+    const possibleSavedScore = localStorage.getItem(id);
+    const userScore = possibleSavedScore !== null ? possibleSavedScore : "";
+
+    const minScore = getMinScore(pars[holeIndex]); // Calculate minScore using the function defined earlier
+    const maxScore = getMaxScore(pars[holeIndex]); // Calculate maxScore using the function defined earlier
+
+    // Add a null option
+    const nullOption = document.createElement("option");
+    nullOption.value = "";
+    nullOption.text = ""; // Placeholder text if desired
+    if (userScore === "") {
+        nullOption.selected = true;
+    }
+    select.appendChild(nullOption);
+
+    for (let score = minScore; score <= maxScore; score++) {
+        const option = document.createElement("option");
+        option.value = score;
+        option.text = score;
+        if (score == userScore) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    }
+
+    // Apply initial background color based on userScore
+    select.style.color = "black";
+    select.style.backgroundColor = userScore === "" ? "yellow" : getHoleForPlayerColor(userScore, pars[holeIndex]);
+
+    select.addEventListener('change', function(event) {
+        const selectedScore = event.target.value;
+
+        select.style.backgroundColor = selectedScore === "" ? "yellow" : getHoleForPlayerColor(selectedScore, pars[holeIndex]);
+       
+        localStorage.setItem(id, selectedScore);
+        updateStats(results, pars, numPlayers, playerIndex);
+
+        // Apply bold and larger font size to the selected option
+        select.style.fontWeight = selectedScore ? "bold" : "normal";
+        select.style.fontSize = "1.2em"; // Adjust font size as needed
+
+        // Simulate the bold effect by adding a pseudo element for the selected option
+        const options = select.querySelectorAll('option');
+        options.forEach(option => {
+            if (option.value === selectedScore) {
+                option.style.fontWeight = "bold";
+                option.style.fontSize = "1.2em";
+            } else {
+                option.style.fontWeight = "normal";
+                option.style.fontSize = "1em"; // Default size
+            }
+        });
+    });
+
+    cell.appendChild(select);
+    return cell;
+  }
 
 
-// You can directly execute this method in the AppsScript UI.
-function testSaveData() {
-  const flatResults = [
-    ["date", "team", "course", "player0", 1, 2, 3],
-    ["date", "team", "course", "player1", 4, 5, 6]
+  function generateResultTable(partialResult, numPlayers) {
+    const headerRow = document.createElement("tr");
+    headerRow.textContent = partialResult.name;
+    headerRow.style = "font-weight: bold; text-decoration: underline; font-size: 1.5em;";
+
+    const scoreRow = generateResultScoreRow(partialResult.name, numPlayers);
+    scoreRow.style.fontSize = "1.5em";
+
+    const pointsRow = generateResultPointsRow(partialResult.name, numPlayers);
+    pointsRow.style.fontSize = "1.5em";
+
+    const netRow = generateResultNetRow(partialResult.name, numPlayers);
+    netRow.style.fontSize = "1.5em";
+
+    const pointsTeamRow = generateResultPointsTeamRow(partialResult.name);
+    pointsTeamRow.style.fontSize = "1.5em";
+
+    const netTeamRow = generateResultNetTeamRow(partialResult.name);
+    netTeamRow.style.fontSize = "1.5em";
+
+    return [headerRow, scoreRow, pointsRow, netRow, pointsTeamRow, netTeamRow];
+  }
+
+
+  function generateResultScoreRow(resultName, numPlayers) {
+      const row = document.createElement("tr");
+
+      const headerCell = document.createElement("td");
+      headerCell.textContent = "Score";
+      row.appendChild(headerCell);
+
+      for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+          const scoreCell = document.createElement("td");
+          scoreCell.align = "center";
+          scoreCell.id = idResultScorePlayer(resultName, playerIndex);
+          scoreCell.textContent = 0;
+          row.appendChild(scoreCell);
+      }
+
+      return row;
+  }
+
+  function generateResultPointsRow(resultName, numPlayers) {
+      const row = document.createElement("tr");
+
+      const headerCell = document.createElement("td");
+      headerCell.textContent = "Points";
+      row.appendChild(headerCell);
+
+      for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+          const pointsCell = document.createElement("td");
+          pointsCell.align = "center";
+          pointsCell.id = idResultPointsPlayer(resultName, playerIndex);
+          pointsCell.textContent = 0;
+          row.appendChild(pointsCell);
+      }
+
+      return row;
+  }
+
+  function generateResultNetRow(resultName, numPlayers) {
+      const row = document.createElement("tr");
+
+      const headerCell = document.createElement("td");
+      headerCell.textContent = "Net";
+      row.appendChild(headerCell);
+
+      for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+          const netCell = document.createElement("td");
+          netCell.align = "center";
+          netCell.id = idResultNetPlayer(resultName, playerIndex);
+          netCell.textContent = "";
+          row.appendChild(netCell);
+      }
+
+      return row;
+  }
+
+  function generateResultPointsTeamRow(resultName) {
+      const row = document.createElement("tr");
+
+      const headerCell = document.createElement("td");
+      headerCell.textContent = "Team Points";
+      headerCell.style = "font-weight: bold";
+      row.appendChild(headerCell);
+
+      const pointsCell = document.createElement("td");
+      pointsCell.style = "font-weight: bold";
+      pointsCell.align = "center";
+      pointsCell.id = idResultPointsTeam(resultName);
+      pointsCell.textContent = 0;
+      row.appendChild(pointsCell);
+
+      return row;
+  }
+
+  function generateResultNetTeamRow(resultName) {
+      const row = document.createElement("tr");
+
+      const headerCell = document.createElement("td");
+      headerCell.textContent = "Team Net";
+      headerCell.style = "font-weight: bold";
+      row.appendChild(headerCell);
+
+      const netCell = document.createElement("td");
+      netCell.style = "font-weight: bold";
+      netCell.align = "center";
+      netCell.id = idResultNetTeam(resultName);
+      netCell.textContent = "";
+      row.appendChild(netCell);
+
+      return row;
+  }
+
+  function updateAllStats(results, pars, numPlayers) {
+      for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+          updateStats(results, pars, numPlayers, playerIndex);
+      }
+  }
+
+  function updateStats(results, pars, numPlayers, playerIndex) {
+      const score = computeScore(pars.length, playerIndex);
+      const points = computePoints(pars, playerIndex);
+
+      for (let result of results) {
+          updateResult(result, pars, playerIndex, score, points, pars);
+
+          let pointsTeam = 0;
+          for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+              const playerPointsOrNaN = parseInt(document.getElementById(
+                  idResultPointsPlayer(result.name, currPlayerIndex))
+                  .textContent);
+              if (isNaN(playerPointsOrNaN)) {
+                  continue;
+              }
+              pointsTeam += playerPointsOrNaN;
+          }
+          document.getElementById(idResultPointsTeam(result.name)).textContent = pointsTeam;
+
+          // Nets can be fractions
+          let netTeam = 0;
+          for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+              const playerNetOrNaN = parseFloat(document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent);
+              if (isNaN(playerNetOrNaN)) {
+                  continue;
+              }
+              netTeam += playerNetOrNaN;
+          }
+          document.getElementById(idResultNetTeam(result.name)).textContent = netTeam;
+      }
+  }
+
+  function updateResult(result, pars, playerIndex, score, points) {
+      const holeIndices = Array.from({ length: result.endExclusive - result.startInclusive }, (_, i) => result.startInclusive + i);
+
+      const resultScore = sumNumbersByIndex(score.scores, holeIndices);
+      document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent = resultScore;
+
+      const resultPoints = sumNumbersByIndex(points.points, holeIndices);
+      document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent = resultPoints;
+
+      const resultNet = computeNet(points, pars, holeIndices, playerIndex);
+      document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent = resultNet;
+  }
+
+  function computeScore(numHoles, playerIndex) {
+      let scores = [];
+      let total = 0;
+      for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+          const rawScore = document.getElementById(idHolePlayer(holeIndex, playerIndex)).value;
+          scores.push(rawScore);
+
+          const score = parseInt(rawScore);
+          if (isNaN(score)) {
+              continue;
+          }
+          total += score;
+      }
+      return { "overall_score": total, "scores": scores };
+  }
+
+  function computePoints(pars, playerIndex) {
+      let scoresOrNaN = [];
+      for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
+          scoresOrNaN.push(parseInt(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value));
+      }
+
+      // We need to compute points iff the user has entered a value for the corresponding hole.
+
+      let points = [];
+      let total = 0;
+      for (let holeIndex = 0; holeIndex < pars.length; holeIndex++) {
+          if (isNaN(scoresOrNaN[holeIndex])) {
+              points.push("");
+              continue;
+          }
+
+          const point = Math.max(0, 2 - (scoresOrNaN[holeIndex] - pars[holeIndex]));
+          points.push(point);
+          total += point;
+      }
+      return { "overall_points": total, "points": points };
+  }
+
+  function computeNet(points, pars, holeIndices, playerIndex) {
+      const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value);
+
+      if (isNaN(targetOrNaN)) {
+          return "";
+      }
+
+      // Weighted just by number of holes.
+      // Points are already independent of par.
+      const resultTarget = targetOrNaN * (holeIndices.length / pars.length);
+
+      const resultPoints = sumNumbersByIndex(points.points, holeIndices);
+
+      return resultPoints - resultTarget;
+  }
+
+  function sumNumbersByIndex(numbersOrNaN, indices) {
+      let out = 0;
+      for (let index of indices) {
+          const numOrNaN = parseInt(numbersOrNaN[index]);
+          if (isNaN(numOrNaN)) {
+              continue;
+          }
+          out += numOrNaN;
+      }
+      return out;
+  }
+
+  function updateTeamTarget(numPlayers) {
+      let total = 0;
+      for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
+          const possibleTarget = parseInt(document.getElementById(idTarget(playerIndex)).value);
+          if (isNaN(possibleTarget)) {
+              continue;
+          }
+          total += possibleTarget;
+      }
+
+      document.getElementById("team_target").textContent = total;
+  }
+
+
+  function lockInputs() {
+      const localSpreadsheetConfig = spreadsheetConfig();
+
+      const submitButton = document.getElementById("submit_button");
+      submitButton.disabled = true;
+
+      const teamInput = document.getElementById("team");
+      teamInput.disabled = true;
+
+      // For now we hardcode that at most 4 players per team.
+      for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+
+          const possiblePlayerName = document.getElementById(idPlayerName(playerIndex));
+          const possiblePlayerTarget = document.getElementById(idTarget(playerIndex));
+
+          if (possiblePlayerName == null) {
+              break;
+          }
+
+          possiblePlayerName.disabled = true;
+          possiblePlayerTarget.disabled = true;
+
+          for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+              const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
+              if (possibleInput == null) {
+                  break;
+              }
+              possibleInput.disabled = true;
+          }
+      }
+
+      // Set the lock flag to true
+      inputsLocked = true;
+      console.log("Inputs locked:", inputsLocked);
+  }
+
+
+
+  function submit() {
+  // Clear the auto-save interval when submit is executed
+  clearInterval(saveInterval);
+
+  const localSpreadsheetConfig = spreadsheetConfig();
+  const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+
+  let flatResults = [];
+
+  // Build player results
+  for (let playerIndex = 0; playerIndex < selectedTeamConfig.players.length; playerIndex++) {
+    // Skip players that don't have a name.
+    const rawName = document.getElementById(idPlayerName(playerIndex)).value;
+    if (rawName === "" || rawName === null) {
+      continue;
+    }
+
+    let playerStats = [
+      document.getElementById("date").textContent,                // Date
+      document.getElementById("team").value,                      // Team
+      localSpreadsheetConfig.courseConfig.courseName,             // Course Name
+      document.getElementById(idPlayerName(playerIndex)).value    // Player Name
+    ];
+
+    // Get each hole's score
+    for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+      playerStats.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value);
+    }
+
+    // Add target score
+    playerStats.push(document.getElementById(idTarget(playerIndex)).value);
+
+    // Add result details (Score, Points, Net)
+    for (const result of RESULTS) {
+      playerStats.push(document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent);
+      playerStats.push(document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent);
+      playerStats.push(document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent);
+    }
+
+    flatResults.push(playerStats);
+  }
+
+  // Check if all scores are entered
+  let allScoresEntered = true;
+  for (let currentPlayerStats of flatResults) {
+    // Skip the first 4 elements (date, team, courseName, playerName)
+    for (let resultIndex = 0; resultIndex < localSpreadsheetConfig.courseConfig.pars.length; resultIndex++) {
+      if (currentPlayerStats[resultIndex + 4] === "") {
+        allScoresEntered = false;
+        break;
+      }
+    }
+  }
+
+  // Add team-level results
+  let teamStats = [
+    document.getElementById("date").textContent,                // Date
+    document.getElementById("team").value,                      // Team
+    localSpreadsheetConfig.courseConfig.courseName,             // Course Name
+    document.getElementById("team").value                       // "Player Name" (team)
   ];
+  for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+    teamStats.push("");   // No hole scores at the team level.
+  }
+  teamStats.push(document.getElementById("team_target").textContent); // Target
 
-  saveData(flatResults);
+  for (const result of RESULTS) {
+    teamStats.push("");   // Score (empty)
+    teamStats.push(document.getElementById(idResultPointsTeam(result.name)).textContent);  // Points
+    teamStats.push(document.getElementById(idResultNetTeam(result.name)).textContent);     // Net
+  }
+  flatResults.push(teamStats);
+
+ // Confirmation dialog
+let confirmationMessage =
+  "Be sure all scores are correct! When so, click 'OK' to SUBMIT these scores. Thanks!\n\n" +
+  "A green pop-up 'Submit & Email Success' message indicates a successful submission.\n\n";
+
+if (!allScoresEntered) {
+  confirmationMessage +=
+    "Wait-- I see some holes without scores-- please 'Cancel' and fully fill in scores!\n\n";
 }
 
-function saveScoresForTeam(teamName, allPlayerScores) {
-  // teamName: String
-  // allPlayerScores: [["name", "target", "hole0", "hole1", ...], ...]
+confirmationMessage +=
+  "With V. 5.0, now each player will get an email of the submitted scorecard immediately upon a successful submission!";
 
-   // G  Storage Sheet https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
-  // G2  Starage  https://docs.google.com/spreadsheets/d/1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM/edit?gid=1733728784#gid=1733728784
+if (!confirm(confirmationMessage)) {
+  return;
+}
 
-  const spreadsheet = SpreadsheetApp.openById("1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ");
-  let teamSheet = spreadsheet.getSheetByName(teamName);
+  // --- Save Scores Before Submitting ---
+  // Build an array of raw scores (this is similar to what your save button used to do)
+  let out = [];
+  for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
+    let currPlayerScores = [];
+    currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
+    currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
 
-  if (teamSheet == null) {
-    teamSheet = spreadsheet.insertSheet(teamName);
+    for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+      currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+    }
+
+    out.push(currPlayerScores);
   }
 
-  teamSheet.clear();
+  console.log("Saving before submitting: " + JSON.stringify(out));
 
-  allPlayerScores.forEach(playerScores => teamSheet.appendRow(playerScores))
+  google.script.run
+    .withSuccessHandler(function () {
+      // Save to localStorage
+      localStorage.setItem("savedScores", JSON.stringify(out));
 
+      const now = new Date();
+      const hours = now.getHours().toString();
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      const time = `${hours}:${minutes}`;
+      document.getElementById("save_status").innerHTML =
+        "<b><i>Saved at</i></b> " + time;
+    })
+    .withFailureHandler(function (error) {
+      const statusElem = document.getElementById("save_status");
+      statusElem.textContent = "Failed to Save";
+      statusElem.style.cssText =
+        "font-size: 40px; font-weight: bold; color: red;";
+      console.error("Error saving scores:", error);
+    })
+    .saveScoresForTeam(document.getElementById("team").value, out);
+
+  // Lock inputs (prevent further changes)
+  lockInputs();
+
+
+// --- Submit the flat results ---
+google.script.run
+  .withSuccessHandler(function (result) {
+    const submitConfirmation = document.getElementById("submit_confirmation");
+    submitConfirmation.textContent = "Submit & Email Success - Thanks!";
+    submitConfirmation.style.cssText =
+      "font-size: 40px; font-weight: bold; color: green;";
+
+    // Voice confirmation for success
+    const successUtterance = new SpeechSynthesisUtterance("Submit & Email Success - Thanks!");
+    successUtterance.rate = 1.0; 
+    window.speechSynthesis.speak(successUtterance);
+  })
+  .withFailureHandler(function (error) {
+    const submitConfirmation = document.getElementById("submit_confirmation");
+    submitConfirmation.textContent =
+      "Failed, re-start App, pull up your tee time, and re-submit.";
+    submitConfirmation.style.cssText =
+      "font-size: 40px; font-weight: bold; color: red;";
+
+    // Voice notification for failure
+    const failureUtterance = new SpeechSynthesisUtterance("Failed, re-start App, pull up your tee time, and re-submit.");
+    failureUtterance.rate = 1.0;
+    window.speechSynthesis.speak(failureUtterance);
+  })
+  .saveData(flatResults);
 }
 
-function testSaveScoresForTeam() {
-  saveScoresForTeam("9:30", [
-    ["AAA", 27, 3, 3, 3, 0, 0, 0],
-    ["BBB", 20, 4, 4, 0, 0],
-    ["CCC", 1]
-  ]);
-}
 
-
-function loadScoresForTeam(teamName) {
-  
-  // G  Storage Sheet https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
-  // G2  Starage      https://docs.google.com/spreadsheets/d/1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM/edit?gid=1733728784#gid=1733728784
-
-  const spreadsheet = SpreadsheetApp.openById("1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ");
-  const teamSheet = spreadsheet.getSheetByName(teamName);
-
-  if (teamSheet == null) {
-    return [];
+  function clearWithConfirmation() {
+      if (confirm("Be VERY sure you want to clear the hole scores!")) {
+          clearScoresAndCache();
+      }
   }
 
-  return teamSheet.getDataRange().getValues();
-}
 
-function testLoadScoresForTeam() {
-  console.log(loadScoresForTeam("9:30"));
-}
+  function clearScoresAndCache() {
+      const localSpreadsheetConfig = spreadsheetConfig();
+      const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+
+      // For now we hardcode that at most 4 players per team.
+      for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+          for (let holeIndex = 0;
+              holeIndex < localSpreadsheetConfig.courseConfig.pars.length;
+              holeIndex++) {
+              const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
+              if (possibleInput == null) {
+                  break;
+                  }
+                possibleInput.value = ""; // Set to empty string
+                possibleInput.style.backgroundColor = "yellow"; // Set background color to yellow when empty
+              }
+      }
+
+      localStorage.clear();
+
+      // Basically just resets everything to empty
+      updateAllStats(
+          RESULTS,
+          localSpreadsheetConfig.courseConfig.pars,
+          selectedTeamConfig.players.length);
+  }
+
+
+  function clearScoresAndCacheForPlayer(playerIndex) {
+    const localSpreadsheetConfig = spreadsheetConfig();
+    const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+
+    for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
+      const possibleInput = document.getElementById(idHolePlayer(holeIndex, playerIndex));
+      if (possibleInput == null) {
+        break;
+      }
+      possibleInput.value = ""; // Set to empty string
+      possibleInput.style.backgroundColor = "yellow"; // Set background color to yellow when empty
+    }
+
+    // Optionally clear local storage related to this player, if applicable.
+    // localStorage.clear(); // This clears everything; use with caution.
+
+    // Update stats for the remaining players
+    updateAllStats(
+      RESULTS,
+      localSpreadsheetConfig.courseConfig.pars,
+      selectedTeamConfig.players.length
+    );
+  }
+
+
+  function idHoleRow(holeIndex) {
+      return "holeRow_" + holeIndex;
+  }
+
+  function idHolePlayer(holeIndex, playerIndex) {
+      return holeIndex + "_" + playerIndex;
+  }
+
+  function idResultScorePlayer(resultName, playerIndex) {
+      return "result_" + resultName + "_score_" + playerIndex;
+  }
+
+  function idResultPointsPlayer(resultName, playerIndex) {
+      return "result_" + resultName + "_points_" + playerIndex;
+  }
+
+  function idResultPointsTeam(resultName) {
+      return "result_" + resultName + "_points_team";
+  }
+
+  function idPlayerName(playerIndex) {
+      return "name_" + playerIndex;
+  }
+
+  function idTarget(playerIndex) {
+      return "target_" + playerIndex;
+  }
+
+  function idResultNetPlayer(resultName, playerIndex) {
+      return "result_" + resultName + "_net_" + playerIndex;
+  }
+
+  function idResultNetTeam(resultName) {
+      return "result_" + resultName + "_net_team";
+  }
+ 
+
+   // Obfucation end - if desired
+
+  </script>
+
+</body>
+
+</html>
