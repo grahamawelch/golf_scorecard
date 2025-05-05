@@ -148,11 +148,10 @@ function saveData(flatResults) {
 
 
 function sendFlatResultsEmail(flatResults) {
-   // G config sheet Id  1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ 
-   // G2 "      "    Id  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
-  const sheetId = '1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ'; // The config sheet containing par ratings
+  // G config sheet Id  1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ 
+  // G2 config sheet Id  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
+  const sheetId = '1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ';
   const subject = `Your ${new Date().toLocaleDateString()} Springfield Seniors Submitted Golf Scores`;
-
 
   const header = [
     "Date", "Tee Time", "Course", "Player Name",
@@ -161,30 +160,21 @@ function sendFlatResultsEmail(flatResults) {
     "Front Score", "Front Points", "Front Net", "Back Score", "Back Points", "Back Net"
   ];
 
-
   // STEP 1: Read pars from external sheet
   const sheet = SpreadsheetApp.openById(sheetId).getSheets()[0];
-  const parValues = sheet.getRange('C1:T1').getValues()[0]; // Get the par values from C1:T1
-
+  const parValues = sheet.getRange('C1:T1').getValues()[0];
 
   // STEP 2: Build second header row (pars)
   const secondHeader = [
-    "", "", "", "<b>Pars</b>",   // Bold "Pars"
-    ...parValues,                 // H1 - H18 pars
-    "",                          // Target
-    "", "", "",                  // Total Score, Total Points, Total Net
-    "", "", "",                  // Front Score, Front Points, Front Net
-    "", "", ""                   // Back Score, Back Points, Back Net
+    "", "", "", "<b>Pars</b>",
+    ...parValues,
+    "", "", "", "", "", "", ""
   ];
 
-
-  // STEP 3: Read player names and emails from another sheet (Players Past Poionts Email Sheet)
-   // G Player Past Points sheet Id  1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ
-   // G2 "      "                Id  1U6Ugwd6uXTWYimMQdOOf-5ngDBzJtmaDiVSyqrBbogA
-
-  const parsSheet = SpreadsheetApp.openById('1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ').getSheetByName('Sheet1');
+  // STEP 3: Read player names and emails
+  const parsSheet = SpreadsheetApp.openById('1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ').getSheetByName('Sheet1');
   const playersData = parsSheet.getRange('A2:B' + parsSheet.getLastRow()).getValues();
- 
+
   const playerEmails = {};
   playersData.forEach(row => {
     const playerName = row[0];
@@ -194,37 +184,38 @@ function sendFlatResultsEmail(flatResults) {
     }
   });
 
-
-  // Now we build the email addresses for the players in the flatResults
+  // Build email recipient list
   let toList = [];
   flatResults.forEach(row => {
-    let playerNameRaw = row[3]; // Player Name is in column 4 of each row
+    let playerNameRaw = row[3];
     if (playerNameRaw) {
-      let cleanedName = playerNameRaw.replace(/!/g, "").trim(); // remove any "!" and extra spaces
+      let cleanedName = playerNameRaw.replace(/!/g, "").trim();
       const email = playerEmails[cleanedName];
       if (email) {
-        toList.push(email);  // Add to the recipient list
+        toList.push(email);
       }
     }
   });
 
+  // Format current time as EST
+  const timestampEST = new Date().toLocaleString('en-US', {
+    timeZone: 'America/New_York'
+  });
 
-    // Email body with headers and data
- let htmlBody = 
-  `<div style="font-family: Arial, sans-serif; font-size: 14px;">
+  // Build HTML email body
+  let htmlBody = `
+  <div style="font-family: Arial, sans-serif; font-size: 14px;">
     <p>Thank you for playing today in the Springfield Seniors Group! Below is your group's resulting scorecard.</p>
     <br><br>
     <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
       <thead>
         <tr style="background-color: #d9edf7;">
-          ${header.map(col => 
-            `<th style="padding: 8px; border: 1px solid #ccc; text-align: center;">
-              ${col}
-            </th>`
+          ${header.map(col =>
+            `<th style="padding: 8px; border: 1px solid #ccc; text-align: center;">${col}</th>`
           ).join('')}
         </tr>
         <tr style="background-color: #d9edf7;">
-          ${secondHeader.map(par => 
+          ${secondHeader.map(par =>
             `<th style="padding: 6px; border: 1px solid #ccc; text-align: center;">
               ${par !== "" ? par : ""}
             </th>`
@@ -232,7 +223,7 @@ function sendFlatResultsEmail(flatResults) {
         </tr>
       </thead>
       <tbody>
-        ${flatResults.map(row => 
+        ${flatResults.map(row =>
           `<tr>
             ${row.map((cell, index) => {
               const align = (index <= 3) ? "left" : "center";
@@ -245,28 +236,23 @@ function sendFlatResultsEmail(flatResults) {
       </tbody>
     </table>
     <br><br>
-    <p>Scores submitted on: ${new Date().toLocaleString()}</p>
+    <p>Scores submitted on: ${timestampEST} EST</p>
     <br><br>
     <p><b><i>Powered by GoogleGolf Scoring System!</i></b></p>
   </div>`;
 
-
   // Send email
   MailApp.sendEmail({
-    to: toList.join(','),  // Players' emails in the "To" field
-    cc: "welch_misc@yahoo.com",  // CC emails
+    to: toList.join(','),
+    cc: "welch_misc@yahoo.com",
     subject: subject,
     htmlBody: htmlBody
   });
 
-
-  // Log the recipients (optional for debugging)
   Logger.log("Email sent to: " + toList.join(', ') + " CC: welch_misc@yahoo.com");
 }
 
-
 // kendunnett@comporium.net
-
 
 
 
