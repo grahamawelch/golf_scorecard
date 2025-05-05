@@ -146,7 +146,7 @@ function saveData(flatResults) {
 
 
 
-
+/**
 function sendFlatResultsEmail(flatResults) {
   // G config sheet Id  1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ 
   // G2 config sheet Id  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
@@ -251,10 +251,121 @@ function sendFlatResultsEmail(flatResults) {
 
   Logger.log("Email sent to: " + toList.join(', ') + " CC: welch_misc@yahoo.com");
 }
+*/
+
+function sendFlatResultsEmail(flatResults) {
+  const sheetId = '1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ';
+  const subject = `Your ${new Date().toLocaleDateString()} Springfield Seniors Submitted Golf Scores`;
+
+  const parHeader = [
+    "Date", "Tee Time", "Course", "Player Name",
+    "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12", "H13", "H14", "H15", "H16", "H17", "H18",
+    "Target", "Total Score", "Total Points", "Total Net",
+    "Front Score", "Front Points", "Front Net", "Back Score", "Back Points", "Back Net"
+  ];
+
+  // STEP 1: Read pars from external sheet
+  const sheet = SpreadsheetApp.openById(sheetId).getSheets()[0];
+  const parValues = sheet.getRange('C1:T1').getValues()[0];
+
+  // STEP 2: Read player names and emails
+  const parsSheet = SpreadsheetApp.openById('1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ').getSheetByName('Sheet1');
+  const playersData = parsSheet.getRange('A2:B' + parsSheet.getLastRow()).getValues();
+
+  const playerEmails = {};
+  playersData.forEach(row => {
+    const playerName = row[0];
+    const email = row[1];
+    if (playerName && email) {
+      playerEmails[playerName] = email;
+    }
+  });
+
+  // Build email recipient list
+  let toList = [];
+  flatResults.forEach(row => {
+    let playerNameRaw = row[3];
+    if (playerNameRaw) {
+      let cleanedName = playerNameRaw.replace(/!/g, "").trim();
+      const email = playerEmails[cleanedName];
+      if (email) {
+        toList.push(email);
+      }
+    }
+  });
+
+  // Format current time as EST
+  const timestampEST = new Date().toLocaleString('en-US', {
+    timeZone: 'America/New_York'
+  });
+
+  // Build HTML email body
+  let htmlBody = `
+  <div style="font-family: Arial, sans-serif; font-size: 14px;">
+    <p>Thank you for playing today in the Springfield Seniors Group! Below is your group's resulting scorecard.</p>
+    <br><br>
+    <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr style="background-color: #d9edf7;">
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Date</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Tee Time</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Course</th>
+          <th style="padding: 8px; border: 1px solid #ccc; text-align: center;">Player Name</th>
+          ${Array.from({length: 18}, (_, i) => 
+            `<th style="padding: 8px; border: 1px solid #ccc; text-align: center;">H${i + 1}</th>`
+          ).join('')}
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Target</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Total Score</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Total Points</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Total Net</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Front Score</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Front Points</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Front Net</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Back Score</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Back Points</th>
+          <th rowspan="2" style="padding: 8px; border: 1px solid #ccc; text-align: center;">Back Net</th>
+        </tr>
+        <tr style="background-color: #d9edf7;">
+          <th style="padding: 6px; border: 1px solid #ccc; text-align: center;"><b>Pars</b></th>
+          ${parValues.map(par =>
+            `<th style="padding: 6px; border: 1px solid #ccc; text-align: center;">${par}</th>`
+          ).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${flatResults.map(row =>
+          `<tr>
+            ${row.map((cell, index) => {
+              const align = (index <= 3) ? "left" : "center";
+              return `<td style="padding: 6px; border: 1px solid #ccc; text-align: ${align};">
+                        ${cell !== undefined && cell !== null ? cell : ""}
+                      </td>`;
+            }).join('')}
+          </tr>`
+        ).join('')}
+      </tbody>
+    </table>
+    <br>
+    <p><i>The last line in the scorecard (with the tee time for the Player Name) is the team's result.</i></p> 
+    <br><br>
+    <p>Scores submitted on: ${timestampEST} EST</p>
+    <br><br>
+    <p><b><i>Powered by GoogleGolf Scoring System!</i></b></p>
+  </div>`;
+
+  // Send email
+  MailApp.sendEmail({
+    to: toList.join(','),
+    cc: "welch_misc@yahoo.com",
+    subject: subject,
+    htmlBody: htmlBody
+  });
+
+  Logger.log("Email sent to: " + toList.join(', ') + " CC: welch_misc@yahoo.com");
+}
+
 
 // kendunnett@comporium.net
-
-
 
 
 
