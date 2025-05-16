@@ -270,27 +270,6 @@
 
 
 
-      // clear out localstore for prior days so it doesn't interfere
-    (function clearOldData() {
-    const savedData = localStorage.getItem("savedScores");
-    if (savedData) {
-        try {
-        const parsedData = JSON.parse(savedData);
-        // Get today's date in YYYY-MM-DD format.
-        const today = new Date().toISOString().split("T")[0];
-        if (parsedData.date !== today) {
-            localStorage.removeItem("savedScores");
-            console.log("Removed outdated savedScores from localStorage.");
-        }
-        } catch (e) {
-        console.error("Error parsing savedScores from localStorage:", e);
-        localStorage.removeItem("savedScores");
-        }
-    }
-    })();
-
-
-
 // Iframe Code for Scoreboard sheet URLs, placement, sizing, & selection of sheet based on day. 
   
     // Define the URLs for asheet (Scoreboard2) and bsheet (Scoreboard)
@@ -596,6 +575,7 @@ function createCheckboxRow(teamConfig) {
       ]
   }
 
+
   function spreadsheetConfig() {
       // This function exists to making testing iteration more straightforward.
       // AppScript will inject the variable CONFIG *before* the HTML content.
@@ -649,10 +629,12 @@ function createScorecard(RESULTS, spreadsheetConfig) {
 
 
 
-
-
-
 function teamOnchange(RESULTS, spreadsheetConfig) {
+   
+  // Fully clear all localStorage to prevent any old score data from being loaded
+  localStorage.clear();
+  console.log("All localStorage data cleared on team change.");
+
   const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
   console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
 
@@ -1625,7 +1607,7 @@ if (!allScoresEntered) {
 }
 
 confirmationMessage +=
-  "With V. 5.0, now each player will get an email of the submitted scorecard immediately upon a successful submission!";
+  "Since V. 5.0, now each player will get an email of the submitted scorecard immediately upon a successful submission!";
 
 if (!confirm(confirmationMessage)) {
   return;
