@@ -48,8 +48,8 @@ function getConfigAsString() {
 
 function extractRawConfig() {
   // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
-   // G   https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
-   // G2  https://docs.google.com/spreadsheets/d/13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc/edit?gid=1521471540#gid=1521471540
+   // G  config   https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
+   // G2 config   https://docs.google.com/spreadsheets/d/13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc/edit?gid=1521471540#gid=1521471540
 
   const spreadsheet = SpreadsheetApp.openById("1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ");
   const sheet = spreadsheet.getSheetByName("Config");
@@ -112,8 +112,8 @@ function constructStructuredConfig(rawConfig) {
 
 
 function saveData(flatResults) {
-  //G const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
-  //G2 const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
+  //G scoresheet const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
+  //G2 scoresheet const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
 
   const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
 
@@ -146,114 +146,10 @@ function saveData(flatResults) {
 
 
 
-/**
-function sendFlatResultsEmail(flatResults) {
-  // G config sheet Id  1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ 
-  // G2 config sheet Id  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
-  const sheetId = '1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ';
-  const subject = `Your ${new Date().toLocaleDateString()} Springfield Seniors Submitted Golf Scores`;
-
-  const header = [
-    "Date", "Tee Time", "Course", "Player Name",
-    "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12", "H13", "H14", "H15", "H16", "H17", "H18",
-    "Target", "Total Score", "Total Points", "Total Net",
-    "Front Score", "Front Points", "Front Net", "Back Score", "Back Points", "Back Net"
-  ];
-
-  // STEP 1: Read pars from external sheet
-  const sheet = SpreadsheetApp.openById(sheetId).getSheets()[0];
-  const parValues = sheet.getRange('C1:T1').getValues()[0];
-
-  // STEP 2: Build second header row (pars)
-  const secondHeader = [
-    "", "", "", "<b>Pars</b>",
-    ...parValues,
-    "", "", "", "", "", "", ""
-  ];
-
-  // STEP 3: Read player names and emails
-  const parsSheet = SpreadsheetApp.openById('1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ').getSheetByName('Sheet1');
-  const playersData = parsSheet.getRange('A2:B' + parsSheet.getLastRow()).getValues();
-
-  const playerEmails = {};
-  playersData.forEach(row => {
-    const playerName = row[0];
-    const email = row[1];
-    if (playerName && email) {
-      playerEmails[playerName] = email;
-    }
-  });
-
-  // Build email recipient list
-  let toList = [];
-  flatResults.forEach(row => {
-    let playerNameRaw = row[3];
-    if (playerNameRaw) {
-      let cleanedName = playerNameRaw.replace(/!/g, "").trim();
-      const email = playerEmails[cleanedName];
-      if (email) {
-        toList.push(email);
-      }
-    }
-  });
-
-  // Format current time as EST
-  const timestampEST = new Date().toLocaleString('en-US', {
-    timeZone: 'America/New_York'
-  });
-
-  // Build HTML email body
-  let htmlBody = `
-  <div style="font-family: Arial, sans-serif; font-size: 14px;">
-    <p>Thank you for playing today in the Springfield Seniors Group! Below is your group's resulting scorecard.</p>
-    <br><br>
-    <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-      <thead>
-        <tr style="background-color: #d9edf7;">
-          ${header.map(col =>
-            `<th style="padding: 8px; border: 1px solid #ccc; text-align: center;">${col}</th>`
-          ).join('')}
-        </tr>
-        <tr style="background-color: #d9edf7;">
-          ${secondHeader.map(par =>
-            `<th style="padding: 6px; border: 1px solid #ccc; text-align: center;">
-              ${par !== "" ? par : ""}
-            </th>`
-          ).join('')}
-        </tr>
-      </thead>
-      <tbody>
-        ${flatResults.map(row =>
-          `<tr>
-            ${row.map((cell, index) => {
-              const align = (index <= 3) ? "left" : "center";
-              return `<td style="padding: 6px; border: 1px solid #ccc; text-align: ${align};">
-                        ${cell !== undefined && cell !== null ? cell : ""}
-                      </td>`;
-            }).join('')}
-          </tr>`
-        ).join('')}
-      </tbody>
-    </table>
-    <br><br>
-    <p>Scores submitted on: ${timestampEST} EST</p>
-    <br><br>
-    <p><b><i>Powered by GoogleGolf Scoring System!</i></b></p>
-  </div>`;
-
-  // Send email
-  MailApp.sendEmail({
-    to: toList.join(','),
-    cc: "welch_misc@yahoo.com",
-    subject: subject,
-    htmlBody: htmlBody
-  });
-
-  Logger.log("Email sent to: " + toList.join(', ') + " CC: welch_misc@yahoo.com");
-}
-*/
 
 function sendFlatResultsEmail(flatResults) {
+  // config sheet G   1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ
+  // config sheet G2  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
   const sheetId = '1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ';
   const subject = `Your ${new Date().toLocaleDateString()} Springfield Seniors Submitted Golf Scores`;
 
@@ -269,8 +165,12 @@ function sendFlatResultsEmail(flatResults) {
   const parValues = sheet.getRange('C1:T1').getValues()[0];
 
   // STEP 2: Read player names and emails
-  const parsSheet = SpreadsheetApp.openById('1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ').getSheetByName('Sheet1');
-  const playersData = parsSheet.getRange('A2:B' + parsSheet.getLastRow()).getValues();
+    // past points sheet G   1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ
+    //                   G2  1wCUrPeEXs4mPeGMByxTEWab91CB0W3Iq9CJcswFfFjI
+  const pastPointsSheet = SpreadsheetApp.openById('1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ').getSheetByName('Sheet1');
+  const playersData = pastPointsSheet.getRange('A3:B' + pastPointsSheet.getLastRow()).getValues();
+
+  console.log("Players Data Retrieved:", playersData); // Log raw player data
 
   const playerEmails = {};
   playersData.forEach(row => {
@@ -280,6 +180,8 @@ function sendFlatResultsEmail(flatResults) {
       playerEmails[playerName] = email;
     }
   });
+
+  console.log("Player Emails Mapping:", playerEmails); // Log email mapping
 
   // Build email recipient list
   let toList = [];
@@ -293,6 +195,8 @@ function sendFlatResultsEmail(flatResults) {
       }
     }
   });
+
+  console.log("Final Recipient List:", toList); // Log built email list
 
   // Format current time as EST
   const timestampEST = new Date().toLocaleString('en-US', {
@@ -346,7 +250,7 @@ function sendFlatResultsEmail(flatResults) {
       </tbody>
     </table>
     <br>
-    <p><i>The last line in the scorecard (with the tee time for the Player Name) is the team's result.</i></p> 
+    <p><i>The last line in the scorecard (with the tee time for the Player Name) is the team's result-- but without any +-2 changes.</i></p> 
     <br><br>
     <p>Scores submitted on: ${timestampEST} EST</p>
     <br><br>
