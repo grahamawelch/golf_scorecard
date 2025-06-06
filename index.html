@@ -71,8 +71,9 @@
       overflow: auto;
     }
 
-      /* Styling for the refresh button */
-    #refresh-btn {
+    /* Styling for the refresh and scoreboard buttons */
+    #refresh-btn,
+    #scoreboard_button {
       margin-top: 20px;
       padding: 10px 20px;
       font-size: 1.5em;
@@ -82,8 +83,9 @@
       cursor: pointer;
     }
 
-    #refresh-btn:hover {
-      background-color: darkgreen;  /* The color for hover state */
+    #refresh-btn:hover,
+    #scoreboard_button:hover {
+      background-color: darkgreen;
     }
 
     .image-container {
@@ -121,7 +123,7 @@
   <div id="title">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V. 5.1<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 6.0</b><br>
   </div>
 
 
@@ -149,29 +151,65 @@
 <br>
 <div id="table"></div>
 <div id="buttons">
-    <table>
-        <tr></tr>
-        <tr></tr>
-        <tr></tr>
-        <tr>
-            <td><button id="submit_button" onclick="submit()" disabled="true" style="color: green; font-size: 30px; padding: 10px 10px">Submit & Email</button></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div id="submit_confirmation"></div></td>
-        </tr>
-        <tr></tr>
-        <tr></tr>
-        <tr></tr>
-        <tr></tr>
-        <tr></tr>
-        <tr></tr>
-        <tr></tr>
-        <tr></tr>
-        <tr></tr>
-        <tr>
-            <td>   <!-- Button to clear alll scores -->  </td> 
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="clear_button" onclick="clearWithConfirmation()" disabled="true" style="color:red; font-size: 30px; padding: 10px 10px">Clear</button></td>
-        </tr>
-    </table>
+<table>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+
+    <!-- Scoreboard Use Only Button (now dark green) -->
+    <tr>
+        <td>
+        <button id="scoreboard_button" onclick="scoreboardOnly()">
+            Scoreboard Use Only
+        </button>
+        </td>
+    </tr>
+
+    <!-- Spacer rows (same vertical space as between Submit & Clear) -->
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+
+    <!-- Submit Button Row (indented about 1/2 inch) -->
+    <tr>
+        <td style="padding-left: 0.5in;">
+            <button id="submit_button" onclick="submit()" disabled="true" style="color: green; font-size: 30px; padding: 10px 10px">
+                Submit & Email
+            </button>
+        </td>
+        <td>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <div id="submit_confirmation"></div>
+        </td>
+    </tr>
+
+    <!-- Spacer rows between Submit & Clear -->
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+
+    <!-- Clear Button Row -->
+    <tr>
+        <td></td>
+        <td></td>
+        <td>
+            <button id="clear_button" onclick="clearWithConfirmation()" disabled="true" style="color:red; font-size: 30px; padding: 10px 10px">
+                Clear
+            </button>
+        </td>
+    </tr>
+</table>
+
+
 </div>
 
 
@@ -268,7 +306,15 @@
     }
   });
 
+/**
+  // show console.logs in code.gs in the browser dev tools via this
+  google.script.run.withSuccessHandler(console.log).debugMessage();
 
+  // show console.logs in code.gs in the browser dev tools via this
+  google.script.run.withSuccessHandler(function(message) {
+    console.log("Debug Message from Apps Script:", message);
+  }).debugMessage();
+*/
 
 // Iframe Code for Scoreboard sheet URLs, placement, sizing, & selection of sheet based on day. 
   
@@ -408,22 +454,75 @@
  // obfuscation start -- if desired
 
 
-
       // global variables to affect the auto saving periods and lock
+    let scoreboardOnlyActive = false;
     let initialDelaySec = 15;
     let saveIntervalSec = 25;
     let saveInterval = null;
     let inputsLocked = false; 
-  
+    let forceLock = false;
+    let showServerLogs = false;  // make true to see some server side msgs from the Submit function
+
    let hasPlayed = false; // Variable to track if the startup sound has already been played
 
 
+  function scoreboardOnly() {
+      scoreboardOnlyActive = true; 
+      forceLock = true;
+      inputsLocked = true;
 
+      // Disable all inputs except refresh
+      const inputs = document.querySelectorAll("input, select, button");
+      inputs.forEach(el => {
+          if (el.id !== "refresh-btn") {
+              el.disabled = true;
+          }
+      });
 
+      // Disable and remove team selection row
+      const teamSelect = document.getElementById("team");
+      if (teamSelect) {
+          teamSelect.onchange = null;
+          teamSelect.disabled = true;
 
+          // Remove the containing div (Tee Time row)
+          const teamContainer = teamSelect.closest("div");
+          if (teamContainer && teamContainer.parentElement) {
+              teamContainer.parentElement.remove();
+          }
+      }
+
+      // Remove team options div if present
+      const teamOptions = document.getElementById("team_options");
+      if (teamOptions) {
+          teamOptions.remove();
+      }
+
+      // Remove team target display
+      const teamTarget = document.getElementById("team_target");
+      if (teamTarget) {
+          const parent = teamTarget.parentElement;
+          if (parent) {
+              parent.remove();
+          }
+      }
+
+      // Clear the dynamic table (checkbox row, buttons, and scorecard)
+      const tableDiv = document.getElementById("table");
+      if (tableDiv) {
+          tableDiv.innerHTML = "";
+      }
+
+      // Remove the Scoreboard Use Only button itself
+      const scoreboardBtn = document.getElementById("scoreboard_button");
+      if (scoreboardBtn) {
+          scoreboardBtn.remove();
+      }
+
+      console.log("Scoreboard Use Only fully activated: UI frozen, elements removed, team selection blocked.");
+  }
 
   
-  console.log("Initialized inputsLocked:", inputsLocked);
 
 
       // Function to refresh the iframe by replacing the src with a unique query parameter
@@ -603,6 +702,89 @@ function createScorecard(RESULTS, spreadsheetConfig) {
 }
 
 
+
+function getScorer(teamConfig) {
+  console.log("getScorer called with teamConfig:", teamConfig);
+
+  if (!teamConfig || !teamConfig.players || teamConfig.players.length === 0) {
+    alert("No players found in this team.");
+    return;
+  }
+
+  const popup = document.createElement('div');
+  popup.style.position = 'fixed';
+  popup.style.top = '50%';
+  popup.style.left = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
+  popup.style.background = 'white';
+  popup.style.border = '2px solid #ccc';
+  popup.style.borderRadius = '10px';
+  popup.style.padding = '20px';
+  popup.style.zIndex = '1000';
+  popup.style.textAlign = 'center';
+  popup.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+
+  popup.innerHTML = `
+    <div style="color: red; font-weight: bold; font-size: 1.2em;">ONLY ONE OF THESE PLAYERS MAY KEEP SCORE FOR THIS TEAM</div>
+    <div style="height: 1em;"></div>
+    <div style="color: blue; font-size: 1.1em; margin-bottom: 10px;">Which is the Scorekeeper?</div>
+  `;
+
+  const playerNames = teamConfig.players.map(p => p.playerName);
+
+  playerNames.forEach(name => {
+    const button = document.createElement('button');
+    button.textContent = name;
+    button.style.display = 'block';
+    button.style.width = '100%';
+    button.style.margin = '20px 0';
+    button.style.padding = '10px';
+    button.style.fontSize = '1em';
+    button.onclick = () => {
+      localStorage.setItem('scorekeeperName', name);
+      localStorage.setItem('teamName', teamConfig.teamName);
+      console.log("Scorekeeper selected:", name);
+      document.body.removeChild(popup);
+      google.script.run.recordScorerActivity({
+        teamName: teamConfig.teamName,
+        playerName: name,
+        activity: "Scorekeeper"
+      });
+    };
+    popup.appendChild(button);
+  });
+
+  // Spacer
+  const spacer = document.createElement('div');
+  spacer.style.height = '20px';
+  popup.appendChild(spacer);
+
+  // Scoreboard Use Only button
+  const scoreboardButton = document.createElement('button');
+  scoreboardButton.textContent = 'Scoreboard Use Only';
+  scoreboardButton.style.display = 'block';
+  scoreboardButton.style.width = '100%';
+  scoreboardButton.style.margin = '10px 0';
+  scoreboardButton.style.padding = '10px';
+  scoreboardButton.style.fontSize = '1em';
+  scoreboardButton.style.backgroundColor = 'green';
+  scoreboardButton.style.color = 'white';
+  scoreboardButton.style.border = 'none';
+  scoreboardButton.style.cursor = 'pointer';
+
+  scoreboardButton.onclick = () => {
+    scoreboardOnly();  // Call your locking function
+    document.body.removeChild(popup);
+  };
+
+  popup.appendChild(scoreboardButton);
+
+  document.body.appendChild(popup);
+}
+
+
+
+
   function createTeamOptions(allTeamConfigs) {
     const teamSelect = document.getElementById("team");  // Assuming 'team' is the id of your <select> element
 
@@ -630,10 +812,22 @@ function createScorecard(RESULTS, spreadsheetConfig) {
 
 
 function teamOnchange(RESULTS, spreadsheetConfig) {
-   
-  // Fully clear all localStorage to prevent any old score data from being loaded
+  // Block everything if Scoreboard Only mode is active
+  if (scoreboardOnlyActive) {
+    console.log("teamOnchange blocked due to Scoreboard Only mode.");
+    return;
+  }
+
+  // Clear localStorage
   localStorage.clear();
   console.log("All localStorage data cleared on team change.");
+
+  // Remove Scoreboard Use Only button
+  const scoreboardBtn = document.getElementById("scoreboard_button");
+  if (scoreboardBtn) {
+    scoreboardBtn.remove();
+    console.log("Scoreboard Use Only button removed.");
+  }
 
   const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
   console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
@@ -650,7 +844,7 @@ function teamOnchange(RESULTS, spreadsheetConfig) {
 
   // Add spacing below the buttons
   const breakDiv = document.createElement("div");
-  breakDiv.style.height = "20px"; // Adjust as needed
+  breakDiv.style.height = "20px";
   tableDiv.appendChild(breakDiv);
 
   // Create scorecard table
@@ -680,6 +874,8 @@ function teamOnchange(RESULTS, spreadsheetConfig) {
     });
     hasPlayed = true;
   }
+
+  getScorer(selectedTeamConfig);
 }
 
 
@@ -1524,164 +1720,165 @@ function generateTargetRow(results, pars, teamConfig) {
 
 
   function submit() {
-  // Clear the auto-save interval when submit is executed
-  clearInterval(saveInterval);
+    // Stop auto‐save interval
+    clearInterval(saveInterval);
 
-  const localSpreadsheetConfig = spreadsheetConfig();
-  const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+    const localSpreadsheetConfig = spreadsheetConfig();
+    const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
+    const courseName = localSpreadsheetConfig.courseConfig.courseName;
+    const pars = localSpreadsheetConfig.courseConfig.pars;
+    const numHoles = pars.length;
+    const teamName = document.getElementById("team").value;
+    const date = document.getElementById("date").textContent;
 
-  let flatResults = [];
+    let flatResults = [];
+    let allScoresEntered = true;
 
-  // Build player results
-  for (let playerIndex = 0; playerIndex < selectedTeamConfig.players.length; playerIndex++) {
-    // Skip players that don't have a name.
-    const rawName = document.getElementById(idPlayerName(playerIndex)).value;
-    if (rawName === "" || rawName === null) {
-      continue;
-    }
+    // --- Build player results ---
+    selectedTeamConfig.players.forEach((_, playerIndex) => {
+      const playerNameEl = document.getElementById(idPlayerName(playerIndex));
+      const playerName = playerNameEl.value;
+      if (!playerName) return; // Skip unnamed players
 
-    let playerStats = [
-      document.getElementById("date").textContent,                // Date
-      document.getElementById("team").value,                      // Team
-      localSpreadsheetConfig.courseConfig.courseName,             // Course Name
-      document.getElementById(idPlayerName(playerIndex)).value    // Player Name
-    ];
-
-    // Get each hole's score
-    for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-      playerStats.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value);
-    }
-
-    // Add target score
-    playerStats.push(document.getElementById(idTarget(playerIndex)).value);
-
-    // Add result details (Score, Points, Net)
-    for (const result of RESULTS) {
-      playerStats.push(document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent);
-      playerStats.push(document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent);
-      playerStats.push(document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent);
-    }
-
-    flatResults.push(playerStats);
-  }
-
-  // Check if all scores are entered
-  let allScoresEntered = true;
-  for (let currentPlayerStats of flatResults) {
-    // Skip the first 4 elements (date, team, courseName, playerName)
-    for (let resultIndex = 0; resultIndex < localSpreadsheetConfig.courseConfig.pars.length; resultIndex++) {
-      if (currentPlayerStats[resultIndex + 4] === "") {
-        allScoresEntered = false;
-        break;
+      const playerStats = [date, teamName, courseName, playerName];
+      for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+        const score = document.getElementById(idHolePlayer(holeIndex, playerIndex)).value;
+        playerStats.push(score);
+        if (score === "") allScoresEntered = false;
       }
+      playerStats.push(document.getElementById(idTarget(playerIndex)).value);
+      for (const result of RESULTS) {
+        playerStats.push(
+          document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent
+        );
+        playerStats.push(
+          document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent
+        );
+        playerStats.push(
+          document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent
+        );
+      }
+      flatResults.push(playerStats);
+    });
+
+    // --- Add team‐level results ---
+    const teamStats = [date, teamName, courseName, teamName];
+    teamStats.push(...Array(numHoles).fill("")); // No individual hole scores
+    teamStats.push(document.getElementById("team_target").textContent);
+    for (const result of RESULTS) {
+      teamStats.push(""); // No team‐level Score
+      teamStats.push(document.getElementById(idResultPointsTeam(result.name)).textContent);
+      teamStats.push(document.getElementById(idResultNetTeam(result.name)).textContent);
     }
-  }
+    flatResults.push(teamStats);
 
-  // Add team-level results
-  let teamStats = [
-    document.getElementById("date").textContent,                // Date
-    document.getElementById("team").value,                      // Team
-    localSpreadsheetConfig.courseConfig.courseName,             // Course Name
-    document.getElementById("team").value                       // "Player Name" (team)
-  ];
-  for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-    teamStats.push("");   // No hole scores at the team level.
-  }
-  teamStats.push(document.getElementById("team_target").textContent); // Target
-
-  for (const result of RESULTS) {
-    teamStats.push("");   // Score (empty)
-    teamStats.push(document.getElementById(idResultPointsTeam(result.name)).textContent);  // Points
-    teamStats.push(document.getElementById(idResultNetTeam(result.name)).textContent);     // Net
-  }
-  flatResults.push(teamStats);
-
- // Confirmation dialog
-let confirmationMessage =
-  "Be sure all scores are correct! When so, click 'OK' to SUBMIT these scores. Thanks!\n\n" +
-  "A green pop-up 'Submit & Email Success' message indicates a successful submission.\n\n";
-
-if (!allScoresEntered) {
-  confirmationMessage +=
-    "Wait-- I see some holes without scores-- please 'Cancel' and fully fill in scores!\n\n";
-}
-
-confirmationMessage +=
-  "Since V. 5.0, now each player will get an email of the submitted scorecard immediately upon a successful submission!";
-
-if (!confirm(confirmationMessage)) {
-  return;
-}
-
-  // --- Save Scores Before Submitting ---
-  // Build an array of raw scores (this is similar to what your save button used to do)
-  let out = [];
-  for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
-    let currPlayerScores = [];
-    currPlayerScores.push(document.getElementById(idPlayerName(currPlayerIndex)).value);
-    currPlayerScores.push(document.getElementById(idTarget(currPlayerIndex)).value);
-
-    for (let holeIndex = 0; holeIndex < localSpreadsheetConfig.courseConfig.pars.length; holeIndex++) {
-      currPlayerScores.push(document.getElementById(idHolePlayer(holeIndex, currPlayerIndex)).value);
+    // --- Confirmation Dialog ---
+    let message =
+      "Be sure all scores are correct! When so, click 'OK' to SUBMIT these scores.\n\n" +
+      "Thanks!\n\n" +
+      "A Green pop‐up Submit & Email Success message indicates a successful submission.\n\n";
+    if (!allScoresEntered) {
+      message +=
+        "Wait -- I see some holes without scores -- please 'Cancel' and fully fill in scores!\n\n";
     }
+    message +=
+      "With V. 5.0 and beyond, now each player will get an email of the submitted scorecard immediately upon a successful submission!";
+    if (!confirm(message)) return;
 
-    out.push(currPlayerScores);
+    // --- Record Submitter Activity ---
+    google.script.run.recordScorerActivity({
+      teamName: localStorage.getItem("teamName") || "Unknown",
+      playerName: localStorage.getItem("scorekeeperName") || "Unknown",
+      activity: "Submitter"
+    });
+
+    // --- Save scores locally before submitting ---
+    const saveArray = selectedTeamConfig.players.map((_, playerIndex) => {
+      const name = document.getElementById(idPlayerName(playerIndex)).value;
+      const target = document.getElementById(idTarget(playerIndex)).value;
+      const holeScores = [];
+      for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
+        holeScores.push(
+          document.getElementById(idHolePlayer(holeIndex, playerIndex)).value
+        );
+      }
+      return [name, target, ...holeScores];
+    });
+    console.log("Saving before submitting:", JSON.stringify(saveArray));
+
+    google.script.run
+      .withSuccessHandler(() => {
+        localStorage.setItem("savedScores", JSON.stringify(saveArray));
+        const now = new Date();
+        const time =
+          now.getHours().toString() + ":" + now.getMinutes().toString().padStart(2, "0");
+        document.getElementById("save_status").innerHTML = "<b><i>Saved at</i></b> " + time;
+      })
+      .withFailureHandler((error) => {
+        const statusElem = document.getElementById("save_status");
+        statusElem.textContent = "Failed to Save";
+        statusElem.style.cssText = "font-size: 40px; font-weight: bold; color: red;";
+        console.error("Error saving scores:", error);
+      })
+      .saveScoresForTeam(teamName, saveArray);
+
+    // --- Lock inputs to prevent changes ---
+    lockInputs();
+
+    // --- Submit to server and collect server‐side debug logs ---
+    const scorekeeperName = localStorage.getItem("scorekeeperName") || "Unknown";
+    console.log("scoreKeeperName being passed to server:", scorekeeperName);
+
+    google.script.run
+      .withSuccessHandler(function (serverLogs) {
+        if (showServerLogs) {
+          serverLogs.forEach(function (line) {
+            console.log("Server:", line);
+          });
+        }
+
+        // After logging (or skipping) server messages, show “Submit Success” UI:
+        const confirmEl = document.getElementById("submit_confirmation");
+        confirmEl.textContent = "Submit & Email Success - Thanks!";
+        confirmEl.style.cssText = "font-size: 40px; font-weight: bold; color: green;";
+
+        const utterance = new SpeechSynthesisUtterance("Submit & Email Success - Thanks!");
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+
+        forceLock = true;
+        inputsLocked = true;
+
+        document.querySelectorAll("input, select, button").forEach((el) => {
+          if (el.id !== "refresh-btn") el.disabled = true;
+        });
+
+        const disableAndDim = (id) => {
+          const btn = document.getElementById(id);
+          if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+          }
+        };
+        disableAndDim("submit_button");
+        disableAndDim("clear_button");
+      })
+      .withFailureHandler((error) => {
+        const confirmEl = document.getElementById("submit_confirmation");
+        confirmEl.textContent =
+          "Failed, re-start App, pull up your tee time, and re-submit.";
+        confirmEl.style.cssText = "font-size: 40px; font-weight: bold; color: red;";
+
+        const utterance = new SpeechSynthesisUtterance(confirmEl.textContent);
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+
+        console.error("Submission failed:", error);
+      })
+      .saveData(flatResults, scorekeeperName);
   }
 
-  console.log("Saving before submitting: " + JSON.stringify(out));
 
-  google.script.run
-    .withSuccessHandler(function () {
-      // Save to localStorage
-      localStorage.setItem("savedScores", JSON.stringify(out));
-
-      const now = new Date();
-      const hours = now.getHours().toString();
-      const minutes = now.getMinutes().toString().padStart(2, "0");
-      const time = `${hours}:${minutes}`;
-      document.getElementById("save_status").innerHTML =
-        "<b><i>Saved at</i></b> " + time;
-    })
-    .withFailureHandler(function (error) {
-      const statusElem = document.getElementById("save_status");
-      statusElem.textContent = "Failed to Save";
-      statusElem.style.cssText =
-        "font-size: 40px; font-weight: bold; color: red;";
-      console.error("Error saving scores:", error);
-    })
-    .saveScoresForTeam(document.getElementById("team").value, out);
-
-  // Lock inputs (prevent further changes)
-  lockInputs();
-
-
-// --- Submit the flat results ---
-google.script.run
-  .withSuccessHandler(function (result) {
-    const submitConfirmation = document.getElementById("submit_confirmation");
-    submitConfirmation.textContent = "Submit & Email Success - Thanks!";
-    submitConfirmation.style.cssText =
-      "font-size: 40px; font-weight: bold; color: green;";
-
-    // Voice confirmation for success
-    const successUtterance = new SpeechSynthesisUtterance("Submit & Email Success - Thanks!");
-    successUtterance.rate = 1.0; 
-    window.speechSynthesis.speak(successUtterance);
-  })
-  .withFailureHandler(function (error) {
-    const submitConfirmation = document.getElementById("submit_confirmation");
-    submitConfirmation.textContent =
-      "Failed, re-start App, pull up your tee time, and re-submit.";
-    submitConfirmation.style.cssText =
-      "font-size: 40px; font-weight: bold; color: red;";
-
-    // Voice notification for failure
-    const failureUtterance = new SpeechSynthesisUtterance("Failed, re-start App, pull up your tee time, and re-submit.");
-    failureUtterance.rate = 1.0;
-    window.speechSynthesis.speak(failureUtterance);
-  })
-  .saveData(flatResults);
-}
 
 
   function clearWithConfirmation() {
