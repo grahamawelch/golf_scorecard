@@ -32,6 +32,8 @@ function doGet() {
   return rootPage;
 }
 
+
+
 function getConfigAsString() {
   const rawConfig = extractRawConfig();
   const structuredConfig = constructStructuredConfig(rawConfig);
@@ -40,16 +42,28 @@ function getConfigAsString() {
   return out;
 }
 
-/**
- * Returns an array of two elements
- * - [Date, CourseName, par1, par2, ... par18]
- * - [[TeamName, Player1, Target1, ...] ...]
- */
+
+var debugBuffer = [];
+
+function pushDebug(msg) {
+  debugBuffer.push(msg);
+}
+
+function clearDebugBuffer() {
+  debugBuffer = [];
+}
+
+function fetchDebugBuffer() {
+  var copy = debugBuffer.slice();
+  clearDebugBuffer();
+  return copy;
+}
+
 
 function extractRawConfig() {
   // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
-   // G  config   https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
-   // G2 config   https://docs.google.com/spreadsheets/d/13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc/edit?gid=1521471540#gid=1521471540
+  // G   https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
+  // G2  https://docs.google.com/spreadsheets/d/13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc/edit?gid=1521471540#gid=1521471540
 
   const spreadsheet = SpreadsheetApp.openById("1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ");
   const sheet = spreadsheet.getSheetByName("Config");
@@ -111,49 +125,65 @@ function constructStructuredConfig(rawConfig) {
 
 
 
-function saveData(flatResults) {
-  //G scoresheet const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
-  //G2 scoresheet const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
 
-  const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
 
-  Logger.log("Saving data: " + JSON.stringify(flatResults));
+function saveData(flatResults, scorekeeperName) {
+  // 1) Clear any old messages:
+  clearDebugBuffer();
+
+  // 2) Start collecting debug lines:
+  pushDebug("Saving data: " + JSON.stringify(flatResults));
+
+  // 3) Open the Scorecard sheet
+  const sheet = SpreadsheetApp
+
+      //G  Scorecard Sheet const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
+      //G2 Scorecard Sheet const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
+
+    .openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM")
+    .getSheetByName("Scores");
 
   const lock = LockService.getScriptLock();
-
   try {
     lock.waitLock(3000);
 
+    // 4) Append each row from flatResults
     flatResults.forEach(result => {
-      Logger.log("Appending row: " + result); // Log each row being appended
+      pushDebug("Appending row: " + JSON.stringify(result));
       sheet.appendRow(result);
     });
     sheet.appendRow(["***"]);
 
-    Logger.log("Data saved successfully.");
+    pushDebug("Data saved successfully for " + scorekeeperName);
 
-    sendFlatResultsEmail(flatResults);
-
-    Logger.log("Emails sent successfully.");
+    // 5) Send the emails
+    sendFlatResultsEmail(flatResults, scorekeeperName);
+    pushDebug("Email sent to players.");
 
   } catch (e) {
-    Logger.log("Error during saveData: " + e.message);
+    pushDebug("Error during saveData: " + e.message);
   } finally {
     lock.releaseLock();
   }
+
+  // 6) Return all the accumulated debug messages to the client
+  return fetchDebugBuffer();
 }
 
 
 
 
 
-function sendFlatResultsEmail(flatResults) {
-  // config sheet G   1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ
-  // config sheet G2  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
+
+function sendFlatResultsEmail(flatResults, scorekeeperName){
+  // G config sheet Id  1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ 
+  // G2 config sheet Id  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
+
+
   const sheetId = '1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ';
   const subject = `Your ${new Date().toLocaleDateString()} Springfield Seniors Submitted Golf Scores`;
 
-  const parHeader = [
+  const header = [
     "Date", "Tee Time", "Course", "Player Name",
     "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12", "H13", "H14", "H15", "H16", "H17", "H18",
     "Target", "Total Score", "Total Points", "Total Net",
@@ -164,49 +194,75 @@ function sendFlatResultsEmail(flatResults) {
   const sheet = SpreadsheetApp.openById(sheetId).getSheets()[0];
   const parValues = sheet.getRange('C1:T1').getValues()[0];
 
-  // STEP 2: Read player names and emails
-    // past points sheet G   1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ
-    //                   G2  1wCUrPeEXs4mPeGMByxTEWab91CB0W3Iq9CJcswFfFjI
-  const pastPointsSheet = SpreadsheetApp.openById('1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ').getSheetByName('Sheet1');
-  const playersData = pastPointsSheet.getRange('A3:B' + pastPointsSheet.getLastRow()).getValues();
+  // STEP 2: Build second header row (pars)
+  const secondHeader = [
+    "", "", "", "<b>Pars</b>",
+    ...parValues,
+    "", "", "", "", "", "", ""
+  ];
 
-  console.log("Players Data Retrieved:", playersData); // Log raw player data
+  // STEP 3: Read player names and emails with fuzzy matching
+  // G pastPointSheet Id  1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ 
+  // G2 pastPointSheet Id 1wCUrPeEXs4mPeGMByxTEWab91CB0W3Iq9CJcswFfFjI
 
-  const playerEmails = {};
-  playersData.forEach(row => {
-    const playerName = row[0];
-    const email = row[1];
-    if (playerName && email) {
-      playerEmails[playerName] = email;
-    }
-  });
+const pastPointSheet = SpreadsheetApp.openById('1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ').getSheetByName('Sheet1');
+const playersData = pastPointSheet.getRange('A2:B' + pastPointSheet.getLastRow()).getValues();
+Logger.log("Loaded playersData: " + playersData.length + " entries");
 
-  console.log("Player Emails Mapping:", playerEmails); // Log email mapping
+const playerEmails = {};
+playersData.forEach(row => {
+  const playerName = row[0];
+  const email = row[1];
+  if (playerName && email) {
+    playerEmails[playerName] = email;
+  }
+});
 
-  // Build email recipient list
-  let toList = [];
-  flatResults.forEach(row => {
-    let playerNameRaw = row[3];
-    if (playerNameRaw) {
-      let cleanedName = playerNameRaw.replace(/!/g, "").trim();
-      const email = playerEmails[cleanedName];
-      if (email) {
-        toList.push(email);
+let toList = [];
+flatResults.forEach(row => {
+  let playerNameRaw = row[3];
+  if (playerNameRaw) {
+    let cleanedName = playerNameRaw.replace(/!/g, "").trim();
+    let bestMatch = null;
+    let highestScore = 0;
+
+    Object.keys(playerEmails).forEach(storedName => {
+      const score = getSimilarityScore(cleanedName, storedName);
+      if (score > highestScore) {
+        highestScore = score;
+        bestMatch = storedName;
       }
-    }
-  });
+    });
 
-  console.log("Final Recipient List:", toList); // Log built email list
+    if (highestScore >= 0.7 && bestMatch) {
+      const email = playerEmails[bestMatch];
+      toList.push(email);
+      Logger.log(`Matched "${cleanedName}" to "${bestMatch}" with score ${highestScore.toFixed(2)} → Email: ${email}`);
+    } else {
+      Logger.log(`No match found for "${cleanedName}". Best score: ${highestScore.toFixed(2)}`);
+    }
+  }
+});
+
 
   // Format current time as EST
   const timestampEST = new Date().toLocaleString('en-US', {
     timeZone: 'America/New_York'
   });
 
-  // Build HTML email body
-  let htmlBody = `
+
+//const scorekeeperName = localStorage.getItem('scorekeeperName') || 'Unknown';
+
+// Build HTML email body with name embedded
+let htmlBody = `
   <div style="font-family: Arial, sans-serif; font-size: 14px;">
     <p>Thank you for playing today in the Springfield Seniors Group! Below is your group's resulting scorecard.</p>
+    <br>
+    <p><b>Submitted by: ${scorekeeperName}</b><i> - Who should monitor their email for the next ~2 hours in case any questions arise.</i></p>
+    <br>
+    <p><b>If this scorecard is correct, no need to text/email a picture of your scorecard.</b></p>
+    <p>   -  If you mis-scored some holes, please bring the App back up, correct, Submit again, and then email Alan with an explanation.<p>
+    <p>   -  Only if you have further problems, then email a picture of socecard to Ken and Alan with an explanation-- so they can figure out what to do,
     <br><br>
     <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
       <thead>
@@ -250,12 +306,14 @@ function sendFlatResultsEmail(flatResults) {
       </tbody>
     </table>
     <br>
-    <p><i>The last line in the scorecard (with the tee time for the Player Name) is the team's result-- but without any +-2 changes.</i></p> 
+    <p><i>The last line in the scorecard (with the tee time for the Player Name) is the team's result-- but without any +-2 changes that the system makes later.  <br><br>
+    You can do it manually-- e,g., Tim is a +-2 player and he socres a +3 on the Front Net and -4 on the Back Net, so the correction would be reduce 1 on the Front (to +2), add 2 (to -2) on the back, and  add 1 to the Total Net = +1.  And, so those adjustements would be made to the the team scores respectively for the Front Net, Back Net, and Total Net.</i></p> 
     <br><br>
     <p>Scores submitted on: ${timestampEST} EST</p>
     <br><br>
     <p><b><i>Powered by GoogleGolf Scoring System!</i></b></p>
   </div>`;
+
 
   // Send email
   MailApp.sendEmail({
@@ -268,8 +326,9 @@ function sendFlatResultsEmail(flatResults) {
   Logger.log("Email sent to: " + toList.join(', ') + " CC: welch_misc@yahoo.com");
 }
 
-
 // kendunnett@comporium.net
+
+
 
 
 
@@ -316,7 +375,7 @@ function testSaveScoresForTeam() {
 function loadScoresForTeam(teamName) {
   
   // G  Storage Sheet https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
-  // G2  Starage      https://docs.google.com/spreadsheets/d/1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM/edit?gid=1733728784#gid=1733728784
+  // G2  Storage      https://docs.google.com/spreadsheets/d/1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM/edit?gid=1733728784#gid=1733728784
 
   const spreadsheet = SpreadsheetApp.openById("1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ");
   const teamSheet = spreadsheet.getSheetByName(teamName);
@@ -331,3 +390,80 @@ function loadScoresForTeam(teamName) {
 function testLoadScoresForTeam() {
   console.log(loadScoresForTeam("9:30"));
 }
+
+
+function recordScorer({ teamName, playerName, activity, timestamp }) {
+  // scorer sheet G   ID 1aON1dd6cw-9AhIUjNXf5rDVYfA2imhTYofY9dX26K_w
+  // scorer sheet G2  ID  1jJKgV-TVlzjQBEKztHRmnZVEnCHSf_Z1e47EClaUxDc
+  
+  const sheetId = "1aON1dd6cw-9AhIUjNXf5rDVYfA2imhTYofY9dX26K_w"; 
+  const ss = SpreadsheetApp.openById(sheetId);
+  const sheet = ss.getSheetByName("Scorer");
+  const email = Session.getActiveUser().getEmail();
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+
+  try {
+    sheet.appendRow([teamName, timestamp, playerName, activity, email]);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+
+function recordScorerActivity(data) {
+  // Same spreadsheet ID you are already using
+  // scorer sheet G   ID 1aON1dd6cw-9AhIUjNXf5rDVYfA2imhTYofY9dX26K_w
+  // scorer sheet G2  ID  1jJKgV-TVlzjQBEKztHRmnZVEnCHSf_Z1e47EClaUxDc
+
+  const sheet = SpreadsheetApp.openById("1aON1dd6cw-9AhIUjNXf5rDVYfA2imhTYofY9dX26K_w") 
+                .getSheetByName("Sheet1"); // This is the actual sheet/tab name
+
+  if (!sheet) {
+    Logger.log("Sheet named 'Scorers' not found.");
+    return;
+  }
+
+  Logger.log("Recording scorer activity: " + JSON.stringify(data));
+
+  const row = [
+    new Date(),
+    data.teamName || '',
+    data.playerName || '',
+    data.activity || 'Scorekeeper'
+  ];
+
+  sheet.appendRow(row);
+}
+
+
+function getSimilarityScore(a, b) {
+  a = a.toLowerCase();
+  b = b.toLowerCase();
+  const distance = levenshteinDistance(a, b);
+  const maxLength = Math.max(a.length, b.length);
+  return maxLength === 0 ? 1.0 : (1 - distance / maxLength);
+}
+
+function levenshteinDistance(a, b) {
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
