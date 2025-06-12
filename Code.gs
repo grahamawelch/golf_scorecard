@@ -33,6 +33,31 @@ function doGet() {
 }
 
 
+/**
+ * Global configuration for sheet IDs between G and G2 via one flag
+ */
+
+const USE_PRODUCTION = true;  // Set to false for test setup (G2) and true for G
+
+const SHEET_IDS = {
+  config: USE_PRODUCTION
+    ? "1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ"
+    : "13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc",
+
+  scorecard: USE_PRODUCTION
+    ? "1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM"
+    : "1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4",
+
+  storage: USE_PRODUCTION
+    ? "1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ"
+    : "1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM",
+
+  scorer: USE_PRODUCTION
+    ? "1aON1dd6cw-9AhIUjNXf5rDVYfA2imhTYofY9dX26K_w"
+    : "1jJKgV-TVlzjQBEKztHRmnZVEnCHSf_Z1e47EClaUxDc"
+};
+
+
 
 function getConfigAsString() {
   const rawConfig = extractRawConfig();
@@ -62,10 +87,11 @@ function fetchDebugBuffer() {
 
 function extractRawConfig() {
   // Documentation: https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
-  // G   https://docs.google.com/spreadsheets/d/1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ/edit#gid=0
-  // G2  https://docs.google.com/spreadsheets/d/13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc/edit?gid=1521471540#gid=1521471540
 
-  const spreadsheet = SpreadsheetApp.openById("1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ");
+  // G   1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ
+  // G2  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
+
+  const spreadsheet = SpreadsheetApp.openById(SHEET_IDS.config);
   const sheet = spreadsheet.getSheetByName("Config");
 
   const courseValues = sheet.getRange(1, 1, 1, 20).getValues()[0];
@@ -125,48 +151,56 @@ function constructStructuredConfig(rawConfig) {
 
 
 
-
-
 function saveData(flatResults, scorekeeperName) {
-  // 1) Clear any old messages:
-  clearDebugBuffer();
+  clearDebugBuffer(); // Step 1: Clear previous logs
 
-  // 2) Start collecting debug lines:
-  pushDebug("Saving data: " + JSON.stringify(flatResults));
+  pushDebug("=== saveData started ===");
+  pushDebug("Received scorekeeperName: " + scorekeeperName);
+  pushDebug("Flat results received: " + JSON.stringify(flatResults));
 
-  // 3) Open the Scorecard sheet
-  const sheet = SpreadsheetApp
+  let sheet;
+  try {
+    sheet = SpreadsheetApp
+        // G   1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM
+        // G2  1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4
 
-      //G  Scorecard Sheet const sheet = SpreadsheetApp.openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM");
-      //G2 Scorecard Sheet const sheet = SpreadsheetApp.openById("1H4T27la0hX6kdI4zOaygNw_8AtV1zlw-xsb1hjSGbE4");
+    sheet = SpreadsheetApp.openById(SHEET_IDS.scorecard)
+                          .getSheetByName("Scores");
 
-    .openById("1UgEI8G1EpqkA786dLZlZoGeeYJXboFYkWD6KGm3tokM")
-    .getSheetByName("Scores");
+    pushDebug("Sheet opened successfully");
+  } catch (e) {
+    pushDebug("ERROR opening sheet: " + e.message);
+    return fetchDebugBuffer();
+  }
 
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(3000);
+    pushDebug("Lock acquired");
 
-    // 4) Append each row from flatResults
-    flatResults.forEach(result => {
-      pushDebug("Appending row: " + JSON.stringify(result));
+    flatResults.forEach((result, i) => {
+      pushDebug(`Appending row ${i + 1}: ` + JSON.stringify(result));
       sheet.appendRow(result);
     });
+
     sheet.appendRow(["***"]);
+    pushDebug("All rows appended including separator");
 
-    pushDebug("Data saved successfully for " + scorekeeperName);
-
-    // 5) Send the emails
     sendFlatResultsEmail(flatResults, scorekeeperName);
-    pushDebug("Email sent to players.");
+    pushDebug("Email sent successfully");
 
   } catch (e) {
-    pushDebug("Error during saveData: " + e.message);
+    pushDebug("ERROR during saveData: " + e.message);
   } finally {
-    lock.releaseLock();
+    try {
+      lock.releaseLock();
+      pushDebug("Lock released");
+    } catch (releaseError) {
+      pushDebug("ERROR releasing lock: " + releaseError.message);
+    }
   }
 
-  // 6) Return all the accumulated debug messages to the client
+  pushDebug("=== saveData finished ===");
   return fetchDebugBuffer();
 }
 
@@ -174,13 +208,12 @@ function saveData(flatResults, scorekeeperName) {
 
 
 
-
 function sendFlatResultsEmail(flatResults, scorekeeperName){
   // G config sheet Id  1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ 
-  // G2 config sheet Id  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
+  //G2 config sheet Id  13b1OqtZhmDwV2_1P5mwHJ3KDUS47AuQhir6BKm0szkc
 
 
-  const sheetId = '1gWOkslCDj9X2lQUvjN7Qo_tTdoVuYMeHhJpsDLFTgVQ';
+  const sheetId = SHEET_IDS.config;
   const subject = `Your ${new Date().toLocaleDateString()} Springfield Seniors Submitted Golf Scores`;
 
   const header = [
@@ -201,13 +234,14 @@ function sendFlatResultsEmail(flatResults, scorekeeperName){
     "", "", "", "", "", "", ""
   ];
 
-  // STEP 3: Read player names and emails with fuzzy matching
-  // G pastPointSheet Id  1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ 
-  // G2 pastPointSheet Id 1wCUrPeEXs4mPeGMByxTEWab91CB0W3Iq9CJcswFfFjI
+  // STEP 3: Read player names and emails (dynamic based on USE_PRODUCTION)
+  const pastPointsSheetId = USE_PRODUCTION
+    ? "1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ"
+    : "1wCUrPeEXs4mPeGMByxTEWab91CB0W3Iq9CJcswFfFjI";
 
-const pastPointSheet = SpreadsheetApp.openById('1UAxip680bg0TiE72jKas_qExCYn7fLEg8nrmH7SnytQ').getSheetByName('Sheet1');
-const playersData = pastPointSheet.getRange('A2:B' + pastPointSheet.getLastRow()).getValues();
-Logger.log("Loaded playersData: " + playersData.length + " entries");
+  const pastPointSheet = SpreadsheetApp.openById(pastPointsSheetId).getSheetByName('Sheet1');
+  const playersData = pastPointSheet.getRange('A2:B' + pastPointSheet.getLastRow()).getValues();
+  Logger.log("Loaded playersData: " + playersData.length + " entries");
 
 const playerEmails = {};
 playersData.forEach(row => {
@@ -347,10 +381,10 @@ function saveScoresForTeam(teamName, allPlayerScores) {
   // teamName: String
   // allPlayerScores: [["name", "target", "hole0", "hole1", ...], ...]
 
-   // G  Storage Sheet https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
-  // G2  Starage  https://docs.google.com/spreadsheets/d/1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM/edit?gid=1733728784#gid=1733728784
+   // G  Storage Sheet 1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ
+  // G2  Storage       1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM
 
-  const spreadsheet = SpreadsheetApp.openById("1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ");
+  const spreadsheet = SpreadsheetApp.openById(SHEET_IDS.storage);
   let teamSheet = spreadsheet.getSheetByName(teamName);
 
   if (teamSheet == null) {
@@ -374,10 +408,10 @@ function testSaveScoresForTeam() {
 
 function loadScoresForTeam(teamName) {
   
-  // G  Storage Sheet https://docs.google.com/spreadsheets/d/1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ/edit#gid=0
-  // G2  Storage      https://docs.google.com/spreadsheets/d/1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM/edit?gid=1733728784#gid=1733728784
+  // G  Storage Sheet 1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ
+  // G2 Storage Sheet 1ItHKfahZZWcpTnFmgHj5roMTOAeR5WVx7vf9efnwpLM
 
-  const spreadsheet = SpreadsheetApp.openById("1vA0ZUSpbOKJQcd2S4hReRUXf0XmnGQ2gM_xi4oeaUTQ");
+  const spreadsheet = SpreadsheetApp.openById(SHEET_IDS.storage);
   const teamSheet = spreadsheet.getSheetByName(teamName);
 
   if (teamSheet == null) {
@@ -396,8 +430,7 @@ function recordScorer({ teamName, playerName, activity, timestamp }) {
   // scorer sheet G   ID 1aON1dd6cw-9AhIUjNXf5rDVYfA2imhTYofY9dX26K_w
   // scorer sheet G2  ID  1jJKgV-TVlzjQBEKztHRmnZVEnCHSf_Z1e47EClaUxDc
   
-  const sheetId = "1aON1dd6cw-9AhIUjNXf5rDVYfA2imhTYofY9dX26K_w"; 
-  const ss = SpreadsheetApp.openById(sheetId);
+  const ss = SpreadsheetApp.openById(SHEET_IDS.scorer);
   const sheet = ss.getSheetByName("Scorer");
   const email = Session.getActiveUser().getEmail();
 
@@ -413,12 +446,10 @@ function recordScorer({ teamName, playerName, activity, timestamp }) {
 
 
 function recordScorerActivity(data) {
-  // Same spreadsheet ID you are already using
   // scorer sheet G   ID 1aON1dd6cw-9AhIUjNXf5rDVYfA2imhTYofY9dX26K_w
   // scorer sheet G2  ID  1jJKgV-TVlzjQBEKztHRmnZVEnCHSf_Z1e47EClaUxDc
 
-  const sheet = SpreadsheetApp.openById("1aON1dd6cw-9AhIUjNXf5rDVYfA2imhTYofY9dX26K_w") 
-                .getSheetByName("Sheet1"); // This is the actual sheet/tab name
+   const sheet = SpreadsheetApp.openById(SHEET_IDS.scorer).getSheetByName("Sheet1");
 
   if (!sheet) {
     Logger.log("Sheet named 'Scorers' not found.");
@@ -466,4 +497,6 @@ function levenshteinDistance(a, b) {
   }
   return matrix[b.length][a.length];
 }
+
+
 
