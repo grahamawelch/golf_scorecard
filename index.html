@@ -88,6 +88,34 @@
       background-color: darkgreen;
     }
 
+
+    button.loading {
+      position: relative;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    button.loading::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      margin-top: -9px;
+      border: 3px solid #fff;
+      border-top: 3px solid #333;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+
     .image-container {
         display: flex;
         justify-content: flex-start;
@@ -123,7 +151,7 @@
   <div id="title">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 6.2</b><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 6.3</b><br>
   </div>
 
 
@@ -182,8 +210,9 @@
     <!-- Submit Button Row (indented about 1/2 inch) -->
     <tr>
         <td style="padding-left: 0.5in;">
-            <button id="submit_button" onclick="submit()" disabled="true" style="color: green; font-size: 30px; padding: 10px 10px">
-                Submit & Email
+            <button id="submit_button" onclick="submit()" disabled="true"
+                        style="color: green; font-size: 30px; padding: 10px 10px">
+                        Submit & Email
             </button>
         </td>
         <td>
@@ -306,37 +335,64 @@
     }
   });
 
+    window.onload = () => {
+      initializeAutoSaveFlag();
+      // Other init code like createSaveLoadButtons(), etc.
+    };
+
+
+    // Initialize the flag from localStorage-- to use later for diabling auto save after a submission for the day
+  function initializeAutoSaveFlag() {
+    const today = new Date().toISOString().slice(0, 10);
+    const disabledDate = localStorage.getItem("autosaveDisabledDate");
+
+    if (disabledDate === today) {
+      window.isSavingDisabled = true;
+      autoSaveSkipNotified = true;
+      const autoSaveStatus = document.getElementById("autosave_status");
+      if (autoSaveStatus) {
+        autoSaveStatus.innerHTML = "<b><i>Auto-save disabled for today (scores already submitted)</i></b>";
+        autoSaveStatus.style.color = "red";
+      }
+    } else {
+      window.isSavingDisabled = false;
+      autoSaveSkipNotified = false;
+    }
+  }
+
 
 
 
 // Iframe Code for Scoreboard sheet URLs, placement, sizing, & selection of sheet based on day. 
+  
   
     // Define the URLs for asheet (Scoreboard2) and bsheet (Scoreboard)
     const aSheetURL = "https://docs.google.com/spreadsheets/d/1v5wiCZfD5cJbJdOG1n37VymvA5sTI_IcVHjIJEAGp4k/edit?gid=0#gid=0"; 
     // A sheet is Scoreboard2 URL
     const bSheetURL = "https://docs.google.com/spreadsheets/d/1m3bLGCeeF4B-QUDUX_ZLplE_ASC3XU1SR6i3TtzTT5k/edit?gid=0#gid=0";
     // B sheet is Scoreboard URL
+  
 
-     /*
-      for G2 test Area
+  /**
+     // for G2 test Area
     // Define the URLs for asheet (Scoreboard2) and bsheet (Scoreboard)
-    const aSheetURL = "https://docs.google.com/spreadsheets/d/1xp1WaBTCvKjIma7TRK_Iu_CVAI9CXSLEgp-UwF1WKlI/edit?gid=0#gid=0"; 
+     const  aSheetURL = "https://docs.google.com/spreadsheets/d/1xp1WaBTCvKjIma7TRK_Iu_CVAI9CXSLEgp-UwF1WKlI/edit?gid=0#gid=0"; 
     // A sheet is Scoreboard2 URL
-    const bSheetURL = "https://docs.google.com/spreadsheets/d/1WGfjUmueuTakLZlrx4K_R0pWMrRzceMr59hfgczQAJQ/edit?gid=0#gid=0";
+    const bSheetURL = "https://docs.google.com/spreadsheets/d/1S9TFC3iTY2KvLcMt6XTlM334ZEbD4EevnFFFIeQGDu0/edit?gid=0#gid=0";
     // B sheet is Scoreboard URL
     
     //  for G-- test area-- to easily copy/edit into a test area
 
       // Define the URLs for asheet (Scbrd2-Stroke Play/singles) and bsheet (Scoreboard-Stableford/team)
-    const aSheetURL = "...put your test area Scoreboard2 URL here within the quotes ...";
+    //const aSheetURL = "...put your test area Scoreboard2 URL here within the quotes ...";
+    //const bSheetURL = "...put your test area Scoreboard URL here within the quotes ...";
+  
 
-    const bSheetURL = "...put your test area Scoreboard URL here within the quotes ...";
+      // Function to set the iframe src based on the day of the week
+     //defaulting all days to Singles Stroke play via Scoreboard2 aka aSheet
     */
 
 
-  // Function to set the iframe src based on the day of the week
-  //defaulting all days to Singles Stroke play via Scoreboard2 aka aSheet
-    
     function setIframeSrc() {
       const today = new Date().getDay();
       const iframe = document.getElementById('google-sheet');
@@ -344,8 +400,6 @@
       // Log the current day of the week to the console
       console.log("Today's day of the week:", today);
 
-
-      // by defalt, every day uses the asheet-- Strokeplay -- singles
 
       if (today === 0) { // Sunday
           console.log("Loading Sheet Scoreboard");
@@ -447,16 +501,37 @@
  // obfuscation start -- if desired
 
 
-      // global variables to affect the auto saving periods and lock
+      // global variables to affect the auto saving periods, locks, notifications
     let scoreboardOnlyActive = false;
     let initialDelaySec = 15;
     let saveIntervalSec = 25;
     let saveInterval = null;
     let inputsLocked = false; 
     let forceLock = false;
-    let showServerLogs = false;  // make true to see some server side msgs from the Submit function
+    let autoSaveSkipNotified = false;  // Global flag to track disabling of auto save notification shown once
+    let showServerLogs = true;  // make true to see some server side msgs from the Submit function
 
    let hasPlayed = false; // Variable to track if the startup sound has already been played
+
+
+       // only for testing
+    function resetAllAutoSaveFlags() {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("autosaveDisabledDate_")) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      console.log(`🚩 Reset auto-save flags for teams: ${keysToRemove.join(", ")}`);
+    }
+
+
+    //resetAllAutoSaveFlags();    // only for testing
+
+
+
 
 
   function scoreboardOnly() {
@@ -517,15 +592,46 @@
 
   
 
+function refreshIframe() {
+  const button = document.getElementById("refresh-btn");
+  const iframe = document.getElementById("google-sheet");
 
-      // Function to refresh the iframe by replacing the src with a unique query parameter
-  function refreshIframe() {
-    const iframe = document.getElementById('google-sheet');
-    const currentSrc = iframe.src.split("?")[0]; // Remove existing query parameters
-    const newSrc = `${currentSrc}?t=${new Date().getTime()}`; // Add timestamp as a query parameter
-    iframe.src = newSrc; // Refresh the iframe with the new src
-    console.log("Iframe refreshed with new src:", newSrc);
+  // Save scroll position
+  const scrollX = window.scrollX || window.pageXOffset;
+  const scrollY = window.scrollY || window.pageYOffset;
+
+  // Save original text and add loading state
+  if (!button.dataset.originalText) {
+    button.dataset.originalText = button.innerHTML;
   }
+  button.classList.add("loading");
+  button.innerHTML = "Loading…";
+
+  try {
+    const currentSrc = iframe.src.split("?")[0];
+    const newSrc = `${currentSrc}?t=${new Date().getTime()}`;
+    iframe.src = newSrc;
+    console.log("Iframe refreshed with new src:", newSrc);
+  } catch (e) {
+    console.error("Error refreshing iframe:", e);
+  }
+
+  // Remove loading state after delay and restore text + scroll position
+  setTimeout(() => {
+    button.classList.remove("loading");
+    if (button.dataset.originalText) {
+      button.innerHTML = button.dataset.originalText;
+      delete button.dataset.originalText;
+    }
+    // Restore scroll position
+    window.scrollTo(scrollX, scrollY);
+  }, 1500);
+}
+
+
+
+
+
 
 
   document.addEventListener("DOMContentLoaded", function() {
@@ -683,16 +789,16 @@ function createCheckboxRow(teamConfig) {
 
 
 
-function createScorecard(RESULTS, spreadsheetConfig) {
-    document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
-    document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
+  function createScorecard(RESULTS, spreadsheetConfig) {
+      document.getElementById("course").textContent = spreadsheetConfig.courseConfig.courseName;
+      document.getElementById("date").textContent = spreadsheetConfig.courseConfig.date;
 
-    document.getElementById("team").onchange = function (event) {
-        teamOnchange(RESULTS, spreadsheetConfig);
-    };
+      document.getElementById("team").onchange = function (event) {
+          teamOnchange(RESULTS, spreadsheetConfig);
+      };
 
-    createTeamOptions(spreadsheetConfig.allTeamConfigs); // This already populates the select box
-}
+      createTeamOptions(spreadsheetConfig.allTeamConfigs); // This already populates the select box
+  }
 
 
 let scoreKeeper;
@@ -804,54 +910,79 @@ function getScorer(teamConfig) {
   }
 
 
+ function clearLocalStorageButPreserveTeamsAutosave(teams) {
+  // Build the keys to keep based on teams array
+  const keysToKeep = teams.map(team => "autosaveDisabledDate_" + team.teamName);
+
+  // Backup the values of those keys
+  const backup = {};
+  keysToKeep.forEach(key => {
+    const val = localStorage.getItem(key);
+    if (val !== null) {
+      backup[key] = val;
+    }
+  });
+
+  // Clear everything
+  localStorage.clear();
+
+  // Restore preserved keys
+  Object.entries(backup).forEach(([key, val]) => {
+    localStorage.setItem(key, val);
+  });
+
+  console.log("Preserved keys after clear:", Object.keys(backup));
+}
+
 
 
 function teamOnchange(RESULTS, spreadsheetConfig) {
+  console.log("teamOnchange start");
+
   // Block everything if Scoreboard Only mode is active
   if (scoreboardOnlyActive) {
     console.log("teamOnchange blocked due to Scoreboard Only mode.");
     return;
   }
 
-
-  // Clear localStorage
-  localStorage.clear();
-  console.log("All localStorage data cleared on team change.");
-
-
-  // Remove Scoreboard Use Only button
+  // Remove Scoreboard Use Only button if present
   const scoreboardBtn = document.getElementById("scoreboard_button");
   if (scoreboardBtn) {
     scoreboardBtn.remove();
     console.log("Scoreboard Use Only button removed.");
   }
 
+  // Clear localStorage except autosave flags for all teams
+  clearLocalStorageButPreserveTeamsAutosave(spreadsheetConfig.allTeamConfigs);
+
+  // Get selected team configuration
   const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
   console.log("Loading team:\n" + JSON.stringify(selectedTeamConfig));
 
+  // Clear main table container
   const tableDiv = document.getElementById("table");
   tableDiv.innerHTML = "";
 
-  // Insert checkbox row first
+  // Insert checkbox row at the top
   const checkboxRow = createCheckboxRow(selectedTeamConfig);
   tableDiv.appendChild(checkboxRow);
 
-  // Create Save and Load button containers (includes autosave logic)
+  // Create Save/Load buttons and autosave status display
   createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig);
 
-  // Add spacing below the buttons
+  // Add spacing below buttons
   const breakDiv = document.createElement("div");
   breakDiv.style.height = "20px";
   tableDiv.appendChild(breakDiv);
 
-  // Create scorecard table
+  // Create the scorecard table using provided data
   createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
 
   // Enable form buttons
   document.getElementById("submit_button").disabled = false;
   document.getElementById("clear_button").disabled = false;
 
-  // Load saved scores from Google Sheets
+  // Load saved scores from Google Sheets for the selected team
   const teamName = document.getElementById("team").value;
   google.script.run
     .withSuccessHandler(populateScorecardWithSavedResults)
@@ -864,16 +995,32 @@ function teamOnchange(RESULTS, spreadsheetConfig) {
   // Play sound only on first team change
   if (!hasPlayed) {
     const audio = document.getElementById("audio");
-    audio.play().then(() => {
-      console.log("Audio played successfully.");
-    }).catch((error) => {
-      console.error("Audio playback failed:", error);
-    });
+    audio.play()
+      .then(() => {
+        console.log("Audio played successfully.");
+      })
+      .catch((error) => {
+        console.error("Audio playback failed:", error);
+      });
     hasPlayed = true;
   }
 
+  // Update scorer UI or logic
   getScorer(selectedTeamConfig);
+
+//resetAutoSaveFlagForCurrentTeam();   // only for testing
+
 }
+
+
+      // only for testing
+    function resetAutoSaveFlagForCurrentTeam() {
+      const teamName = document.getElementById("team")?.value || "UNKNOWN_TEAM";
+      const teamKey = `autosaveDisabledDate_${teamName}`;
+      localStorage.removeItem(teamKey);
+      console.log(`🚩 Auto-save flag reset for team "${teamName}". Current flag value:`, localStorage.getItem(teamKey));
+    }
+
 
 
 
@@ -898,10 +1045,10 @@ function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
     // Create Save Button
     const saveElement = document.createElement("td");
     const saveButtonContainer = createSaveButton(spreadsheetConfig, selectedTeamConfig);
-    const buttonEl = saveButtonContainer.querySelector("button"); // ✅ Correct reference
+    const buttonEl = saveButtonContainer.querySelector("button");
     console.log("✅ Save button created.");
 
-    // Create Load Button using the correct function
+    // Create Load Button
     const loadElement = document.createElement("td");
     const loadButton = createLoadButton();
     console.log("✅ Load button created.");
@@ -911,7 +1058,6 @@ function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
     const autoSaveStatus = document.createElement("span");
     autoSaveStatus.id = "autosave_status";
     autoSaveStatus.style.fontSize = "20px";
-    autoSaveStatus.style.color = "green";
     statusElement.appendChild(autoSaveStatus);
 
     // Append elements
@@ -935,18 +1081,45 @@ function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
     // Append to main table
     table.appendChild(subTable);
 
-    console.log("✅ Buttons added to DOM.");
+    // **Check autosave disabled key here**
+    const teamName = selectedTeamConfig?.team || document.getElementById("team")?.value || "UNKNOWN_TEAM";
+    const teamKey = `autosaveDisabledDate_${teamName}`;
+    const storedDate = localStorage.getItem(teamKey);
+    const today = new Date().toISOString().slice(0, 10);
 
-    // Auto-save using intervals---  buttonE1 is actually calling the Save button on-click function
+    // Set auto-save disabled flag for today
+    window.autoSaveManuallyDisabled = (storedDate === today);
+
+    if (window.autoSaveManuallyDisabled) {
+      autoSaveStatus.innerHTML = "<b>Auto-save disabled for today (scores already submitted)</b>";
+      autoSaveStatus.style.color = "red";
+      console.log(`🛑 Autosave is disabled for ${teamName} today.`);
+    } else {
+      autoSaveStatus.innerHTML = "<b>Auto-save is active</b>";
+      autoSaveStatus.style.color = "green";
+      console.log(`✅ Autosave is active for ${teamName}.`);
+    }
+
+    // Auto-save interval logic...
     if (buttonEl && typeof initialDelaySec !== "undefined" && typeof saveIntervalSec !== "undefined") {
       setTimeout(() => {
         console.log("⌛ Initial delay complete");
         saveInterval = setInterval(() => {
-          console.log("⏱ Save tick. Checking lock:", inputsLocked);
           if (inputsLocked) {
             console.log("🚫 Skipping due to lock");
             return;
           }
+
+          if (window.autoSaveManuallyDisabled) {
+            console.log("🚫 Skipping auto-save due to submission today");
+            const autoSaveStatus = document.getElementById("autosave_status");
+            if (autoSaveStatus) {
+              autoSaveStatus.innerHTML = "<b>Auto-save disabled for today (scores already submitted)</b>";
+              autoSaveStatus.style.color = "red";
+            }
+            return;
+          }
+
           console.log("💾 Auto-save triggered");
           buttonEl.click();
         }, saveIntervalSec * 1000);
@@ -954,11 +1127,11 @@ function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
     } else {
       console.error("❌ Could not start auto-save — missing button or delay values");
     }
-
   } catch (e) {
     console.error("❌ Exception in createSaveLoadButtons:", e);
   }
 }
+
 
 
 
@@ -970,6 +1143,7 @@ function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
   button.style.fontSize = "30px";
   button.style.color = "green";
   button.style.padding = "10px 10px";
+  button.id = "save_button"; // ✅ Needed for CSS and control
 
   const statusSpan = document.createElement("span");
   statusSpan.style.fontSize = "20px";
@@ -980,12 +1154,16 @@ function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
   let isSaving = false;
 
   button.onclick = function () {
-    if (isSaving || window.isSavingDisabled) {
+    if (isSaving || inputsLocked) {
       console.log("Save is temporarily disabled or already in progress.");
       return;
     }
 
     isSaving = true;
+
+    const originalText = button.textContent;
+    button.textContent = "Saving...";
+    button.classList.add("loading");
 
     let out = [];
     for (let currPlayerIndex = 0; currPlayerIndex < selectedTeamConfig.players.length; currPlayerIndex++) {
@@ -1005,6 +1183,9 @@ function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
     google.script.run
       .withSuccessHandler(function () {
         isSaving = false;
+        button.textContent = originalText;
+        button.classList.remove("loading");
+
         const now = new Date();
         const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
         statusSpan.innerHTML = `<b><i>Saved at</i></b> ${time}`;
@@ -1012,6 +1193,9 @@ function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
       })
       .withFailureHandler(function (error) {
         isSaving = false;
+        button.textContent = originalText;
+        button.classList.remove("loading");
+
         statusSpan.textContent = "Failed to Save";
         statusSpan.style.color = "red";
         console.error("Error saving scores:", error);
@@ -1019,7 +1203,52 @@ function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
       .saveScoresForTeam(document.getElementById("team").value, out);
   };
 
-  window.saveButtonReference = button; // ✅ Store reference for potential use
+  window.saveButtonReference = button;
+  container.appendChild(button);
+  container.appendChild(statusSpan);
+  return container;
+}
+
+
+function createLoadButton() {
+  const container = document.createElement("div");
+
+  const button = document.createElement("button");
+  button.id = "reload_button";
+  button.innerHTML = "Re-Load";
+  button.style.fontSize = "30px";
+  button.style.color = "blue";
+  button.style.padding = "10px 10px";
+
+  const statusSpan = document.createElement("span");
+  statusSpan.id = "reload_status";
+  statusSpan.style.fontSize = "20px";
+  statusSpan.style.color = "blue";
+  statusSpan.style.marginLeft = "10px";
+
+  button.onclick = function () {
+    if (button.classList.contains("loading")) return;
+
+    button.classList.add("loading");
+
+    const teamName = document.getElementById("team").value;
+    google.script.run
+      .withSuccessHandler(function (results) {
+        populateScorecardWithSavedResults(results);
+        const now = new Date();
+        const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
+        statusSpan.innerHTML = `<b><i>Re-Loaded at</i></b> ${time}`;
+        statusSpan.style.color = "blue";
+        button.classList.remove("loading");
+      })
+      .withFailureHandler(function (error) {
+        statusSpan.textContent = "Failed to Re-Load";
+        statusSpan.style.color = "red";
+        console.error("Error loading scores:", error);
+        button.classList.remove("loading");
+      })
+      .loadScoresForTeam(teamName);
+  };
 
   container.appendChild(button);
   container.appendChild(statusSpan);
@@ -1027,47 +1256,6 @@ function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
   return container;
 }
 
-
-
-function createLoadButton() {
-    const container = document.createElement("div");
-
-    const button = document.createElement("button");
-    button.id = "reload_button";
-    button.innerHTML = "Re-Load";
-    button.style.fontSize = "30px";
-    button.style.color = "blue";
-    button.style.padding = "10px 10px";
-
-    const statusSpan = document.createElement("span");
-    statusSpan.id = "reload_status";
-    statusSpan.style.fontSize = "20px";
-    statusSpan.style.color = "blue";
-    statusSpan.style.marginLeft = "10px";
-
-    button.onclick = function () {
-        const teamName = document.getElementById("team").value;
-        google.script.run
-            .withSuccessHandler(function (results) {
-                populateScorecardWithSavedResults(results);
-                const now = new Date();
-                const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}`;
-                statusSpan.innerHTML = `<b><i>Re-Loaded at</i></b> ${time}`;
-                statusSpan.style.color = "blue";
-            })
-            .withFailureHandler(function (error) {
-                statusSpan.textContent = "Failed to Re-Load";
-                statusSpan.style.color = "red";
-                console.error("Error loading scores:", error);
-            })
-            .loadScoresForTeam(teamName);
-    };
-
-    container.appendChild(button);
-    container.appendChild(statusSpan);
-
-    return container;
-}
 
 
   function populateScorecardWithSavedResults(allPlayerScores) {
@@ -1716,9 +1904,14 @@ function generateTargetRow(results, pars, teamConfig) {
 
 
 
+
 function submit() {
-  // Stop auto‐save interval
   clearInterval(saveInterval);
+
+  const submitBtn = document.getElementById("submit_button");
+  const originalText = submitBtn.textContent;
+  submitBtn.classList.add("loading");
+  submitBtn.textContent = "Submitting...";
 
   const localSpreadsheetConfig = spreadsheetConfig();
   const selectedTeamConfig = getSelectedTeamConfig(localSpreadsheetConfig.allTeamConfigs);
@@ -1731,11 +1924,10 @@ function submit() {
   let flatResults = [];
   let allScoresEntered = true;
 
-  // --- Build player results ---
   selectedTeamConfig.players.forEach((_, playerIndex) => {
     const playerNameEl = document.getElementById(idPlayerName(playerIndex));
     const playerName = playerNameEl.value;
-    if (!playerName) return; // Skip unnamed players
+    if (!playerName) return;
 
     const playerStats = [date, currentTeamName, courseName, playerName];
     for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
@@ -1745,31 +1937,23 @@ function submit() {
     }
     playerStats.push(document.getElementById(idTarget(playerIndex)).value);
     for (const result of RESULTS) {
-      playerStats.push(
-        document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent
-      );
-      playerStats.push(
-        document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent
-      );
-      playerStats.push(
-        document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent
-      );
+      playerStats.push(document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent);
+      playerStats.push(document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent);
+      playerStats.push(document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent);
     }
     flatResults.push(playerStats);
   });
 
-  // --- Add team‐level results ---
   const teamStats = [date, currentTeamName, courseName, currentTeamName];
-  teamStats.push(...Array(numHoles).fill("")); // No individual hole scores
+  teamStats.push(...Array(numHoles).fill(""));
   teamStats.push(document.getElementById("team_target").textContent);
   for (const result of RESULTS) {
-    teamStats.push(""); // No team‐level Score
+    teamStats.push("");
     teamStats.push(document.getElementById(idResultPointsTeam(result.name)).textContent);
     teamStats.push(document.getElementById(idResultNetTeam(result.name)).textContent);
   }
   flatResults.push(teamStats);
 
-  // --- Confirmation Dialog ---
   let message =
     "Be sure all scores are correct! When so, click 'OK' to SUBMIT these scores.\n\n" +
     "Thanks!\n\n" +
@@ -1780,27 +1964,28 @@ function submit() {
   }
   message +=
     "With V. 5.0 and beyond, now each player will get an email of the submitted scorecard immediately upon a successful submission!";
-  if (!confirm(message)) return;
+  if (!confirm(message)) {
+    submitBtn.classList.remove("loading");
+    submitBtn.textContent = originalText;
+    return;
+  }
 
-  // --- Record Submitter Activity ---
   google.script.run.recordScorerActivity({
-    teamName: teamName || "Unknown",
+    teamName: currentTeamName || "Unknown",
     playerName: scoreKeeper || "Unknown",
     activity: "Submitter"
   });
 
-  // --- Save scores locally before submitting ---
   const saveArray = selectedTeamConfig.players.map((_, playerIndex) => {
     const name = document.getElementById(idPlayerName(playerIndex)).value;
     const target = document.getElementById(idTarget(playerIndex)).value;
     const holeScores = [];
     for (let holeIndex = 0; holeIndex < numHoles; holeIndex++) {
-      holeScores.push(
-        document.getElementById(idHolePlayer(holeIndex, playerIndex)).value
-      );
+      holeScores.push(document.getElementById(idHolePlayer(holeIndex, playerIndex)).value);
     }
     return [name, target, ...holeScores];
   });
+
   console.log("Saving before submitting:", JSON.stringify(saveArray));
 
   google.script.run
@@ -1818,24 +2003,33 @@ function submit() {
     })
     .saveScoresForTeam(currentTeamName, saveArray);
 
-  // --- Lock inputs to prevent changes ---
   lockInputs();
 
-  // --- Submit to server and collect server‐side debug logs ---
   console.log("scoreKeeper being passed to server:", scoreKeeper);
 
   google.script.run
     .withSuccessHandler(function (serverLogs) {
       if (showServerLogs) {
-        serverLogs.forEach(function (line) {
-          console.log("Server:", line);
-        });
+        serverLogs.forEach((line) => console.log("Server:", line));
       }
+
+      const teamKey = `autosaveDisabledDate_${currentTeamName}`;
+      const today = new Date().toISOString().slice(0, 10);
+      localStorage.setItem(teamKey, today);
+      window.autoSaveManuallyDisabled = true;
+
+      const autoSaveStatus = document.getElementById("autosave_status");
+      if (autoSaveStatus) {
+        autoSaveStatus.innerHTML = "<b>Auto-save disabled for today (scores already submitted)</b>";
+        autoSaveStatus.style.color = "red";
+      }
+
+      console.log(`✅ Submit successful — autosaveDisabledDate set for ${currentTeamName}:`, today);
+      console.log("autoSaveManuallyDisabled after submit:", window.autoSaveManuallyDisabled);
 
       const confirmEl = document.getElementById("submit_confirmation");
       confirmEl.textContent = "Submit & Email Success - Thanks!";
       confirmEl.style.cssText = "font-size: 40px; font-weight: bold; color: green;";
-
       const utterance = new SpeechSynthesisUtterance("Submit & Email Success - Thanks!");
       utterance.rate = 1.0;
       window.speechSynthesis.speak(utterance);
@@ -1856,30 +2050,27 @@ function submit() {
       };
       disableAndDim("submit_button");
       disableAndDim("clear_button");
+
+      // ✅ Reset button state
+      submitBtn.classList.remove("loading");
+      submitBtn.textContent = originalText;
     })
     .withFailureHandler((error) => {
       const confirmEl = document.getElementById("submit_confirmation");
-      confirmEl.textContent =
-        "Failed, re-start App, pull up your tee time, and re-submit.";
+      confirmEl.textContent = "Failed, re-start App, pull up your tee time, and re-submit.";
       confirmEl.style.cssText = "font-size: 40px; font-weight: bold; color: red;";
-
       const utterance = new SpeechSynthesisUtterance(confirmEl.textContent);
       utterance.rate = 1.0;
       window.speechSynthesis.speak(utterance);
 
       console.error("Submission failed:", error);
+
+      // ❌ Reset button state on failure too
+      submitBtn.classList.remove("loading");
+      submitBtn.textContent = originalText;
     })
     .saveData(flatResults, scoreKeeper || "Unknown");
 }
-
-
-
-
-  function clearWithConfirmation() {
-      if (confirm("Be VERY sure you want to clear the hole scores!")) {
-          clearScoresAndCache();
-      }
-  }
 
 
   function clearScoresAndCache() {
@@ -1923,8 +2114,6 @@ function submit() {
       possibleInput.style.backgroundColor = "yellow"; // Set background color to yellow when empty
     }
 
-    // Optionally clear local storage related to this player, if applicable.
-    // localStorage.clear(); // This clears everything; use with caution.
 
     // Update stats for the remaining players
     updateAllStats(
