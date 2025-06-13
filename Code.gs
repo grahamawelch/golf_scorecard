@@ -349,16 +349,15 @@ let htmlBody = `
   </div>`;
 
 
-  // Send email
+  / // Send email
   MailApp.sendEmail({
     to: toList.join(','),
-    cc: "welch_misc@yahoo.com",
+    cc: "welch_misc@yahoo.com, kendunnett@comporium.net",
     subject: subject,
     htmlBody: htmlBody
   });
 
-  Logger.log("Email sent to: " + toList.join(', ') + " CC: welch_misc@yahoo.com");
-}
+  Logger.log("Email sent to: " + toList.join(', ') + " CC: welch_misc@yahoo.com, kendunnett@comporium.net");
 
 // kendunnett@comporium.net
 
