@@ -1734,6 +1734,44 @@ function generateTargetRow(results, pars, teamConfig) {
       return row;
   }
 
+
+  function applyPerformanceColor(cell, actual, expected, direction = "higher") {
+      console.log("applyPerformanceColor called with:", { actual, expected, direction });
+
+      if (isNaN(actual) || isNaN(expected)) {
+          cell.style.color = ""; // default black
+          return;
+      }
+
+      // Black if both actual and expected are zero (start state)
+      if (actual === 0 && expected === 0) {
+          cell.style.color = "";
+          return;
+      }
+
+      // For other stats, if actual is zero, keep black (start)
+      if (actual === 0) {
+          cell.style.color = "";
+          return;
+      }
+
+      // Ratio for coloring (higher or lower is better)
+      const ratio = direction === "higher" ? actual / expected : expected / actual;
+
+      if (ratio >= 0.95) {
+          cell.style.color = "green";
+      } else if (ratio >= 0.85) {
+          cell.style.color = "orange";
+      } else {
+          cell.style.color = "red";
+      }
+  }
+
+
+
+
+
+
   function updateAllStats(results, pars, numPlayers) {
       for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
           updateStats(results, pars, numPlayers, playerIndex);
@@ -1745,45 +1783,91 @@ function generateTargetRow(results, pars, teamConfig) {
       const points = computePoints(pars, playerIndex);
 
       for (let result of results) {
-          updateResult(result, pars, playerIndex, score, points, pars);
+          updateResult(result, pars, playerIndex, score, points);
 
+          // TEAM POINTS
           let pointsTeam = 0;
           for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-              const playerPointsOrNaN = parseInt(document.getElementById(
-                  idResultPointsPlayer(result.name, currPlayerIndex))
-                  .textContent);
-              if (isNaN(playerPointsOrNaN)) {
-                  continue;
+              const playerPointsOrNaN = parseInt(
+                  document.getElementById(idResultPointsPlayer(result.name, currPlayerIndex)).textContent
+              );
+              if (!isNaN(playerPointsOrNaN)) {
+                  pointsTeam += playerPointsOrNaN;
               }
-              pointsTeam += playerPointsOrNaN;
           }
-          document.getElementById(idResultPointsTeam(result.name)).textContent = pointsTeam;
 
-          // Nets can be fractions
+          const teamPointsCell = document.getElementById(idResultPointsTeam(result.name));
+          teamPointsCell.textContent = pointsTeam;
+
+          // TEAM TARGET
+          let teamTarget = 0;
+          for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
+              const playerTarget = parseInt(document.getElementById(idTarget(currPlayerIndex)).value);
+              if (!isNaN(playerTarget)) {
+                  teamTarget += playerTarget;
+              }
+          }
+
+          // Move these lines inside the loop where result is defined
+          const holesPlayed = result.endExclusive - result.startInclusive;
+          const expectedTeamPoints = (teamTarget / pars.length) * holesPlayed;
+
+          // Apply color for team points
+          applyPerformanceColor(teamPointsCell, pointsTeam, expectedTeamPoints, "higher");
+
+          // TEAM NET
           let netTeam = 0;
           for (let currPlayerIndex = 0; currPlayerIndex < numPlayers; currPlayerIndex++) {
-              const playerNetOrNaN = parseFloat(document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent);
-              if (isNaN(playerNetOrNaN)) {
-                  continue;
+              const playerNetOrNaN = parseFloat(
+                  document.getElementById(idResultNetPlayer(result.name, currPlayerIndex)).textContent
+              );
+              if (!isNaN(playerNetOrNaN)) {
+                  netTeam += playerNetOrNaN;
               }
-              netTeam += playerNetOrNaN;
           }
-          document.getElementById(idResultNetTeam(result.name)).textContent = netTeam;
+
+          const netTeamCell = document.getElementById(idResultNetTeam(result.name));
+          netTeamCell.textContent = netTeam;
+
+          // Apply color for team net (goal is to stay close to 0 or positive)
+          applyPerformanceColor(netTeamCell, netTeam, 0, "higher");
       }
   }
 
+
   function updateResult(result, pars, playerIndex, score, points) {
-      const holeIndices = Array.from({ length: result.endExclusive - result.startInclusive }, (_, i) => result.startInclusive + i);
+      const holeIndices = Array.from(
+          { length: result.endExclusive - result.startInclusive },
+          (_, i) => result.startInclusive + i
+      );
 
       const resultScore = sumNumbersByIndex(score.scores, holeIndices);
-      document.getElementById(idResultScorePlayer(result.name, playerIndex)).textContent = resultScore;
-
       const resultPoints = sumNumbersByIndex(points.points, holeIndices);
-      document.getElementById(idResultPointsPlayer(result.name, playerIndex)).textContent = resultPoints;
+
+      const scoreCell = document.getElementById(idResultScorePlayer(result.name, playerIndex));
+      const pointsCell = document.getElementById(idResultPointsPlayer(result.name, playerIndex));
+      const netCell = document.getElementById(idResultNetPlayer(result.name, playerIndex));
+
+      scoreCell.textContent = resultScore;
+      pointsCell.textContent = resultPoints;
 
       const resultNet = computeNet(points, pars, holeIndices, playerIndex);
-      document.getElementById(idResultNetPlayer(result.name, playerIndex)).textContent = resultNet;
+      netCell.textContent = resultNet;
+
+      const targetPoints = parseInt(document.getElementById(idTarget(playerIndex)).value);
+      const expectedPoints = (targetPoints / pars.length) * holeIndices.length;
+      const expectedScore = sumNumbersByIndex(pars, holeIndices) + holeIndices.length;
+      const expectedNet = 0; // Net should trend around 0 (resultPoints - expectedPoints)
+
+      console.log(`Player ${playerIndex} - Score: ${resultScore}, Expected: ${expectedScore}`);
+      console.log(`Player ${playerIndex} - Net: ${resultNet}, Expected: ${expectedNet}`);
+
+      applyPerformanceColor(pointsCell, resultPoints, expectedPoints, "higher"); // Higher = better
+      applyPerformanceColor(scoreCell, resultScore, expectedScore, "lower");     // Lower = better
+      applyPerformanceColor(netCell, resultNet, expectedNet, "higher");          // Higher = better
   }
+
+
 
   function computeScore(numHoles, playerIndex) {
       let scores = [];
@@ -2071,6 +2155,14 @@ function submit() {
     })
     .saveData(flatResults, scoreKeeper || "Unknown");
 }
+
+
+
+  function clearWithConfirmation() {
+      if (confirm("Be VERY sure you want to clear the hole scores!")) {
+          clearScoresAndCache();
+      }
+  }
 
 
   function clearScoresAndCache() {
