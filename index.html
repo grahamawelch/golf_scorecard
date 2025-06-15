@@ -34,11 +34,6 @@
       font-size: 1.4em; /* Adjust base font size */
     }
 
-    #course {
-      font-size: 1.75em;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
 
     #title {
       font-size: 1em;
@@ -88,7 +83,6 @@
       background-color: darkgreen;
     }
 
-
     button.loading {
       position: relative;
       opacity: 0.6;
@@ -115,7 +109,6 @@
       }
     }
 
-
     .image-container {
         display: flex;
         justify-content: flex-start;
@@ -138,7 +131,6 @@
   <audio id="audio" src="https://www.dropbox.com/scl/fi/666kzmgv2f3t6c1alhx1g/startup-sound.mp3?rlkey=isnzy1syfswgg5p3n2gskz1zp&st=5ryggmm7&raw=1" type="audio/mpeg"></audio>
 
 
-
     <div class="image-container">
         <img src="https://live.staticflickr.com/65535/54259105499_43c986c7ea_z.jpg" alt="GoogleGolf Scoring System Logo">
         <img src="https://live.staticflickr.com/65535/54033042787_0126e057cd_w_d.jpg" alt="BT Logo">
@@ -154,13 +146,13 @@
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 6.3</b><br>
   </div>
 
+  <div id="course" style="display: inline-block; font-size: 1.75em; font-weight: bold;"></div>
 
-<div id="course"> </div>
-
-<div id="all_input">
+  <div id="all_input">
     <div>
-        <div style="display: inline-block; font-size: 1.75em;"><b>Date: </b></div>
+        <div style="display: inline-block; font-size: 1.75em; font-weight: bold;">Date: </div>
         <div style="display: inline-block; font-size: 1.75em; font-weight: bold;" id="date"></div>
+    </div>
     </div>
     <div>
         <div style="display: inline-block; font-size: 1.75em;">
@@ -534,61 +526,58 @@
 
 
 
-  function scoreboardOnly() {
-      scoreboardOnlyActive = true; 
+    function scoreboardOnly() {
+      scoreboardOnlyActive = true;
       forceLock = true;
       inputsLocked = true;
 
       // Disable all inputs except refresh
       const inputs = document.querySelectorAll("input, select, button");
       inputs.forEach(el => {
-          if (el.id !== "refresh-btn") {
-              el.disabled = true;
-          }
+        if (el.id !== "refresh-btn") {
+          el.disabled = true;
+        }
       });
 
-      // Disable and remove team selection row
+      // Disable team selection
       const teamSelect = document.getElementById("team");
       if (teamSelect) {
-          teamSelect.onchange = null;
-          teamSelect.disabled = true;
+        teamSelect.onchange = null;
+        teamSelect.disabled = true;
 
-          // Remove the containing div (Tee Time row)
-          const teamContainer = teamSelect.closest("div");
-          if (teamContainer && teamContainer.parentElement) {
-              teamContainer.parentElement.remove();
-          }
+        // Optionally just hide the row instead of removing it
+        const teamContainer = teamSelect.closest("div");
+        if (teamContainer) {
+          teamContainer.style.display = "none";
+        }
       }
 
-      // Remove team options div if present
+      // Hide team options div if present
       const teamOptions = document.getElementById("team_options");
       if (teamOptions) {
-          teamOptions.remove();
+        teamOptions.style.display = "none";
       }
 
-      // Remove team target display
+      // Hide team target display
       const teamTarget = document.getElementById("team_target");
       if (teamTarget) {
-          const parent = teamTarget.parentElement;
-          if (parent) {
-              parent.remove();
-          }
+        teamTarget.style.display = "none";
       }
 
-      // Clear the dynamic table (checkbox row, buttons, and scorecard)
+      // Clear the dynamic table
       const tableDiv = document.getElementById("table");
       if (tableDiv) {
-          tableDiv.innerHTML = "";
+        tableDiv.innerHTML = "";
       }
 
       // Remove the Scoreboard Use Only button itself
       const scoreboardBtn = document.getElementById("scoreboard_button");
       if (scoreboardBtn) {
-          scoreboardBtn.remove();
+        scoreboardBtn.remove();
       }
 
-      console.log("Scoreboard Use Only fully activated: UI frozen, elements removed, team selection blocked.");
-  }
+      console.log("Scoreboard Use Only fully activated: UI frozen, elements hidden or removed.");
+    }
 
   
 
