@@ -214,7 +214,9 @@ function sendFlatResultsEmail(flatResults, scorekeeperName){
 
 
   const sheetId = SHEET_IDS.config;
-  const subject = `Your ${new Date().toLocaleDateString()} Springfield Seniors Submitted Golf Scores`;
+  
+  const teeTime = flatResults.length > 0 ? flatResults[0][1] : "Unknown Tee Time";
+  const subject = `Your ${new Date().toLocaleDateString()} ${teeTime} Springfield Seniors Submitted Golf Scores`;
 
   const header = [
     "Date", "Tee Time", "Course", "Player Name",
