@@ -443,7 +443,7 @@
 //Par Info -- setting Max and Min scores for each hole-- Important, ensure the below "score" functions have the same values
 
     // Function to calculate minScore -- needs to mimic same as getUserScore()'s value, too
-  function getMinScore(par) {
+    function getMinScore(par) {
     return Math.max(par - 3, 1); // this is an Albatross, but 1 for Par 3's
   }
 
@@ -1736,39 +1736,47 @@ function generateTargetRow(results, pars, teamConfig) {
 
 
   function applyPerformanceColor(cell, actual, expected, direction = "higher") {
-      console.log("applyPerformanceColor called with:", { cellId: cell.id, actual, expected, direction });
-      //console.trace();  // 👈 shows exact call location in the console
-      
-      console.log("applyPerformanceColor called with:", { actual, expected, direction });
+    // ⛔️ Prevent coloring for score cells
+    if (cell.id && cell.id.toLowerCase().includes("score")) {
+        console.warn("⛔️ BLOCKED SCORE COLORING for:", cell.id);
+        cell.style.color = ""; // Reset to default
+        return;
+    }
 
-      if (isNaN(actual) || isNaN(expected)) {
-          cell.style.color = ""; // default black
-          return;
-      }
+    // 🪵 Verbose logging to trace all cell updates
+    console.log("applyPerformanceColor called with:", {
+        cellId: cell.id,
+        actual,
+        expected,
+        direction,
+        cellText: cell.textContent
+    });
 
-      // Black if both actual and expected are zero (start state)
-      if (actual === 0 && expected === 0) {
-          cell.style.color = "";
-          return;
-      }
+    if (isNaN(actual) || isNaN(expected)) {
+        cell.style.color = ""; // default black
+        return;
+    }
 
-      // For other stats, if actual is zero, keep black (start)
-      if (actual === 0) {
-          cell.style.color = "";
-          return;
-      }
+    if (actual === 0 && expected === 0) {
+        cell.style.color = "";
+        return;
+    }
 
-      // Ratio for coloring (higher or lower is better)
-      const ratio = direction === "higher" ? actual / expected : expected / actual;
+    if (actual === 0) {
+        cell.style.color = "";
+        return;
+    }
 
-      if (ratio >= 0.95) {
-          cell.style.color = "green";
-      } else if (ratio >= 0.85) {
-          cell.style.color = "orange";
-      } else {
-          cell.style.color = "red";
-      }
-  }
+    const ratio = direction === "higher" ? actual / expected : expected / actual;
+
+    if (ratio >= 0.95) {
+        cell.style.color = "green";
+    } else if (ratio >= 0.85) {
+        cell.style.color = "orange";
+    } else {
+        cell.style.color = "red";
+    }
+}
 
 
 
