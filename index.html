@@ -143,7 +143,7 @@
   <div id="title">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 6.3</b><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 6.4</b><br>
   </div>
 
   <div id="course" style="display: inline-block; font-size: 1.75em; font-weight: bold;"></div>
@@ -272,14 +272,22 @@
 
   <script>
   
-    document.addEventListener("click", function playOnce() {
-        var audio = document.getElementById("audio");
-        audio.play().catch(function(error) {
-            console.error("Audio playback failed:", error);
-        });
-        document.removeEventListener("click", playOnce); // Removes listener after first click
-    });
 
+  document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("click", function playOnce() {
+      const audio = document.getElementById("audio");
+      if (audio) {
+        audio.play().catch(function (error) {
+          console.error("Audio playback failed:", error);
+        });
+      } else {
+        console.warn("Audio element not found.");
+      }
+      document.removeEventListener("click", playOnce);
+    });
+  });
+
+  
 
 // Window positioning and tailoring to Mobile and Android -- may need to add for others. 
 
@@ -313,7 +321,7 @@
         
         document.body.style.zoom = "1"; // Keep same zoom for Android devices
 
-         // Reduce font size for Android devices
+        // Reduce font size for Android devices
         if (title) title.style.fontSize = "0.3em";
         //if (course) course.style.fontSize = "0.25em";
         if (instructions) instructions.style.fontSize = "0.4em";
@@ -525,7 +533,6 @@
 
 
 
-
     function scoreboardOnly() {
       scoreboardOnlyActive = true;
       forceLock = true;
@@ -579,6 +586,9 @@
       console.log("Scoreboard Use Only fully activated: UI frozen, elements hidden or removed.");
     }
 
+
+
+  
   
 
 function refreshIframe() {
@@ -1724,7 +1734,11 @@ function generateTargetRow(results, pars, teamConfig) {
   }
 
 
+
   function applyPerformanceColor(cell, actual, expected, direction = "higher") {
+      console.log("applyPerformanceColor called with:", { cellId: cell.id, actual, expected, direction });
+      //console.trace();  // 👈 shows exact call location in the console
+      
       console.log("applyPerformanceColor called with:", { actual, expected, direction });
 
       if (isNaN(actual) || isNaN(expected)) {
@@ -1823,38 +1837,48 @@ function generateTargetRow(results, pars, teamConfig) {
       }
   }
 
+function updateResult(result, pars, playerIndex, score, points) {
+    const holeIndices = Array.from(
+        { length: result.endExclusive - result.startInclusive },
+        (_, i) => result.startInclusive + i
+    );
 
-  function updateResult(result, pars, playerIndex, score, points) {
-      const holeIndices = Array.from(
-          { length: result.endExclusive - result.startInclusive },
-          (_, i) => result.startInclusive + i
-      );
+    const rawScores = score.scores;
+    console.log(`Player ${playerIndex} - Raw Scores:`, rawScores);
 
-      const resultScore = sumNumbersByIndex(score.scores, holeIndices);
-      const resultPoints = sumNumbersByIndex(points.points, holeIndices);
+    const playedHoles = holeIndices.filter(i => {
+        const val = rawScores[i];
+        return val !== "" && !isNaN(parseFloat(val));
+    });
 
-      const scoreCell = document.getElementById(idResultScorePlayer(result.name, playerIndex));
-      const pointsCell = document.getElementById(idResultPointsPlayer(result.name, playerIndex));
-      const netCell = document.getElementById(idResultNetPlayer(result.name, playerIndex));
+    console.log(`Hole Indices for result:`, holeIndices);
+    console.log(`Played Holes in result range:`, playedHoles);
 
-      scoreCell.textContent = resultScore;
-      pointsCell.textContent = resultPoints;
+    const resultScore = sumNumbersByIndex(score.scores, holeIndices);
+    const resultPoints = sumNumbersByIndex(points.points, holeIndices);
 
-      const resultNet = computeNet(points, pars, holeIndices, playerIndex);
-      netCell.textContent = resultNet;
+    const scoreCell = document.getElementById(idResultScorePlayer(result.name, playerIndex));
+    const pointsCell = document.getElementById(idResultPointsPlayer(result.name, playerIndex));
+    const netCell = document.getElementById(idResultNetPlayer(result.name, playerIndex));
 
-      const targetPoints = parseInt(document.getElementById(idTarget(playerIndex)).value);
-      const expectedPoints = (targetPoints / pars.length) * holeIndices.length;
-      const expectedScore = sumNumbersByIndex(pars, holeIndices) + holeIndices.length;
-      const expectedNet = 0; // Net should trend around 0 (resultPoints - expectedPoints)
+    scoreCell.textContent = resultScore;
+    pointsCell.textContent = resultPoints;
 
-      console.log(`Player ${playerIndex} - Score: ${resultScore}, Expected: ${expectedScore}`);
-      console.log(`Player ${playerIndex} - Net: ${resultNet}, Expected: ${expectedNet}`);
+    const resultNet = computeNet(points, pars, holeIndices, playerIndex);
+    netCell.textContent = resultNet;
 
-      applyPerformanceColor(pointsCell, resultPoints, expectedPoints, "higher"); // Higher = better
-      applyPerformanceColor(scoreCell, resultScore, expectedScore, "lower");     // Lower = better
-      applyPerformanceColor(netCell, resultNet, expectedNet, "higher");          // Higher = better
-  }
+    const targetPoints = parseInt(document.getElementById(idTarget(playerIndex)).value);
+    const expectedPoints = (targetPoints / pars.length) * holeIndices.length;
+    const expectedNet = 0;
+
+    console.log(`Player ${playerIndex} - Points: ${resultPoints}, Expected Points: ${expectedPoints}`);
+    console.log(`Player ${playerIndex} - Net: ${resultNet}, Expected Net: ${expectedNet}`);
+
+    applyPerformanceColor(pointsCell, resultPoints, expectedPoints, "higher");
+    applyPerformanceColor(netCell, resultNet, expectedNet, "higher");
+}
+
+
 
 
 
@@ -1898,20 +1922,19 @@ function generateTargetRow(results, pars, teamConfig) {
   }
 
   function computeNet(points, pars, holeIndices, playerIndex) {
-      const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value);
+    const targetOrNaN = parseInt(document.getElementById(idTarget(playerIndex)).value);
 
-      if (isNaN(targetOrNaN)) {
-          return "";
-      }
+    if (isNaN(targetOrNaN)) {
+        return "";
+    }
 
-      // Weighted just by number of holes.
-      // Points are already independent of par.
-      const resultTarget = targetOrNaN * (holeIndices.length / pars.length);
+    const resultTarget = targetOrNaN * (holeIndices.length / pars.length);
+    const resultPoints = sumNumbersByIndex(points.points, holeIndices);
+    const net = resultPoints - resultTarget;
 
-      const resultPoints = sumNumbersByIndex(points.points, holeIndices);
+    return Math.round(net * 10) / 10;
+}
 
-      return resultPoints - resultTarget;
-  }
 
   function sumNumbersByIndex(numbersOrNaN, indices) {
       let out = 0;
