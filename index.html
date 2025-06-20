@@ -443,7 +443,7 @@
 //Par Info -- setting Max and Min scores for each hole-- Important, ensure the below "score" functions have the same values
 
     // Function to calculate minScore -- needs to mimic same as getUserScore()'s value, too
-    function getMinScore(par) {
+  function getMinScore(par) {
     return Math.max(par - 3, 1); // this is an Albatross, but 1 for Par 3's
   }
 
@@ -803,6 +803,7 @@ function createCheckboxRow(teamConfig) {
 let scoreKeeper;
 let teamName;
 
+
 function getScorer(teamConfig) {
   console.log("getScorer called with teamConfig:", teamConfig);
 
@@ -883,8 +884,6 @@ function getScorer(teamConfig) {
 }
 
 
-
-
   function createTeamOptions(allTeamConfigs) {
     const teamSelect = document.getElementById("team");  // Assuming 'team' is the id of your <select> element
 
@@ -932,8 +931,6 @@ function getScorer(teamConfig) {
 
   console.log("Preserved keys after clear:", Object.keys(backup));
 }
-
-
 
 function teamOnchange(RESULTS, spreadsheetConfig) {
   console.log("teamOnchange start");
@@ -1012,6 +1009,7 @@ function teamOnchange(RESULTS, spreadsheetConfig) {
 }
 
 
+
       // only for testing
     function resetAutoSaveFlagForCurrentTeam() {
       const teamName = document.getElementById("team")?.value || "UNKNOWN_TEAM";
@@ -1021,9 +1019,7 @@ function teamOnchange(RESULTS, spreadsheetConfig) {
     }
 
 
-
-
-    function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
   try {
     console.log("➡ createSaveLoadButtons called.");
 
@@ -1184,6 +1180,7 @@ function teamOnchange(RESULTS, spreadsheetConfig) {
 
 
 
+
 function createSaveButton(spreadsheetConfig, selectedTeamConfig) {
   const container = document.createElement("div");
 
@@ -1304,6 +1301,9 @@ function createLoadButton() {
 
   return container;
 }
+
+
+
 
 
 
