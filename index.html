@@ -1023,8 +1023,7 @@ function teamOnchange(RESULTS, spreadsheetConfig) {
 
 
 
-
-function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+    function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
   try {
     console.log("➡ createSaveLoadButtons called.");
 
@@ -1076,17 +1075,13 @@ function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
     tr.appendChild(loadElement);
     tr.appendChild(statusElement);
     subTable.appendChild(tr);
-
-    // Append to main table
     table.appendChild(subTable);
 
-    // **Check autosave disabled key here**
+    // Auto-save flag setup
     const teamName = selectedTeamConfig?.team || document.getElementById("team")?.value || "UNKNOWN_TEAM";
     const teamKey = `autosaveDisabledDate_${teamName}`;
     const storedDate = localStorage.getItem(teamKey);
     const today = new Date().toISOString().slice(0, 10);
-
-    // Set auto-save disabled flag for today
     window.autoSaveManuallyDisabled = (storedDate === today);
 
     if (window.autoSaveManuallyDisabled) {
@@ -1099,24 +1094,78 @@ function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
       console.log(`✅ Autosave is active for ${teamName}.`);
     }
 
-    // Auto-save interval logic...
+    // Visibility setup
+    if (typeof window.isTabActive === "undefined") {
+      window.isTabActive = !document.hidden;
+      window.autoSavePaused = !window.isTabActive;
+      window.resumePending = false;
+      window.justResumed = false;
+
+      document.addEventListener("visibilitychange", () => {
+        const statusEl = document.getElementById("autosave_status");
+        window.isTabActive = !document.hidden;
+
+        if (document.hidden) {
+          window.autoSavePaused = true;
+          window.resumePending = false;
+          window.justResumed = false;
+
+          if (statusEl && !window.autoSaveManuallyDisabled) {
+            statusEl.innerHTML = "<b>Auto-save paused (tab not visible)</b>";
+            statusEl.style.color = "red";
+          }
+
+        } else {
+          window.autoSavePaused = false;
+          window.resumePending = true;
+          window.justResumed = true;
+
+          // Leave status as paused until the next save actually happens
+        }
+
+        console.log("📶 Visibility changed — isTabActive:", window.isTabActive);
+      });
+    }
+
+    // Auto-save interval logic
     if (buttonEl && typeof initialDelaySec !== "undefined" && typeof saveIntervalSec !== "undefined") {
       setTimeout(() => {
         console.log("⌛ Initial delay complete");
-        saveInterval = setInterval(() => {
+
+        window.saveInterval = setInterval(() => {
+          const statusEl = document.getElementById("autosave_status");
+
+          if (window.autoSaveManuallyDisabled) {
+            if (statusEl) {
+              statusEl.innerHTML = "<b>Auto-save disabled for today (scores already submitted)</b>";
+              statusEl.style.color = "red";
+            }
+            return;
+          }
+
           if (inputsLocked) {
             console.log("🚫 Skipping due to lock");
             return;
           }
 
-          if (window.autoSaveManuallyDisabled) {
-            console.log("🚫 Skipping auto-save due to submission today");
-            const autoSaveStatus = document.getElementById("autosave_status");
-            if (autoSaveStatus) {
-              autoSaveStatus.innerHTML = "<b>Auto-save disabled for today (scores already submitted)</b>";
-              autoSaveStatus.style.color = "red";
-            }
+          if (window.autoSavePaused) {
+            console.log("⏸️ Skipping auto-save — tab not visible");
             return;
+          }
+
+          if (window.resumePending) {
+            console.log("⏳ Skipping one interval after resume");
+            window.resumePending = false;
+            return;
+          }
+
+          // ✅ First successful auto-save after resume
+          if (window.justResumed) {
+            window.justResumed = false;
+            if (statusEl && !window.autoSaveManuallyDisabled) {
+              statusEl.innerHTML = "<b>Auto-save is active</b>";
+              statusEl.style.color = "green";
+            }
           }
 
           console.log("💾 Auto-save triggered");
@@ -1130,6 +1179,7 @@ function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
     console.error("❌ Exception in createSaveLoadButtons:", e);
   }
 }
+
 
 
 
