@@ -273,6 +273,7 @@ function sendFlatResultsEmail(flatResults, scorekeeperName) {
   let htmlBody = `
   <div style="font-family: Arial, sans-serif; font-size: 14px;">
     <p>Thank you for playing today in the Springfield Seniors Group! Below is your group's resulting scorecard.</p>
+    <p>Only reply to Alan and Ken, this system email, is not monitored.</p> 
     <br>
     <p><b>Submitted by: ${scorekeeperName}</b><i> - Who should monitor their email for the next ~2 hours in case any questions arise.</i></p>
     <br>
@@ -506,4 +507,29 @@ function levenshteinDistance(a, b) {
 }
 
 
+const SPREADSHEET_ID = "1m3bLGCeeF4B-QUDUX_ZLplE_ASC3XU1SR6i3TtzTT5k";
+const SHEET_NAME = "Scoreboard";
 
+function getScoreABSummaryFromSheet() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_NAME);
+  // Adjust range to where AB results are written (e.g., A100:B118)
+  const values = sheet.getRange("A100:B118").getValues();
+  return values.filter(row => row[0] !== "" && row[1] !== "");
+}
+
+function getScoreCDSummaryFromSheet() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_NAME);
+  // Adjust range to where CD results are written (e.g., A120:B139)
+  const values = sheet.getRange("A120:B139").getValues();
+  return values.filter(row => row[0] !== "" && row[1] !== "");
+}
+
+function getScoreTeamSummaryFromSheet() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_NAME);
+  // Adjust range to where Team results are written (e.g., A141:D171)
+  const values = sheet.getRange("A141:D171").getValues();
+  return values.filter(row => row[0] !== "" && row[1] !== "");
+}
