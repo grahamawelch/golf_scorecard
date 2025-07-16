@@ -531,5 +531,6 @@ function getScoreTeamSummaryFromSheet() {
   const sheet = ss.getSheetByName(SHEET_NAME);
   // Adjust range to where Team results are written (e.g., A141:D171)
   const values = sheet.getRange("A141:D171").getValues();
-  return values.filter(row => row[0] !== "" && row[1] !== "");
+  //return values.filter(row => row[0] !== "" && row[1] !== "");
+  return values.filter(row => row[0] !== "");
 }
