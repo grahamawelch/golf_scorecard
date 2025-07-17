@@ -509,10 +509,15 @@
     }
   });
 
-    window.onload = () => {
-      initializeAutoSaveFlag();
-      // Other init code like createSaveLoadButtons(), etc.
-    };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    startKeepAlivePing();
+  });
+
+  window.onload = () => {
+    initializeAutoSaveFlag();
+    // Other init code like createSaveLoadButtons(), etc.
+  };
 
 
     // Initialize the flag from localStorage-- to use later for diabling auto save after a submission for the day
@@ -533,6 +538,25 @@
       autoSaveSkipNotified = false;
     }
   }
+
+
+  function startKeepAlivePing() {
+    if (!window.pingIntervalId) {
+      console.log("🔄 Starting keep-alive ping every 4 minutes...");
+      window.pingIntervalId = setInterval(() => {
+        console.log("📡 Sending keep-alive ping to server...");
+        google.script.run
+          .withFailureHandler(error => console.log("❌ Ping failed:", error))
+          .withSuccessHandler(response => console.log("✅ Ping response:", response))
+          .pingServer();
+      }, 4 * 60 * 1000); // every 4 minutes
+    }
+  }
+
+  // Automatically start on page load (or move into a user action)
+  document.addEventListener("DOMContentLoaded", () => {
+    startKeepAlivePing();
+  });
 
 
 
