@@ -534,3 +534,7 @@ function getScoreTeamSummaryFromSheet() {
   //return values.filter(row => row[0] !== "" && row[1] !== "");
   return values.filter(row => row[0] !== "");
 }
+
+function pingServer() {
+  return "pong";
+}
