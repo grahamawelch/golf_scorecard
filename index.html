@@ -275,12 +275,12 @@
 
 <br>
 
-  <!-- yes, the below spacing is not eloquent-- but found necessary to keep all parts aligned -- especially the Delete Player boxes -->
+  <!-- yes, the below spacing is not elegant-- but found necessary to keep all parts aligned -- especially the Delete Player boxes -->
 
   <div id="title">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 7.2</b><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 7.3</b><br>
   </div>
 
   <div id="course" style="display: inline-block; font-size: 1.75em; font-weight: bold;"></div>
@@ -429,6 +429,11 @@
       </button>
     </div>
 
+
+
+
+
+
     </div>
 
     <br>
@@ -530,6 +535,12 @@
     initializeAutoSaveFlag();
     // Other init code like createSaveLoadButtons(), etc.
   };
+
+
+  // === WATCH ONLY ADD ===
+  let watchOnlyActive = false;
+  let watchOnlyInterval = null;
+
 
 
     // Initialize the flag from localStorage-- to use later for diabling auto save after a submission for the day
@@ -728,6 +739,153 @@
     console.log("Scoreboard Use Only fully activated: UI frozen, elements hidden or removed.");
   }
 
+/**
+function watchOnlyMode() {
+  console.log("▶ Watch Only Mode activated");
+  window.watchOnlyActive = true;
+
+  // Disable all scorecard inputs/selects
+  const inputs = document.querySelectorAll("#table input, #table textarea, #table select");
+  inputs.forEach(inp => {
+    inp.disabled = true;
+    inp.style.cursor = "not-allowed";
+  });
+
+  // Disable all save buttons
+  const saveButtons = document.querySelectorAll(".save-load-buttons button, .save-button-bottom button");
+  saveButtons.forEach(btn => {
+    btn.disabled = true;
+    btn.style.cursor = "not-allowed";
+  });
+
+  // Remove Submit & Email button
+  const submitBtn = document.getElementById("submit_button");
+  if (submitBtn) submitBtn.remove();
+
+  // Remove Clear button
+  const clearBtn = document.getElementById("clear_button");
+  if (clearBtn) clearBtn.remove();
+
+  // === Remove Delete Player rows ===
+  const deletePlayerContainers = document.querySelectorAll("div");
+  deletePlayerContainers.forEach(div => {
+    const bTag = div.querySelector("b");
+    if (bTag && bTag.textContent.includes("Delete Player")) {
+      div.remove();
+    }
+  });
+
+  // Update autosave/status display
+  const statusEl = document.getElementById("autosave_status_top");
+  if (statusEl) {
+    statusEl.innerHTML = "<b>Watch Only Mode - auto-reloading</b>";
+    statusEl.style.color = "orange";
+  }
+
+  // Stop any running auto-save loop
+  if (window.saveInterval) {
+    clearInterval(window.saveInterval);
+    window.saveInterval = null;
+  }
+
+  // Function to reload scores
+  function reloadScores() {
+    console.log("🔄 Reloading scores (Watch Only mode)");
+    const loadButton = document.getElementById("reload_button");
+    if (loadButton && !loadButton.disabled) {
+      loadButton.click();
+    }
+  }
+
+  // Immediate reload so watchers see latest scores
+  reloadScores();
+
+  // Start periodic reload every 30 seconds
+  if (window.reloadInterval) clearInterval(window.reloadInterval);
+  window.reloadInterval = setInterval(reloadScores, 30000);
+}
+*/
+
+
+function watchOnlyMode() {
+  console.log("▶ Watch Only Mode activated");
+  window.watchOnlyActive = true;
+
+  const disableInputs = () => {
+    const inputs = document.querySelectorAll("#table input, #table textarea, #table select");
+    inputs.forEach(inp => {
+      inp.disabled = true;
+      inp.style.cursor = "not-allowed";
+    });
+
+    const saveButtons = document.querySelectorAll(".save-load-buttons button, .save-button-bottom button");
+    saveButtons.forEach(btn => {
+      btn.disabled = true;
+      btn.style.cursor = "not-allowed";
+    });
+  };
+
+  const submitBtn = document.getElementById("submit_button");
+  if (submitBtn) submitBtn.remove();
+
+  const clearBtn = document.getElementById("clear_button");
+  if (clearBtn) clearBtn.remove();
+
+  const deletePlayerContainers = document.querySelectorAll("div");
+  deletePlayerContainers.forEach(div => {
+    const bTag = div.querySelector("b");
+    if (bTag && bTag.textContent.includes("Delete Player")) {
+      div.remove();
+    }
+  });
+
+  const statusEl = document.getElementById("autosave_status_top");
+  if (statusEl) {
+    statusEl.innerHTML = "<b>Watch Only Mode - auto-reloading</b>";
+    statusEl.style.color = "orange";
+  }
+
+  if (window.saveInterval) {
+    clearInterval(window.saveInterval);
+    window.saveInterval = null;
+  }
+
+  function reloadScores() {
+    const teamName = document.getElementById("team")?.value;
+    if (!teamName) return;
+
+    console.log("🔄 [DEBUG] Reloading scores (Watch Only mode) for team:", teamName);
+
+    const scoreInputs = document.querySelectorAll("#table input, #table textarea, #table select");
+    scoreInputs.forEach(inp => inp.disabled = false);
+
+    // Clear values + reset shading
+    scoreInputs.forEach(inp => {
+      inp.value = "";
+      inp.style.backgroundColor = ""; // reset inline background
+      inp.className = inp.className.replace(/\b(score-(good|bad|neutral))\b/g, ""); // remove custom score classes
+    });
+
+    google.script.run
+      .withSuccessHandler(function(data) {
+        console.log("📊 [DEBUG] Backend scores received:", data);
+        populateScorecardWithSavedResults(data);
+        disableInputs();
+      })
+      .withFailureHandler(function(error) {
+        console.error("❌ [DEBUG] Failed to fetch backend scores:", error);
+      })
+      .loadScoresForTeam(teamName);
+  }
+
+  reloadScores();
+
+  if (window.reloadInterval) clearInterval(window.reloadInterval);
+  window.reloadInterval = setInterval(reloadScores, 30000);
+}
+
+
+
 
 
   function getScoreLabelClass(scoreLabel) {
@@ -886,7 +1044,7 @@
     });
 
 
-
+/**
   function createCheckboxRow(teamConfig) {
     const containerDiv = document.createElement("div");
     containerDiv.style.display = "flex";
@@ -964,6 +1122,87 @@
 
     return containerDiv;
   }
+*/
+
+function createCheckboxRow(teamConfig) {
+    const containerDiv = document.createElement("div");
+    containerDiv.style.display = "flex";
+    containerDiv.style.alignItems = "center";
+
+    // Add spacing row
+    const nullRowAbove = document.createElement("div");
+    nullRowAbove.style.height = "20px"; 
+    containerDiv.appendChild(nullRowAbove);
+
+    // === Only create Delete Player header and checkboxes if NOT in Watch Only mode ===
+    if (!window.watchOnlyActive) {
+        // Add header for delete player
+        const headerDiv = document.createElement("div");
+        headerDiv.innerHTML = "<b style='font-size: 1.4em; color: red;'>Delete Player</b>"; 
+        headerDiv.style.marginRight = "20px"; 
+        containerDiv.appendChild(headerDiv);
+
+        // Create a single row of checkboxes
+        const boxDiv = document.createElement("div");
+
+        for (let j = 0; j < teamConfig.players.length; j++) {
+            const checkboxContainer = document.createElement("label");
+            checkboxContainer.style.display = "inline-block";
+            checkboxContainer.style.marginLeft = "50px";
+            checkboxContainer.style.width = "30px";
+            checkboxContainer.style.height = "30px";
+            checkboxContainer.style.backgroundColor = "red";
+            checkboxContainer.style.borderRadius = "4px";
+            checkboxContainer.style.cursor = "pointer";
+            checkboxContainer.style.textAlign = "center";
+            checkboxContainer.style.lineHeight = "30px";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.style.opacity = "0"; 
+            checkbox.style.width = "30px"; 
+            checkbox.style.height = "30px"; 
+            checkbox.style.margin = "0"; 
+
+            // Handle checkbox actions with pop-up confirmation
+            checkbox.onchange = function () {
+                if (checkbox.checked) {
+                    const playerName = document.getElementById(idPlayerName(j)).value;
+                    const confirmation = confirm(
+                        `Do you really want to delete ${playerName}, his Target Pts, and Scores?\n\n` +
+                        `If sure, hit OK, if not, hit Cancel.\n\n` +
+                        `Note: After the deletion, you have about 5 secs average to hit the Reload button to retrieve the deleted info. But after that, it is gone.`
+                    );
+
+                    if (!confirmation) {
+                        checkbox.checked = false; // Ensure checkbox remains unchecked if canceled
+                        return;
+                    }
+
+                    checkboxContainer.style.color = "white"; 
+                    checkboxContainer.innerHTML = "✔"; 
+                    deletePlayerAndTarget(j, checkbox); 
+                    updateTeamTarget(teamConfig.players.length); 
+                } else {
+                    checkboxContainer.style.color = ""; 
+                    checkboxContainer.innerHTML = ""; 
+                }
+            };
+
+            checkboxContainer.appendChild(checkbox); 
+            boxDiv.appendChild(checkboxContainer); 
+        }
+
+        containerDiv.appendChild(boxDiv);
+    }
+
+    // Add final spacing row
+    const nullRowBelow = document.createElement("div");
+    nullRowBelow.style.height = "200px"; 
+    containerDiv.appendChild(nullRowBelow);
+
+    return containerDiv;
+}
 
 
 
@@ -1044,84 +1283,93 @@
   let teamName;
 
 
-  function getScorer(teamConfig) {
-    console.log("getScorer called with teamConfig:", teamConfig);
+function getScorer(teamConfig) {
+  console.log("getScorer called with teamConfig:", teamConfig);
 
-    if (!teamConfig || !teamConfig.players || teamConfig.players.length === 0) {
-      alert("No players found in this team.");
-      return;
-    }
-
-    const popup = document.createElement('div');
-    popup.style.position = 'fixed';
-    popup.style.top = '50%';
-    popup.style.left = '50%';
-    popup.style.transform = 'translate(-50%, -50%)';
-    popup.style.background = 'white';
-    popup.style.border = '2px solid #ccc';
-    popup.style.borderRadius = '10px';
-    popup.style.padding = '20px';
-    popup.style.zIndex = '1000';
-    popup.style.textAlign = 'center';
-    popup.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-
-    popup.innerHTML = `
-      <div style="color: red; font-weight: bold; font-size: 1.2em;">ONLY ONE OF THESE PLAYERS (AT A TIME) MAY KEEP SCORE FOR THIS TEAM </div>
-      <div style="height: 1em;"></div>
-      <div style="color: blue; font-size: 1.1em; margin-bottom: 10px;">Which is the Scorekeeper?</div>
-    `;
-
-    const playerNames = teamConfig.players.map(p => p.playerName);
-
-    playerNames.forEach(name => {
-      const button = document.createElement('button');
-      button.textContent = name;
-      button.style.display = 'block';
-      button.style.width = '100%';
-      button.style.margin = '20px 0';
-      button.style.padding = '10px';
-      button.style.fontSize = '1em';
-      button.onclick = () => {
-        scoreKeeper = name;
-        teamName = teamConfig.teamName;
-        console.log("Scorekeeper selected:", name);
-        document.body.removeChild(popup);
-        google.script.run.recordScorerActivity({
-          teamName: teamConfig.teamName,
-          playerName: name,
-          activity: "Scorekeeper"
-        });
-      };
-      popup.appendChild(button);
-    });
-
-    // Spacer
-    const spacer = document.createElement('div');
-    spacer.style.height = '20px';
-    popup.appendChild(spacer);
-
-    // Scoreboard Use Only button
-    const scoreboardButton = document.createElement('button');
-    scoreboardButton.textContent = 'Scoreboard Use Only';
-    scoreboardButton.style.display = 'block';
-    scoreboardButton.style.width = '100%';
-    scoreboardButton.style.margin = '10px 0';
-    scoreboardButton.style.padding = '10px';
-    scoreboardButton.style.fontSize = '1em';
-    scoreboardButton.style.backgroundColor = 'green';
-    scoreboardButton.style.color = 'white';
-    scoreboardButton.style.border = 'none';
-    scoreboardButton.style.cursor = 'pointer';
-
-    scoreboardButton.onclick = () => {
-      scoreboardOnly();  // Call your locking function
-      document.body.removeChild(popup);
-    };
-
-    popup.appendChild(scoreboardButton);
-
-    document.body.appendChild(popup);
+  if (!teamConfig || !teamConfig.players || teamConfig.players.length === 0) {
+    alert("No players found in this team.");
+    return;
   }
+
+  const popup = document.createElement('div');
+  popup.style.position = 'fixed';
+  popup.style.top = '50%';
+  popup.style.left = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
+  popup.style.background = 'white';
+  popup.style.border = '2px solid #ccc';
+  popup.style.borderRadius = '10px';
+  popup.style.padding = '20px';
+  popup.style.zIndex = '1000';
+  popup.style.textAlign = 'center';
+  popup.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+
+  popup.innerHTML = `
+    <div style="color: red; font-weight: bold; font-size: 1.2em;">
+      ONLY ONE OF THESE PLAYERS (AT A TIME) MAY KEEP SCORE FOR THIS TEAM
+    </div>
+    <div style="height: 1em;"></div>
+    <div style="color: orange; font-weight: bold; font-size: 1.2em;">
+      But many can "Watch Only This Team".
+    </div>
+    <div style="height: 1em;"></div>
+    <div style="color: blue; font-size: 1.2em; margin-bottom: 10px;">
+      WHICH IS THE SCOREKEEPER?
+    </div>
+  `;
+
+  const playerNames = teamConfig.players.map(p => p.playerName);
+
+  playerNames.forEach(name => {
+    const button = document.createElement('button');
+    button.textContent = name;
+    button.style.display = 'block';
+    button.style.width = '100%';
+    button.style.margin = '20px 0';
+    button.style.padding = '10px';
+    button.style.fontSize = '1em';
+    button.onclick = () => {
+      scoreKeeper = name;
+      teamName = teamConfig.teamName;
+      console.log("Scorekeeper selected:", name);
+      document.body.removeChild(popup);
+      google.script.run.recordScorerActivity({
+        teamName: teamConfig.teamName,
+        playerName: name,
+        activity: "Scorekeeper"
+      });
+    };
+    popup.appendChild(button);
+  });
+
+  // Spacer
+  const spacer = document.createElement('div');
+  spacer.style.height = '20px';
+  popup.appendChild(spacer);
+
+  // === WATCH ONLY BUTTON ===
+  const watchOnlyBtn = document.createElement('button');
+  watchOnlyBtn.textContent = 'Watch Only This Team';
+  watchOnlyBtn.style.display = 'block';
+  watchOnlyBtn.style.width = '100%';
+  watchOnlyBtn.style.margin = '10px 0';
+  watchOnlyBtn.style.padding = '10px';
+  watchOnlyBtn.style.fontSize = '1em';
+  watchOnlyBtn.style.backgroundColor = 'orange';
+  watchOnlyBtn.style.color = 'white';
+  watchOnlyBtn.style.border = 'none';
+  watchOnlyBtn.style.cursor = 'pointer';
+
+  watchOnlyBtn.onclick = () => {
+    watchOnlyMode();
+    document.body.removeChild(popup);
+  };
+
+  popup.appendChild(watchOnlyBtn);
+
+  document.body.appendChild(popup);
+}
+
 
 
   function createTeamOptions(allTeamConfigs) {
@@ -1172,11 +1420,19 @@
     console.log("Preserved keys after clear:", Object.keys(backup));
   }
 
+/**
   function teamOnchange(RESULTS, spreadsheetConfig) {
     console.log("teamOnchange start");
 
     // Block everything if Scoreboard Only mode is active
-    if (scoreboardOnlyActive) {
+     //if (scoreboardOnlyActive) {
+      //console.log("teamOnchange blocked due to Scoreboard Only mode.");
+      //return;
+    //}
+    
+
+        // === WATCH ONLY ADD ===
+    if (scoreboardOnlyActive && !watchOnlyActive) {
       console.log("teamOnchange blocked due to Scoreboard Only mode.");
       return;
     }
@@ -1251,6 +1507,218 @@
   //resetAutoSaveFlagForCurrentTeam();   // only for testing
 
   }
+*/
+
+  // initial score reload to try 5 times before auto save starts
+function initScoreReloadAndAutoSaveSafety() {
+  // Tracks whether reload has succeeded at least once
+  window.initialReloadSucceeded = false;
+
+  // Utility: check if scorecard is empty
+  function isScorecardEmpty() {
+    return [...document.querySelectorAll("#table input, #table textarea")]
+      .every(inp => inp.value.trim() === "");
+  }
+
+  // Wrapper to reload scores with custom handlers
+  function reloadScoresWithHandlers(onSuccess, onFailure) {
+    const teamName = document.getElementById("team")?.value;
+    if (!teamName) {
+      console.warn("⚠️ No team selected for reload.");
+      return;
+    }
+
+    console.log("🔄 Reloading scores for team:", teamName);
+
+    google.script.run
+      .withSuccessHandler((data) => {
+        console.log("✅ Backend scores received:", data);
+        populateScorecardWithSavedResults(data);
+        disableInputs();
+        if (typeof onSuccess === "function") onSuccess();
+      })
+      .withFailureHandler((err) => {
+        console.error("❌ Reload failed:", err);
+        if (typeof onFailure === "function") onFailure(err);
+      })
+      .loadScoresForTeam(teamName);
+  }
+
+  // Attempt initial reload up to 5 times with backoff
+  function attemptInitialReload(attempt = 1) {
+    console.log(`🔁 Initial reload attempt ${attempt}`);
+    reloadScoresWithHandlers(
+      () => {
+        window.initialReloadSucceeded = true;
+        console.log("✅ Initial reload succeeded");
+      },
+      (error) => {
+        if (attempt < 5) {
+          const delay = attempt * 2000; // exponential backoff
+          console.warn(`⏳ Retry reload in ${delay / 1000}s (attempt ${attempt + 1})`);
+          setTimeout(() => attemptInitialReload(attempt + 1), delay);
+        } else {
+          console.error("❌ All reload attempts failed. Auto-save paused.");
+          alert("Could not load saved scores. Auto-save paused.");
+        }
+      }
+    );
+  }
+
+  // Hook into existing auto-save by wrapping save checks
+  const origClick = HTMLElement.prototype.click;
+  HTMLElement.prototype.click = function () {
+    if (this.id === "submit_button" || this.id?.includes("save")) {
+      if (!window.initialReloadSucceeded) {
+        console.warn("⏸️ Auto-save skipped — reload not yet successful");
+        return;
+      }
+      if (isScorecardEmpty()) {
+        console.warn("⚠️ Auto-save skipped — scorecard appears empty");
+        return;
+      }
+    }
+    return origClick.apply(this, arguments);
+  };
+
+  // Start the first reload attempts
+  attemptInitialReload();
+}
+
+
+
+
+/**
+function teamOnchange(RESULTS, spreadsheetConfig) {
+  console.log("teamOnchange start");
+
+  // Block normal changes if Scoreboard Only active
+  if (scoreboardOnlyActive && !watchOnlyActive) {
+    console.log("teamOnchange blocked due to Scoreboard Only mode.");
+    return;
+  }
+
+  const tableDiv = document.getElementById("table");
+  tableDiv.innerHTML = "";
+
+  const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
+
+  // Insert checkbox row at the top
+  const checkboxRow = createCheckboxRow(selectedTeamConfig);
+  tableDiv.appendChild(checkboxRow);
+
+  // Create Save/Load buttons
+  createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig);
+
+  const breakDiv = document.createElement("div");
+  breakDiv.style.height = "20px";
+  tableDiv.appendChild(breakDiv);
+
+  // Create the scorecard table
+  createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
+
+  // Bottom save button
+  createBottomSaveButton(spreadsheetConfig, selectedTeamConfig);
+
+  // Enable buttons only if NOT in Watch Only mode
+  if (!window.watchOnlyActive) {
+    const submitBtn = document.getElementById("submit_button");
+    if (submitBtn) submitBtn.disabled = false;
+
+    const clearBtn = document.getElementById("clear_button");
+    if (clearBtn) clearBtn.disabled = false;
+  }
+
+  // Load saved scores
+  const teamName = document.getElementById("team").value;
+  google.script.run
+    .withSuccessHandler(function(data) {
+      populateScorecardWithSavedResults(data);
+
+      // If Watch Only mode, immediately disable inputs after backend update
+      if (window.watchOnlyActive) {
+        const inputs = document.querySelectorAll("#table input, #table textarea, #table select");
+        inputs.forEach(inp => {
+          inp.disabled = true;
+          inp.style.cursor = "not-allowed";
+        });
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error("Failed to load scores:", error);
+      alert("Failed to load scores. Please try again or check the team name.");
+    })
+    .loadScoresForTeam(teamName);
+
+  // Play sound once
+  if (!hasPlayed) {
+    const audio = document.getElementById("audio");
+    audio.play().catch(err => console.error("Audio failed:", err));
+    hasPlayed = true;
+  }
+
+  getScorer(selectedTeamConfig);
+
+  initScoreReloadAndAutoSaveSafety();
+}
+*/
+
+function teamOnchange(RESULTS, spreadsheetConfig) {
+  console.log("teamOnchange start");
+
+  // Block normal changes if Scoreboard Only active
+  if (scoreboardOnlyActive && !watchOnlyActive) {
+    console.log("teamOnchange blocked due to Scoreboard Only mode.");
+    return;
+  }
+
+  const tableDiv = document.getElementById("table");
+  tableDiv.innerHTML = "";
+
+  const selectedTeamConfig = getSelectedTeamConfig(spreadsheetConfig.allTeamConfigs);
+
+  // Insert checkbox row at the top
+  const checkboxRow = createCheckboxRow(selectedTeamConfig);
+  tableDiv.appendChild(checkboxRow);
+
+  // Create Save/Load buttons
+  createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig);
+
+  const breakDiv = document.createElement("div");
+  breakDiv.style.height = "20px";
+  tableDiv.appendChild(breakDiv);
+
+  // Create the scorecard table
+  createScorecardTable(RESULTS, spreadsheetConfig.courseConfig, selectedTeamConfig);
+
+  // Bottom save button
+  createBottomSaveButton(spreadsheetConfig, selectedTeamConfig);
+
+  // Enable buttons only if NOT in Watch Only mode
+  if (!window.watchOnlyActive) {
+    const submitBtn = document.getElementById("submit_button");
+    if (submitBtn) submitBtn.disabled = false;
+
+    const clearBtn = document.getElementById("clear_button");
+    if (clearBtn) clearBtn.disabled = false;
+  }
+
+  // ⚠️ Removed direct google.script.run.loadScoresForTeam here
+  // Reload + retries + autosave safety will be handled instead
+
+  // Play sound once
+  if (!hasPlayed) {
+    const audio = document.getElementById("audio");
+    audio.play().catch(err => console.error("Audio failed:", err));
+    hasPlayed = true;
+  }
+
+  getScorer(selectedTeamConfig);
+
+  // Safer reload with retries + autosave gating
+  initScoreReloadAndAutoSaveSafety();
+}
+
 
 
 
@@ -1264,7 +1732,7 @@
 
 
 
-
+/**
 function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
   try {
     console.log("➡ createSaveLoadButtons called.");
@@ -1390,6 +1858,272 @@ function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
     console.error("❌ Exception in createSaveLoadButtons:", e);
   }
 }
+*/
+
+/**
+function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+  try {
+    console.log("➡ createSaveLoadButtons called.");
+
+    const container = document.getElementById("table");
+    if (!container) {
+      console.error("❌ Table element with id 'table' not found.");
+      return;
+    }
+
+    // Remove previous button sets
+    const existingSubs = container.querySelectorAll(".save-load-buttons, .save-button-bottom");
+    existingSubs.forEach(el => el.remove());
+
+    // ==== TOP SAVE/LOAD BUTTONS ====
+    const topSubTable = document.createElement("table");
+    topSubTable.classList.add("save-load-buttons");
+    const topTr = document.createElement("tr");
+
+    const saveElement = document.createElement("td");
+    const topSaveContainer = createSaveButton(spreadsheetConfig, selectedTeamConfig, "top");
+    const topSaveButton = topSaveContainer.querySelector("button");
+    saveElement.appendChild(topSaveContainer);
+    saveElement.style.paddingRight = "25px";
+    saveElement.style.paddingBottom = "10px";
+    saveElement.style.paddingTop = "10px";
+
+    const loadElement = document.createElement("td");
+    const loadButton = createLoadButton();
+    loadElement.appendChild(loadButton);
+    loadElement.style.paddingLeft = "20px";
+    loadElement.style.paddingBottom = "10px";
+    loadElement.style.paddingTop = "10px";
+
+    const statusElement = document.createElement("td");
+    const autoSaveStatus = document.createElement("span");
+    autoSaveStatus.id = "autosave_status_top";
+    autoSaveStatus.style.fontSize = "20px";
+    statusElement.appendChild(autoSaveStatus);
+
+    topTr.appendChild(saveElement);
+    topTr.appendChild(loadElement);
+    topTr.appendChild(statusElement);
+    topSubTable.appendChild(topTr);
+    container.prepend(topSubTable);
+
+    // === AUTOSAVE SETUP (Top button only) ===
+    const teamName = selectedTeamConfig?.team || document.getElementById("team")?.value || "UNKNOWN_TEAM";
+    const teamKey = `autosaveDisabledDate_${teamName}`;
+    const storedDate = localStorage.getItem(teamKey);
+    const today = new Date().toISOString().slice(0, 10);
+    window.autoSaveManuallyDisabled = (storedDate === today);
+
+    if (window.autoSaveManuallyDisabled) {
+      autoSaveStatus.innerHTML = "<b>Auto-save disabled for today (scores already submitted)</b>";
+      autoSaveStatus.style.color = "red";
+    } else {
+      autoSaveStatus.innerHTML = "<b>Auto-save is active</b>";
+      autoSaveStatus.style.color = "green";
+    }
+
+    // === VISIBILITY HANDLING ===
+    if (typeof window.isTabActive === "undefined") {
+      window.isTabActive = !document.hidden;
+      window.autoSavePaused = !window.isTabActive;
+      window.resumePending = false;
+      window.justResumed = false;
+
+      document.addEventListener("visibilitychange", () => {
+        const statusEl = document.getElementById("autosave_status_top");
+        window.isTabActive = !document.hidden;
+
+        if (document.hidden) {
+          window.autoSavePaused = true;
+          window.resumePending = false;
+          window.justResumed = false;
+          if (statusEl && !window.autoSaveManuallyDisabled) {
+            statusEl.innerHTML = "<b>Auto-save paused (tab not visible)</b>";
+            statusEl.style.color = "red";
+          }
+        } else {
+          window.autoSavePaused = false;
+          window.resumePending = true;
+          window.justResumed = true;
+        }
+      });
+    }
+
+    // === AUTOSAVE INTERVAL ===
+    if (topSaveButton && typeof initialDelaySec !== "undefined" && typeof saveIntervalSec !== "undefined") {
+      setTimeout(() => {
+        window.saveInterval = setInterval(() => {
+          const statusEl = document.getElementById("autosave_status_top");
+
+          // === WATCH ONLY ADD ===
+          if (window.watchOnlyActive || window.autoSaveManuallyDisabled || inputsLocked || window.autoSavePaused) {
+            console.log("⏸️ Skipping auto-save");
+            return;
+          }
+
+
+          if (window.resumePending) {
+            console.log("⏳ Skipping one interval after resume");
+            window.resumePending = false;
+            return;
+          }
+
+          if (window.justResumed) {
+            window.justResumed = false;
+            if (statusEl && !window.autoSaveManuallyDisabled) {
+              statusEl.innerHTML = "<b>Auto-save is active</b>";
+              statusEl.style.color = "green";
+            }
+          }
+
+          console.log("💾 Auto-save triggered");
+          topSaveButton.click();
+        }, saveIntervalSec * 1000);
+      }, initialDelaySec * 1000);
+    } else {
+      console.error("❌ Could not start auto-save — missing button or delay values");
+    }
+
+  } catch (e) {
+    console.error("❌ Exception in createSaveLoadButtons:", e);
+  }
+}
+*/
+
+function createSaveLoadButtons(spreadsheetConfig, selectedTeamConfig) {
+  try {
+    console.log("➡ createSaveLoadButtons called.");
+
+    const container = document.getElementById("table");
+    if (!container) {
+      console.error("❌ Table element with id 'table' not found.");
+      return;
+    }
+
+    // Remove previous button sets
+    const existingSubs = container.querySelectorAll(".save-load-buttons, .save-button-bottom");
+    existingSubs.forEach(el => el.remove());
+
+    // ==== TOP SAVE/LOAD BUTTONS ====
+    const topSubTable = document.createElement("table");
+    topSubTable.classList.add("save-load-buttons");
+    const topTr = document.createElement("tr");
+
+    const saveElement = document.createElement("td");
+    const topSaveContainer = createSaveButton(spreadsheetConfig, selectedTeamConfig, "top");
+    const topSaveButton = topSaveContainer.querySelector("button");
+    saveElement.appendChild(topSaveContainer);
+    saveElement.style.paddingRight = "25px";
+    saveElement.style.paddingBottom = "10px";
+    saveElement.style.paddingTop = "10px";
+
+    const loadElement = document.createElement("td");
+    const loadButton = createLoadButton();
+    loadElement.appendChild(loadButton);
+    loadElement.style.paddingLeft = "20px";
+    loadElement.style.paddingBottom = "10px";
+    loadElement.style.paddingTop = "10px";
+
+    const statusElement = document.createElement("td");
+    const autoSaveStatus = document.createElement("span");
+    autoSaveStatus.id = "autosave_status_top";
+    autoSaveStatus.style.fontSize = "20px";
+    statusElement.appendChild(autoSaveStatus);
+
+    topTr.appendChild(saveElement);
+    topTr.appendChild(loadElement);
+    topTr.appendChild(statusElement);
+    topSubTable.appendChild(topTr);
+    container.prepend(topSubTable);
+
+    // === AUTOSAVE SETUP (Top button only) ===
+    const teamName = selectedTeamConfig?.team || document.getElementById("team")?.value || "UNKNOWN_TEAM";
+    const teamKey = `autosaveDisabledDate_${teamName}`;
+    const storedDate = localStorage.getItem(teamKey);
+    const today = new Date().toISOString().slice(0, 10);
+    window.autoSaveManuallyDisabled = (storedDate === today);
+
+    // Only set status if NOT watchOnly
+    if (!window.watchOnlyActive) {
+      if (window.autoSaveManuallyDisabled) {
+        autoSaveStatus.innerHTML = "<b>Auto-save disabled for today (scores already submitted)</b>";
+        autoSaveStatus.style.color = "red";
+      } else {
+        autoSaveStatus.innerHTML = "<b>Auto-save is active</b>";
+        autoSaveStatus.style.color = "green";
+      }
+    }
+
+    // === VISIBILITY HANDLING ===
+    if (typeof window.isTabActive === "undefined") {
+      window.isTabActive = !document.hidden;
+      window.autoSavePaused = !window.isTabActive;
+      window.resumePending = false;
+      window.justResumed = false;
+
+      document.addEventListener("visibilitychange", () => {
+        const statusEl = document.getElementById("autosave_status_top");
+        window.isTabActive = !document.hidden;
+
+        if (!window.watchOnlyActive) { // Skip updates in watchOnly mode
+          if (document.hidden) {
+            window.autoSavePaused = true;
+            window.resumePending = false;
+            window.justResumed = false;
+            if (statusEl && !window.autoSaveManuallyDisabled) {
+              statusEl.innerHTML = "<b>Auto-save paused (tab not visible)</b>";
+              statusEl.style.color = "red";
+            }
+          } else {
+            window.autoSavePaused = false;
+            window.resumePending = true;
+            window.justResumed = true;
+          }
+        }
+      });
+    }
+
+    // === AUTOSAVE INTERVAL ===
+    if (topSaveButton && typeof initialDelaySec !== "undefined" && typeof saveIntervalSec !== "undefined") {
+      setTimeout(() => {
+        window.saveInterval = setInterval(() => {
+          const statusEl = document.getElementById("autosave_status_top");
+
+          // Skip autosave entirely in watchOnly
+          if (window.watchOnlyActive || window.autoSaveManuallyDisabled || inputsLocked || window.autoSavePaused) {
+            console.log("⏸️ Skipping auto-save");
+            return;
+          }
+
+          if (window.resumePending) {
+            console.log("⏳ Skipping one interval after resume");
+            window.resumePending = false;
+            return;
+          }
+
+          if (window.justResumed) {
+            window.justResumed = false;
+            if (statusEl && !window.autoSaveManuallyDisabled) {
+              statusEl.innerHTML = "<b>Auto-save is active</b>";
+              statusEl.style.color = "green";
+            }
+          }
+
+          console.log("💾 Auto-save triggered");
+          topSaveButton.click();
+        }, saveIntervalSec * 1000);
+      }, initialDelaySec * 1000);
+    } else {
+      console.error("❌ Could not start auto-save — missing button or delay values");
+    }
+
+  } catch (e) {
+    console.error("❌ Exception in createSaveLoadButtons:", e);
+  }
+}
+
+
+
 
 function createBottomSaveButton(spreadsheetConfig, selectedTeamConfig) {
   const container = document.getElementById("table");
