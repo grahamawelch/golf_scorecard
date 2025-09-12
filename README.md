@@ -1,6 +1,6 @@
 # golf_scorecard
 
-A simple website that offers a UI mimicking a golf score card.
+A website that uses a UI to mimick a golf score card and does more-- auto math, uses targeted Stableford points for indiviuals and teams, works with the backend to show a scoreboard (skins for 2 groups and team Stableford scores after each 9), and then once done, a submission works with the backend to email all of the players.
 
 It should automatically compute scores as Stableford values are entered.  It auto saves every 20 seconds
 and if problems arise, can use the RELOAD button to reload the saved scores. 
