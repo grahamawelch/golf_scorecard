@@ -273,7 +273,10 @@ function sendFlatResultsEmail(flatResults, scorekeeperName) {
   let htmlBody = `
   <div style="font-family: Arial, sans-serif; font-size: 14px;">
     <p>Thank you for playing today in the Springfield Seniors Group! Below is your group's resulting scorecard.</p>
-    <p>Only reply to Alan and Ken, this system email, is not monitored.</p> 
+    <br>
+    <p><b> Alan Welch and his software programs provides this scorecard results email. </b></p>
+    <br>
+    <p>Only reply to <b>Alan and/or Ken</b>--- because this is system email and is not monitored.</p> 
     <br>
     <p><b>Submitted by: ${scorekeeperName}</b><i> - Who should monitor their email for the next ~2 hours in case any questions arise.</i></p>
     <br>
