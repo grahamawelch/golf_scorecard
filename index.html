@@ -257,6 +257,17 @@
     color: #2A5179 !important; /* deep cyan with purple undertones */
   }
 
+   .notice {
+      text-align: center;
+      font-size: 2em;
+      font-weight: bold;
+      color: red;
+      margin: 30px 0;
+    }
+    .disabled-section {
+      opacity: 0.4;
+      pointer-events: none; /* disables clicking, selecting, etc. */
+    }
 
   </style>
 
@@ -264,6 +275,22 @@
 
 
 <body>
+
+  <!-- Big Notice -->
+  <div class="notice">
+    APP PAUSED FOR NOW <br><br>
+    If you found value in this App, <br>
+    <br>
+    please contact <b>Ken Dunnett</b> <br>
+    <br>
+    and let him know.
+  </div>
+
+
+  <!-- Greyed-out / disabled original content -->
+  <div class="disabled-section">
+
+
 
   <audio id="audio" src="https://www.dropbox.com/scl/fi/666kzmgv2f3t6c1alhx1g/startup-sound.mp3?rlkey=isnzy1syfswgg5p3n2gskz1zp&st=5ryggmm7&raw=1" type="audio/mpeg"></audio>
 
@@ -277,10 +304,10 @@
 
   <!-- yes, the below spacing is not elegant-- but found necessary to keep all parts aligned -- especially the Delete Player boxes -->
 
-    <div id="title">
+  <div id="title">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Google-Based DIY Golf Group <br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scoring System<br> 
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 7.6<b><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>V. 7.7<b><br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br> 
   </div>
 
@@ -291,6 +318,7 @@
 
 <br>
 <br>
+
 
   <div id="course" style="display: inline-block; font-size: 1.75em; font-weight: bold;"></div>
 
@@ -434,8 +462,7 @@
 
     <br>
     <br>
-
-    <!--  
+<!--
     <div style="margin-left: 1in; margin-bottom: 20px;">
       <button
         onclick="location.href='https://tinyurl.com/springfieldgolfsignup'"
@@ -443,7 +470,7 @@
         Signup for Playing Future Days
       </button>
     </div>
-    -->
+-->
 
 
 
@@ -475,6 +502,9 @@
                 <span style="background-color: #D3D3D3"><b>Bogeys</b></span>. &nbsp; <b><i> are highlighted.</b></i>
           </p>
 
+
+     
+  </div>
 
   <script>
   
@@ -945,10 +975,12 @@ function watchOnlyMode() {
   }
 
 
+  /**  To disable loading the Scoreboards
 
   function loadABScoreboard() {
     google.script.run.withSuccessHandler(populateABTable).getScoreABSummaryFromSheet();
   }
+
   function populateABTable(results) {
     const tbody = document.getElementById("scoreboardAB-body");
     tbody.innerHTML = "";
@@ -974,6 +1006,7 @@ function watchOnlyMode() {
   function loadCDScoreboard() {
     google.script.run.withSuccessHandler(populateCDTable).getScoreCDSummaryFromSheet();
   }
+
   function populateCDTable(results) {
     const tbody = document.getElementById("scoreboardCD-body");
     tbody.innerHTML = "";
@@ -1062,6 +1095,7 @@ function watchOnlyMode() {
   // Load initially
   window.onload = refreshScoreboards;
 
+*/
 
 
 
